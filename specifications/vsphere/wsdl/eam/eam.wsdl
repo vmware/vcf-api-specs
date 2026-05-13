@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!--
-   	Copyright (c) 2005-2025
+   	Copyright (c) 2005-2026
 	Broadcom. All Rights Reserved.
 	The term "Broadcom" refers to Broadcom Inc.
 	and/or its subsidiaries.
@@ -195,6 +195,7 @@
          <element name="HostNotReachableFault" type="vim25:HostNotReachable"/>
          <element name="InvalidArgumentFault" type="vim25:InvalidArgument"/>
          <element name="InvalidRequestFault" type="vim25:InvalidRequest"/>
+         <element name="InvalidTokenFault" type="vim25:InvalidToken"/>
          <element name="InvalidTypeFault" type="vim25:InvalidType"/>
          <element name="ManagedObjectNotFoundFault" type="vim25:ManagedObjectNotFound"/>
          <element name="MethodNotFoundFault" type="vim25:MethodNotFound"/>
@@ -3133,6 +3134,9 @@
    <message name="InvalidRequestFaultMsg">
       <part name="fault" element="eam:InvalidRequestFault" />
    </message>
+   <message name="InvalidTokenFaultMsg">
+      <part name="fault" element="eam:InvalidTokenFault" />
+   </message>
    <message name="InvalidTypeFaultMsg">
       <part name="fault" element="eam:InvalidTypeFault" />
    </message>
@@ -3297,7 +3301,7 @@
    <binding name="EamBinding" type="eam:EamPortType">
       <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
       <operation name="QuerySolutionId">
-         <soap:operation soapAction="urn:eam/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:eam/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3309,7 +3313,7 @@
          </fault>
       </operation>
       <operation name="QueryConfig">
-         <soap:operation soapAction="urn:eam/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:eam/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3321,7 +3325,7 @@
          </fault>
       </operation>
       <operation name="Update">
-         <soap:operation soapAction="urn:eam/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:eam/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3342,7 +3346,7 @@
          </fault>
       </operation>
       <operation name="AgencyQueryRuntime">
-         <soap:operation soapAction="urn:eam/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:eam/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3354,7 +3358,7 @@
          </fault>
       </operation>
       <operation name="QueryAgent">
-         <soap:operation soapAction="urn:eam/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:eam/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3366,7 +3370,7 @@
          </fault>
       </operation>
       <operation name="RegisterAgentVm">
-         <soap:operation soapAction="urn:eam/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:eam/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3381,7 +3385,7 @@
          </fault>
       </operation>
       <operation name="UnregisterAgentVm">
-         <soap:operation soapAction="urn:eam/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:eam/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3393,7 +3397,7 @@
          </fault>
       </operation>
       <operation name="Agency_Enable">
-         <soap:operation soapAction="urn:eam/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:eam/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3405,7 +3409,7 @@
          </fault>
       </operation>
       <operation name="Agency_Disable">
-         <soap:operation soapAction="urn:eam/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:eam/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3417,7 +3421,7 @@
          </fault>
       </operation>
       <operation name="Uninstall">
-         <soap:operation soapAction="urn:eam/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:eam/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3429,7 +3433,7 @@
          </fault>
       </operation>
       <operation name="DestroyAgency">
-         <soap:operation soapAction="urn:eam/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:eam/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3441,7 +3445,7 @@
          </fault>
       </operation>
       <operation name="AddIssue">
-         <soap:operation soapAction="urn:eam/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:eam/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3456,7 +3460,7 @@
          </fault>
       </operation>
       <operation name="AgentQueryRuntime">
-         <soap:operation soapAction="urn:eam/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:eam/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3468,7 +3472,7 @@
          </fault>
       </operation>
       <operation name="MarkAsAvailable">
-         <soap:operation soapAction="urn:eam/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:eam/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3480,7 +3484,7 @@
          </fault>
       </operation>
       <operation name="AgentQueryConfig">
-         <soap:operation soapAction="urn:eam/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:eam/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3492,7 +3496,7 @@
          </fault>
       </operation>
       <operation name="Resolve">
-         <soap:operation soapAction="urn:eam/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:eam/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3504,7 +3508,7 @@
          </fault>
       </operation>
       <operation name="ResolveAll">
-         <soap:operation soapAction="urn:eam/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:eam/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3516,7 +3520,7 @@
          </fault>
       </operation>
       <operation name="QueryIssue">
-         <soap:operation soapAction="urn:eam/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:eam/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3528,7 +3532,7 @@
          </fault>
       </operation>
       <operation name="QueryAgency">
-         <soap:operation soapAction="urn:eam/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:eam/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3540,7 +3544,7 @@
          </fault>
       </operation>
       <operation name="CreateAgency">
-         <soap:operation soapAction="urn:eam/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:eam/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3561,7 +3565,7 @@
          </fault>
       </operation>
       <operation name="ScanForUnknownAgentVm">
-         <soap:operation soapAction="urn:eam/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:eam/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3573,7 +3577,7 @@
          </fault>
       </operation>
       <operation name="SetMaintenanceModePolicy">
-         <soap:operation soapAction="urn:eam/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:eam/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3585,7 +3589,7 @@
          </fault>
       </operation>
       <operation name="GetMaintenanceModePolicy">
-         <soap:operation soapAction="urn:eam/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:eam/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>

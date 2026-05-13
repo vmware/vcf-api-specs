@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Copyright (c) 2025 Broadcom. All Rights Reserved.
+The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+
+SPDX-License-Identifier: Apache-2.0-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.vmware.custom_sdk</groupId>
+        <artifactId>vcf-custom-sdk-java</artifactId>
+        <version>0.0.1</version>
+        <relativePath>../../../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>pbm</artifactId>
+
+    <properties>
+        <pbm.wsdl.root>${wsdl.root}/pbm</pbm.wsdl.root>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>${vcf.sdk.groupId}</groupId>
+            <artifactId>vim25</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.cxf</groupId>
+                <artifactId>cxf-codegen-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>generate-bindings</id>
+                        <configuration>
+                            <wsdlRoot>${pbm.wsdl.root}</wsdlRoot>
+                            <includes>
+                                <include>*.wsdl</include>
+                            </includes>
+                            <defaultOptions>
+                                <bindingFiles>
+                                    <bindingFile>${episode.file}</bindingFile>
+                                </bindingFiles>
+                                <extraargs>
+                                    <extraarg>-suppress-generated-date</extraarg>
+                                    <extraarg>-p</extraarg>
+                                    <extraarg>urn:pbm=${vcf.sdk.groupId}.pbm</extraarg>
+                                </extraargs>
+                            </defaultOptions>
+                            <wsdlOptions>
+                                <wsdlOption>
+                                    <wsdl>${pbm.wsdl.root}/pbmService.wsdl</wsdl>
+                                    <wsdlLocation>pbmService.wsdl</wsdlLocation>
+                                    <extraargs>
+                                        <extraarg>-p</extraarg>
+                                        <extraarg>urn:pbmService=${vcf.sdk.groupId}.pbm</extraarg>
+                                    </extraargs>
+                                </wsdlOption>
+                            </wsdlOptions>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>pbmservice/**</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <configuration>
+                            <excludes>
+                                <exclude>pbmservice/**</exclude>
+                            </excludes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+
+        <resources>
+            <resource>
+                <directory>${pbm.wsdl.root}</directory>
+            </resource>
+        </resources>
+    </build>
+
+</project>

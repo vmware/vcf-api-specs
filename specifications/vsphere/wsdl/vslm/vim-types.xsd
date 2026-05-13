@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!--
-   	Copyright (c) 2005-2025
+   	Copyright (c) 2005-2026
 	Broadcom. All Rights Reserved.
 	The term "Broadcom" refers to Broadcom Inc.
 	and/or its subsidiaries.
@@ -3641,6 +3641,46 @@
          </extension>
       </complexContent>
    </complexType>
+   <simpleType name="SearchIndexQuerySpecResourceType">
+      <restriction base="xsd:string">
+         <enumeration value="ClusterComputeResource" />
+         <enumeration value="ComputeResource" />
+         <enumeration value="Datacenter" />
+         <enumeration value="Datastore" />
+         <enumeration value="DistributedVirtualPortgroup" />
+         <enumeration value="DistributedVirtualSwitch" />
+         <enumeration value="Folder" />
+         <enumeration value="HostSystem" />
+         <enumeration value="Network" />
+         <enumeration value="OpaqueNetwork" />
+         <enumeration value="ResourcePool" />
+         <enumeration value="ServiceInstance" />
+         <enumeration value="StoragePod" />
+         <enumeration value="VirtualApp" />
+         <enumeration value="VirtualMachine" />
+         <enumeration value="VmwareDistributedVirtualSwitch" />
+      </restriction>
+   </simpleType>
+   <simpleType name="SearchIndexPredicateComparisonOperator">
+      <restriction base="xsd:string">
+         <enumeration value="Equal" />
+         <enumeration value="NotEqual" />
+         <enumeration value="Greater" />
+         <enumeration value="GreaterOrEqual" />
+         <enumeration value="Less" />
+         <enumeration value="LessOrEqual" />
+         <enumeration value="In" />
+         <enumeration value="NotIn" />
+         <enumeration value="Like" />
+         <enumeration value="NotLike" />
+      </restriction>
+   </simpleType>
+   <simpleType name="SearchIndexPredicateArrayOperator">
+      <restriction base="xsd:string">
+         <enumeration value="AllElements" />
+         <enumeration value="AnyElement" />
+      </restriction>
+   </simpleType>
    <complexType name="SelectionSet">
       <complexContent>
          <extension base="vim25:DynamicData">
@@ -4316,6 +4356,35 @@
             <sequence>
                <element name="name" type="xsd:string" />
                <element name="scheduledTask" type="vim25:ManagedObjectReference" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="TransitGatewayCreateSpec">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="ID" type="xsd:string" />
+               <element name="name" type="xsd:string" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="TransitGatewayConfigInfo">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="ID" type="xsd:string" />
+               <element name="name" type="xsd:string" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="TransitGatewayConfigSpec">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="name" type="xsd:string" minOccurs="0" />
             </sequence>
          </extension>
       </complexContent>
@@ -7618,6 +7687,12 @@
          <element name="HostMemberRuntimeInfo" type="vim25:HostMemberRuntimeInfo" minOccurs="0" maxOccurs="unbounded" />
       </sequence>
    </complexType>
+   <simpleType name="HostMemberRuntimeInfoNsxNetworkMigrationAvailabilityInfoMigrationSeverity">
+      <restriction base="xsd:string">
+         <enumeration value="warning" />
+         <enumeration value="error" />
+      </restriction>
+   </simpleType>
    <complexType name="HostMemberHealthCheckResult">
       <complexContent>
          <extension base="vim25:DynamicData">
@@ -37778,6 +37853,13 @@
          <element name="VStorageObjectSnapshotInfoVStorageObjectSnapshot" type="vim25:VStorageObjectSnapshotInfoVStorageObjectSnapshot" minOccurs="0" maxOccurs="unbounded" />
       </sequence>
    </complexType>
+   <simpleType name="VslmVsoPostRelocateChangeMetadataOperation">
+      <restriction base="xsd:string">
+         <enumeration value="UPDATE" />
+         <enumeration value="RESET" />
+         <enumeration value="NO_OP" />
+      </restriction>
+   </simpleType>
    <complexType name="RetrieveVStorageObjSpec">
       <complexContent>
          <extension base="vim25:DynamicData">

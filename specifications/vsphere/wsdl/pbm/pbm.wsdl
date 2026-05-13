@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!--
-   	Copyright (c) 2005-2025
+   	Copyright (c) 2005-2026
 	Broadcom. All Rights Reserved.
 	The term "Broadcom" refers to Broadcom Inc.
 	and/or its subsidiaries.
@@ -30,11 +30,13 @@
          <element name="versionURI" type="xsd:string" />
          <element name="MethodFaultFault" type="vim25:MethodFault"/>
          <element name="RuntimeFaultFault" type="vim25:RuntimeFault"/>
+         <element name="AuthenticationRequiredFault" type="vim25:AuthenticationRequired"/>
          <element name="HostCommunicationFault" type="vim25:HostCommunication"/>
          <element name="HostNotConnectedFault" type="vim25:HostNotConnected"/>
          <element name="HostNotReachableFault" type="vim25:HostNotReachable"/>
          <element name="InvalidArgumentFault" type="vim25:InvalidArgument"/>
          <element name="InvalidRequestFault" type="vim25:InvalidRequest"/>
+         <element name="InvalidTokenFault" type="vim25:InvalidToken"/>
          <element name="InvalidTypeFault" type="vim25:InvalidType"/>
          <element name="ManagedObjectNotFoundFault" type="vim25:ManagedObjectNotFound"/>
          <element name="MethodNotFoundFault" type="vim25:MethodNotFound"/>
@@ -43,6 +45,7 @@
          <element name="NotSupportedFault" type="vim25:NotSupported"/>
          <element name="RequestCanceledFault" type="vim25:RequestCanceled"/>
          <element name="SecurityErrorFault" type="vim25:SecurityError"/>
+         <element name="SessionNotFoundFault" type="vim25:SessionNotFound"/>
          <element name="SystemErrorFault" type="vim25:SystemError"/>
          <element name="UnexpectedFaultFault" type="vim25:UnexpectedFault"/>
          <element name="InvalidCollectorVersionFault" type="vim25:InvalidCollectorVersion"/>
@@ -3267,6 +3270,9 @@
    <message name="RuntimeFaultFaultMsg">
       <part name="fault" element="pbm:RuntimeFaultFault" />
    </message>
+   <message name="AuthenticationRequiredFaultMsg">
+      <part name="fault" element="pbm:AuthenticationRequiredFault" />
+   </message>
    <message name="HostCommunicationFaultMsg">
       <part name="fault" element="pbm:HostCommunicationFault" />
    </message>
@@ -3281,6 +3287,9 @@
    </message>
    <message name="InvalidRequestFaultMsg">
       <part name="fault" element="pbm:InvalidRequestFault" />
+   </message>
+   <message name="InvalidTokenFaultMsg">
+      <part name="fault" element="pbm:InvalidTokenFault" />
    </message>
    <message name="InvalidTypeFaultMsg">
       <part name="fault" element="pbm:InvalidTypeFault" />
@@ -3305,6 +3314,9 @@
    </message>
    <message name="SecurityErrorFaultMsg">
       <part name="fault" element="pbm:SecurityErrorFault" />
+   </message>
+   <message name="SessionNotFoundFaultMsg">
+      <part name="fault" element="pbm:SessionNotFoundFault" />
    </message>
    <message name="SystemErrorFaultMsg">
       <part name="fault" element="pbm:SystemErrorFault" />
@@ -3521,7 +3533,7 @@
    <binding name="PbmBinding" type="pbm:PbmPortType">
       <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
       <operation name="PbmRetrieveServiceContent">
-         <soap:operation soapAction="urn:pbm/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:pbm/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3533,7 +3545,7 @@
          </fault>
       </operation>
       <operation name="PbmCheckCompliance">
-         <soap:operation soapAction="urn:pbm/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:pbm/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3548,7 +3560,7 @@
          </fault>
       </operation>
       <operation name="PbmFetchComplianceResult">
-         <soap:operation soapAction="urn:pbm/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:pbm/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3563,7 +3575,7 @@
          </fault>
       </operation>
       <operation name="PbmCheckRollupCompliance">
-         <soap:operation soapAction="urn:pbm/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:pbm/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3578,7 +3590,7 @@
          </fault>
       </operation>
       <operation name="PbmFetchRollupComplianceResult">
-         <soap:operation soapAction="urn:pbm/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:pbm/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3593,7 +3605,7 @@
          </fault>
       </operation>
       <operation name="PbmQueryByRollupComplianceStatus">
-         <soap:operation soapAction="urn:pbm/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:pbm/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3611,7 +3623,7 @@
          </fault>
       </operation>
       <operation name="PbmQueryMatchingHub">
-         <soap:operation soapAction="urn:pbm/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:pbm/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3626,7 +3638,7 @@
          </fault>
       </operation>
       <operation name="PbmQueryMatchingHubWithSpec">
-         <soap:operation soapAction="urn:pbm/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:pbm/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3641,7 +3653,7 @@
          </fault>
       </operation>
       <operation name="PbmCheckCompatibility">
-         <soap:operation soapAction="urn:pbm/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:pbm/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3653,7 +3665,7 @@
          </fault>
       </operation>
       <operation name="PbmCheckCompatibilityWithSpec">
-         <soap:operation soapAction="urn:pbm/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:pbm/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3665,7 +3677,7 @@
          </fault>
       </operation>
       <operation name="PbmCheckRequirements">
-         <soap:operation soapAction="urn:pbm/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:pbm/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3680,7 +3692,7 @@
          </fault>
       </operation>
       <operation name="PbmFetchResourceType">
-         <soap:operation soapAction="urn:pbm/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:pbm/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3692,7 +3704,7 @@
          </fault>
       </operation>
       <operation name="PbmFetchVendorInfo">
-         <soap:operation soapAction="urn:pbm/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:pbm/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3704,7 +3716,7 @@
          </fault>
       </operation>
       <operation name="PbmFetchCapabilityMetadata">
-         <soap:operation soapAction="urn:pbm/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:pbm/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3716,7 +3728,7 @@
          </fault>
       </operation>
       <operation name="PbmFetchCapabilitySchema">
-         <soap:operation soapAction="urn:pbm/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:pbm/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3731,7 +3743,7 @@
          </fault>
       </operation>
       <operation name="PbmCreate">
-         <soap:operation soapAction="urn:pbm/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:pbm/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3752,7 +3764,7 @@
          </fault>
       </operation>
       <operation name="PbmUpdate">
-         <soap:operation soapAction="urn:pbm/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:pbm/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3770,7 +3782,7 @@
          </fault>
       </operation>
       <operation name="PbmDelete">
-         <soap:operation soapAction="urn:pbm/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:pbm/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3782,7 +3794,7 @@
          </fault>
       </operation>
       <operation name="PbmQueryProfile">
-         <soap:operation soapAction="urn:pbm/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:pbm/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3797,7 +3809,7 @@
          </fault>
       </operation>
       <operation name="PbmRetrieveContent">
-         <soap:operation soapAction="urn:pbm/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:pbm/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3812,7 +3824,7 @@
          </fault>
       </operation>
       <operation name="PbmQueryAssociatedProfiles">
-         <soap:operation soapAction="urn:pbm/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:pbm/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3827,7 +3839,7 @@
          </fault>
       </operation>
       <operation name="PbmQueryAssociatedProfile">
-         <soap:operation soapAction="urn:pbm/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:pbm/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3842,7 +3854,7 @@
          </fault>
       </operation>
       <operation name="PbmQueryAssociatedEntity">
-         <soap:operation soapAction="urn:pbm/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:pbm/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3857,7 +3869,7 @@
          </fault>
       </operation>
       <operation name="PbmQueryDefaultRequirementProfile">
-         <soap:operation soapAction="urn:pbm/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:pbm/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3878,7 +3890,7 @@
          </fault>
       </operation>
       <operation name="PbmResetDefaultRequirementProfile">
-         <soap:operation soapAction="urn:pbm/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:pbm/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3890,7 +3902,7 @@
          </fault>
       </operation>
       <operation name="PbmAssignDefaultRequirementProfile">
-         <soap:operation soapAction="urn:pbm/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:pbm/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3914,7 +3926,7 @@
          </fault>
       </operation>
       <operation name="PbmFindApplicableDefaultProfile">
-         <soap:operation soapAction="urn:pbm/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:pbm/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3938,7 +3950,7 @@
          </fault>
       </operation>
       <operation name="PbmQueryDefaultRequirementProfiles">
-         <soap:operation soapAction="urn:pbm/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:pbm/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3959,7 +3971,7 @@
          </fault>
       </operation>
       <operation name="PbmResetVSanDefaultProfile">
-         <soap:operation soapAction="urn:pbm/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:pbm/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3971,7 +3983,7 @@
          </fault>
       </operation>
       <operation name="PbmQuerySpaceStatsForStorageContainer">
-         <soap:operation soapAction="urn:pbm/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:pbm/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3989,7 +4001,7 @@
          </fault>
       </operation>
       <operation name="PbmQueryAssociatedEntities">
-         <soap:operation soapAction="urn:pbm/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:pbm/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4004,7 +4016,7 @@
          </fault>
       </operation>
       <operation name="PbmQueryReplicationGroups">
-         <soap:operation soapAction="urn:pbm/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:pbm/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>

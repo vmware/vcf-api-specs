@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!--
-   	Copyright (c) 2005-2025
+   	Copyright (c) 2005-2026
 	Broadcom. All Rights Reserved.
 	The term "Broadcom" refers to Broadcom Inc.
 	and/or its subsidiaries.
@@ -1815,6 +1815,18 @@
          <element name="vmSearch" type="xsd:boolean" />
       </sequence>
    </complexType>
+   <complexType name="QueryRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="querySpec" type="vim25:SearchIndexQuerySpec" />
+      </sequence>
+   </complexType>
+   <complexType name="QueryNextRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="iterationSpec" type="vim25:SearchIndexIterationSpec" />
+      </sequence>
+   </complexType>
    <complexType name="CurrentTimeRequestType">
       <sequence>
          <element name="_this" type="vim25:ManagedObjectReference" />
@@ -2676,6 +2688,11 @@
          <element name="_this" type="vim25:ManagedObjectReference" />
       </sequence>
    </complexType>
+   <complexType name="RepairVmDiskChainsRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+      </sequence>
+   </complexType>
    <complexType name="PerformVsanUpgradePreflightCheckRequestType">
       <sequence>
          <element name="_this" type="vim25:ManagedObjectReference" />
@@ -2898,6 +2915,12 @@
          <element name="_this" type="vim25:ManagedObjectReference" />
          <element name="switchUuid" type="xsd:string" />
          <element name="portgroupKey" type="xsd:string" />
+      </sequence>
+   </complexType>
+   <complexType name="GetVpcNetworkSpanRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="spanId" type="xsd:string" minOccurs="0" />
       </sequence>
    </complexType>
    <complexType name="UpdateDVSLacpGroupConfigRequestType">
@@ -3487,6 +3510,15 @@
          <element name="_this" type="vim25:ManagedObjectReference" />
          <element name="datastore" type="vim25:ManagedObjectReference" />
          <element name="maxQdepth" type="xsd:long" />
+      </sequence>
+   </complexType>
+   <complexType name="ResolveNfsServerHostNameRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="hostName" type="xsd:string" />
+         <element name="volumeName" type="xsd:string" minOccurs="0" />
+         <element name="force" type="xsd:boolean" minOccurs="0" />
+         <element name="isNFS41" type="xsd:boolean" minOccurs="0" />
       </sequence>
    </complexType>
    <complexType name="QueryMaxQueueDepthRequestType">
@@ -5779,6 +5811,7 @@
          <element name="id" type="vim25:ID" />
          <element name="datastore" type="vim25:ManagedObjectReference" />
          <element name="description" type="xsd:string" />
+         <element name="snapshotId" type="vim25:ID" minOccurs="0" />
       </sequence>
    </complexType>
    <complexType name="VStorageObjectDeleteSnapshotExRequestType">
@@ -5805,6 +5838,20 @@
          <element name="snapshotId" type="vim25:ID" />
       </sequence>
    </complexType>
+   <complexType name="RepairVStorageObjectChainRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="id" type="vim25:ID" />
+         <element name="datastore" type="vim25:ManagedObjectReference" />
+      </sequence>
+   </complexType>
+   <complexType name="UnregisterDiskRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="id" type="vim25:ID" />
+         <element name="datastore" type="vim25:ManagedObjectReference" />
+      </sequence>
+   </complexType>
    <complexType name="HostCreateDiskRequestType">
       <sequence>
          <element name="_this" type="vim25:ManagedObjectReference" />
@@ -5817,6 +5864,7 @@
          <element name="path" type="xsd:string" />
          <element name="name" type="xsd:string" minOccurs="0" />
          <element name="modifyControlFlags" type="xsd:boolean" minOccurs="0" />
+         <element name="id" type="vim25:ID" minOccurs="0" />
       </sequence>
    </complexType>
    <complexType name="HostExtendDiskRequestType">
@@ -5853,6 +5901,7 @@
          <element name="_this" type="vim25:ManagedObjectReference" />
          <element name="id" type="vim25:ID" />
          <element name="datastore" type="vim25:ManagedObjectReference" />
+         <element name="isLcParentAttached" type="xsd:boolean" minOccurs="0" />
       </sequence>
    </complexType>
    <complexType name="HostRetrieveVStorageObjectRequestType">
@@ -5890,6 +5939,7 @@
          <element name="id" type="vim25:ID" />
          <element name="datastore" type="vim25:ManagedObjectReference" />
          <element name="spec" type="vim25:VslmRelocateSpec" />
+         <element name="isLcParentAttached" type="xsd:boolean" minOccurs="0" />
       </sequence>
    </complexType>
    <complexType name="HostSetVStorageObjectControlFlagsRequestType">
@@ -5956,6 +6006,9 @@
          <element name="crypto" type="vim25:CryptoSpec" minOccurs="0" />
          <element name="path" type="xsd:string" minOccurs="0" />
          <element name="provisioningType" type="xsd:string" minOccurs="0" />
+         <element name="isLinkedClone" type="xsd:boolean" minOccurs="0" />
+         <element name="targetId" type="vim25:ID" minOccurs="0" />
+         <element name="targetDatastore" type="vim25:ManagedObjectReference" minOccurs="0" />
       </sequence>
    </complexType>
    <complexType name="HostVStorageObjectRevertRequestType">
@@ -5998,6 +6051,7 @@
          <element name="_this" type="vim25:ManagedObjectReference" />
          <element name="id" type="vim25:ID" />
          <element name="datastore" type="vim25:ManagedObjectReference" />
+         <element name="isLcParentAttached" type="xsd:boolean" minOccurs="0" />
       </sequence>
    </complexType>
    <complexType name="HostUpdateVStorageObjectMetadataExRequestType">
@@ -6033,6 +6087,7 @@
          <element name="_this" type="vim25:ManagedObjectReference" />
          <element name="path" type="xsd:string" />
          <element name="name" type="xsd:string" minOccurs="0" />
+         <element name="id" type="vim25:ID" minOccurs="0" />
       </sequence>
    </complexType>
    <complexType name="ExtendDiskRequestType">
@@ -6229,6 +6284,9 @@
          <element name="profile" type="vim25:VirtualMachineProfileSpec" minOccurs="0" maxOccurs="unbounded" />
          <element name="crypto" type="vim25:CryptoSpec" minOccurs="0" />
          <element name="path" type="xsd:string" minOccurs="0" />
+         <element name="isLinkedClone" type="xsd:boolean" minOccurs="0" />
+         <element name="targetId" type="vim25:ID" minOccurs="0" />
+         <element name="targetDatastore" type="vim25:ManagedObjectReference" minOccurs="0" />
       </sequence>
    </complexType>
    <complexType name="RevertVStorageObjectRequestType">

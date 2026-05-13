@@ -1,0 +1,5024 @@
+openapi: 3.0.4
+info:
+  title: VCF SDDC LCM Service APIs
+  version: 9.1.0.0
+servers:
+- description: VCF SDDC LCM Service
+  url: https://vcf.broadcom.com/sddc-lcm
+security:
+- bearerToken: []
+tags:
+- description: SDDC LCM Health APIs.
+  name: Health
+- description: SDDC LCM Configuration APIs.
+  name: Config
+- description: SDDC LCM Depot-related APIs
+  name: Depot
+- description: "Component installation, import or deployment reconfiguration APIs.\
+    \ These APIs are subject to change in future VCF releases. Appropriate details\
+    \ around such changes will be provided."
+  name: Components
+- description: "Component support bundle generation, download and deletion APIs."
+  name: SupportBundles
+- description: Standalone node installation and reconfiguration APIs.
+  name: Nodes
+- description: API to Patch or Upgrade component. These APIs are subject to change
+    in future VCF releases. Appropriate details around such changes will be provided.
+  name: Upgrade
+paths:
+  /v1/health:
+    get:
+      description: Get the SDDC LCM health status.
+      operationId: getHealth
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+          description: OK
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      security: []
+      tags:
+      - Health
+  /v1/config:
+    get:
+      description: "Fetch the SDDC LCM configuration, including registered components\
+        \ and the associated fleet, if any."
+      operationId: getConfig
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Config'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      tags:
+      - Config
+    post:
+      description: Configure SDDC LCM by connecting it to SDDC Manager and Fleet LCM.
+      operationId: setConfig
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfigSpec'
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+          description: Accepted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request. Invalid input specification.
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      tags:
+      - Config
+  /v1/depot:
+    post:
+      description: Register Fleet Depot as a depot to components known to this SDDC
+        LCM instance
+      operationId: setDepot
+      parameters:
+      - description: Correlation ID for tracing the request across services
+        explode: true
+        in: header
+        name: X-Correlation-Id
+        required: false
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FleetDepotSpec'
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+          description: Accepted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request. Invalid input specification.
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      tags:
+      - Depot
+  /v1/depot/components:
+    post:
+      description: Resolve component versions to binary urls given a Fleet Depot endpoint
+        and a list of components with their versions
+      operationId: resolveDepotComponents
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DepotComponentsSpec'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResolvedComponentVersions'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request. Invalid input specification.
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      tags:
+      - Depot
+  /v1/components:
+    get:
+      description: Fetch the components registered with SDDC LCM.
+      operationId: getComponents
+      parameters:
+      - description: Component scope to filter by.
+        explode: true
+        in: query
+        name: scope
+        required: false
+        schema:
+          enum:
+          - FLEET
+          - INSTANCE
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Components'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      tags:
+      - Components
+    post:
+      description: Install new or import existing component(s).
+      operationId: createComponents
+      parameters:
+      - description: Correlation ID for tracing the request across services
+        explode: true
+        in: header
+        name: X-Correlation-Id
+        required: false
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComponentSpecs'
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+          description: Accepted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request. Invalid input specification.
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      tags:
+      - Components
+  /v1/components/status:
+    post:
+      description: Fetches the status for the components with the input IDs.
+      operationId: fetchComponentStatuses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComponentStatusesSpec'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComponentStatuses'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request. Invalid input specification.
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      tags:
+      - Components
+  /v1/components/{componentId}:
+    get:
+      description: Get a Component.
+      operationId: getComponent
+      parameters:
+      - description: Component Identifier.
+        explode: true
+        in: path
+        name: componentId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Component'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      tags:
+      - Components
+    patch:
+      description: Update component deployment (by adding more nodes to it).
+      operationId: updateComponent
+      parameters:
+      - description: Correlation ID for tracing the request across services
+        explode: true
+        in: header
+        name: X-Correlation-Id
+        required: false
+        schema:
+          type: string
+        style: simple
+      - description: Component Identifier.
+        explode: true
+        in: path
+        name: componentId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComponentUpdateSpec'
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+          description: Accepted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request. Invalid input specification.
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      tags:
+      - Components
+    post:
+      description: Perform an action on a given component.
+      operationId: performComponentAction
+      parameters:
+      - description: Correlation ID for tracing the request across services
+        explode: true
+        in: header
+        name: X-Correlation-Id
+        required: false
+        schema:
+          type: string
+        style: simple
+      - description: Component Identifier.
+        explode: true
+        in: path
+        name: componentId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      - description: Component action to perform.
+        explode: true
+        in: query
+        name: action
+        required: true
+        schema:
+          enum:
+          - shutdown
+          - restart
+          - start
+          - refresh
+          - precheck
+          - apply
+          type: string
+        style: form
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComponentUpgradeSpec'
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+          description: Accepted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal Server Error
+      tags:
+      - Components
+  /v1/components/backups:
+    get:
+      description: Get the backups for all components.
+      operationId: getComponentsBackups
+      parameters:
+      - description: Component ID.
+        explode: true
+        in: query
+        name: componentId
+        required: false
+        schema:
+          format: uuid
+          type: string
+        style: form
+      - description: "The earliest date for which to list items, formatted as 2025-09-12T16:09:53Z."
+        explode: true
+        in: query
+        name: periodStart
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      - description: "The latest date for which to list items, formatted as 2025-09-12T16:09:53Z."
+        explode: true
+        in: query
+        name: periodEnd
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComponentBackups'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      tags:
+      - Components
+    post:
+      description: Initiate a backup or restore components task.
+      operationId: backupRestoreComponentsAction
+      parameters:
+      - description: Correlation ID for tracing the request across services
+        explode: true
+        in: header
+        name: X-Correlation-Id
+        required: false
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BackupRestoreSpec'
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+          description: Accepted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request. Invalid input specification.
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      tags:
+      - Components
+  /v1/components/{componentId}/config:
+    get:
+      description: Get a Component's config.
+      operationId: getComponentConfig
+      parameters:
+      - description: Component Identifier.
+        explode: true
+        in: path
+        name: componentId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComponentConfig'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      tags:
+      - Components
+    patch:
+      description: Update a Component's config.
+      operationId: updateComponentConfig
+      parameters:
+      - description: Correlation ID for tracing the request across services
+        explode: true
+        in: header
+        name: X-Correlation-Id
+        required: false
+        schema:
+          type: string
+        style: simple
+      - description: Component Identifier.
+        explode: true
+        in: path
+        name: componentId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComponentConfigUpdateSpec'
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+          description: Accepted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request. Invalid input specification.
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      tags:
+      - Components
+  /v1/components/{componentId}/nodes:
+    get:
+      description: List a Component's nodes.
+      operationId: getComponentNodes
+      parameters:
+      - description: Component Identifier.
+        explode: true
+        in: path
+        name: componentId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      - description: Page Number.
+        explode: true
+        in: query
+        name: pageNumber
+        required: false
+        schema:
+          type: integer
+        style: form
+      - description: Page Size. Maximum allowed is 50.
+        explode: true
+        in: query
+        name: pageSize
+        required: false
+        schema:
+          type: integer
+        style: form
+      - description: Comma-separated list of node types
+        example: "control-plane,worker"
+        explode: true
+        in: query
+        name: nodeTypes
+        required: false
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Nodes'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      tags:
+      - Components
+  /v1/components/{componentId}/status:
+    get:
+      description: Get a Component's status.
+      operationId: getComponentStatus
+      parameters:
+      - description: Component Identifier.
+        explode: true
+        in: path
+        name: componentId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComponentStatus'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      tags:
+      - Components
+  /v1/components/{componentId}/support-bundles:
+    get:
+      description: Fetch the list of generated support bundles for a given component.
+      operationId: getComponentSupportBundles
+      parameters:
+      - description: Component Identifier.
+        explode: true
+        in: path
+        name: componentId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/SupportBundle'
+                type: array
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      tags:
+      - SupportBundles
+    post:
+      description: Generates a support bundle for a given component.
+      operationId: generateComponentSupportBundle
+      parameters:
+      - description: Correlation ID for tracing the request across services
+        explode: true
+        in: header
+        name: X-Correlation-Id
+        required: false
+        schema:
+          type: string
+        style: simple
+      - description: Component Identifier.
+        explode: true
+        in: path
+        name: componentId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComponentSupportBundleSpec'
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+          description: Accepted
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      tags:
+      - SupportBundles
+  /v1/components/{componentId}/support-bundles/{supportBundleId}:
+    delete:
+      description: Delete a support bundle for a given component by its ID.
+      operationId: deleteComponentSupportBundle
+      parameters:
+      - description: Correlation ID for tracing the request across services
+        explode: true
+        in: header
+        name: X-Correlation-Id
+        required: false
+        schema:
+          type: string
+        style: simple
+      - description: Component Identifier.
+        explode: true
+        in: path
+        name: componentId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      - description: Support Bundle Identifier.
+        explode: true
+        in: path
+        name: supportBundleId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+          description: Accepted
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      tags:
+      - SupportBundles
+  /v1/nodes:
+    post:
+      description: Install new standalone node.
+      operationId: createNode
+      parameters:
+      - description: Correlation ID for tracing the request across services
+        explode: true
+        in: header
+        name: X-Correlation-Id
+        required: false
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OvaNodeSpec'
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+          description: Accepted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request. Invalid input specification.
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      tags:
+      - Nodes
+  /v1/nodes/{nodeId}/config:
+    patch:
+      description: Update a node's config.
+      operationId: updateNodeConfig
+      parameters:
+      - description: Correlation ID for tracing the request across services
+        explode: true
+        in: header
+        name: X-Correlation-Id
+        required: false
+        schema:
+          type: string
+        style: simple
+      - description: Standalone Node Identifier.
+        explode: true
+        in: path
+        name: nodeId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OvaNodeSizeConfigSpec'
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+          description: Accepted
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      tags:
+      - Nodes
+  /v1/tasks:
+    get:
+      description: Get all tasks
+      operationId: getTasks
+      parameters:
+      - description: Filter tasks by status
+        in: query
+        name: status
+        required: false
+        schema:
+          type: string
+      - description: Filter tasks by type
+        in: query
+        name: type
+        required: false
+        schema:
+          type: string
+      - description: Filter tasks by creator (username or service account)
+        in: query
+        name: createdBy
+        required: false
+        schema:
+          type: string
+      - description: Filter tasks by name (internal name)
+        in: query
+        name: name
+        required: false
+        schema:
+          type: string
+      - description: Filter tasks by description (public name for the task)
+        in: query
+        name: description
+        required: false
+        schema:
+          type: string
+      - description: Filter tasks with start time greater than the specified timestamp
+          (ISO 8601 format)
+        in: query
+        name: startTimeGt
+        required: false
+        schema:
+          format: date-time
+          type: string
+      - description: Filter tasks with start time less than the specified timestamp
+          (ISO 8601 format)
+        in: query
+        name: startTimeLt
+        required: false
+        schema:
+          format: date-time
+          type: string
+      - description: Filter tasks with update time greater than the specified timestamp
+          (ISO 8601 format)
+        in: query
+        name: updateTimeGt
+        required: false
+        schema:
+          format: date-time
+          type: string
+      - description: Filter tasks with update time less than the specified timestamp
+          (ISO 8601 format)
+        in: query
+        name: updateTimeLt
+        required: false
+        schema:
+          format: date-time
+          type: string
+      - description: Filter tasks with end time greater than the specified timestamp
+          (ISO 8601 format)
+        in: query
+        name: endTimeGt
+        required: false
+        schema:
+          format: date-time
+          type: string
+      - description: Filter tasks with end time less than the specified timestamp
+          (ISO 8601 format)
+        in: query
+        name: endTimeLt
+        required: false
+        schema:
+          format: date-time
+          type: string
+      - description: Filter tasks by resource ID
+        in: query
+        name: resourceId
+        required: false
+        schema:
+          type: string
+      - description: Filter tasks by resource type
+        in: query
+        name: resourceType
+        required: false
+        schema:
+          type: string
+      - description: Whether to include system/internal tasks in the response. Defaults
+          to false (only customer-visible tasks).
+        in: query
+        name: includeSystemTasks
+        required: false
+        schema:
+          default: false
+          type: boolean
+      - description: Page Number.
+        explode: true
+        in: query
+        name: pageNumber
+        required: false
+        schema:
+          type: integer
+        style: form
+      - description: Page Size. Maximum allowed is 50.
+        explode: true
+        in: query
+        name: pageSize
+        required: false
+        schema:
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageOfTaskSummary'
+          description: OK
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageOfTaskSummary'
+          description: Internal Server Error
+      summary: Get all tasks
+      tags:
+      - Task
+  /v1/tasks/{taskId}:
+    get:
+      description: Get a task
+      operationId: getTask
+      parameters:
+      - description: Task Id
+        in: path
+        name: taskId
+        required: true
+        schema:
+          format: uuid
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal Server Error
+      summary: Get a task
+      tags:
+      - Task
+  /v1/tasks/{taskId}?action=retry:
+    post:
+      description: Retry a failed task from the underlying stage that failed
+      operationId: retryTask
+      parameters:
+      - description: Task Id
+        in: path
+        name: taskId
+        required: true
+        schema:
+          format: uuid
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+          description: Task retry initiated successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: "Bad Request - Task cannot be retried (e.g., task is not in\
+            \ a failed state)"
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal Server Error
+      summary: Retry a failed task
+      tags:
+      - Task
+  /v1/tasks/{taskId}?action=cancel:
+    post:
+      description: "Cancel a task. The running stage will continue until it reaches\
+        \ a terminal state, but subsequent stages will not be executed."
+      operationId: cancelTask
+      parameters:
+      - description: Task Id
+        in: path
+        name: taskId
+        required: true
+        schema:
+          format: uuid
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+          description: Task cancellation initiated successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: "Bad Request - Task cannot be cancelled (e.g., task is already\
+            \ completed or cancelled)"
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal Server Error
+      summary: Cancel a task
+      tags:
+      - Task
+components:
+  parameters:
+    AcceptLanguageHeader:
+      in: header
+      name: Accept-Language
+      required: false
+      schema:
+        example: en-US
+        type: string
+    CorrelationIdHeader:
+      description: Correlation ID for tracing the request across services
+      explode: true
+      in: header
+      name: X-Correlation-Id
+      required: false
+      schema:
+        type: string
+      style: simple
+    configActionQueryParam:
+      description: Fleet LCM configuration action.
+      explode: true
+      in: query
+      name: action
+      required: false
+      schema:
+        enum:
+        - apply
+        type: string
+      style: form
+    componentIdPathParam:
+      description: Component Identifier.
+      explode: true
+      in: path
+      name: componentId
+      required: true
+      schema:
+        format: uuid
+        type: string
+      style: simple
+    componentActionQueryParam:
+      description: Component action to perform.
+      explode: true
+      in: query
+      name: action
+      required: true
+      schema:
+        enum:
+        - shutdown
+        - restart
+        - start
+        - refresh
+        - precheck
+        - apply
+        type: string
+      style: form
+    componentFilterScopeQueryParam:
+      description: Component scope to filter by.
+      explode: true
+      in: query
+      name: scope
+      required: false
+      schema:
+        enum:
+        - FLEET
+        - INSTANCE
+        type: string
+      style: form
+    componentIdQueryParam:
+      description: Component ID.
+      explode: true
+      in: query
+      name: componentId
+      required: false
+      schema:
+        format: uuid
+        type: string
+      style: form
+    periodStartQueryParam:
+      description: "The earliest date for which to list items, formatted as 2025-09-12T16:09:53Z."
+      explode: true
+      in: query
+      name: periodStart
+      required: false
+      schema:
+        format: date-time
+        type: string
+      style: form
+    periodEndQueryParam:
+      description: "The latest date for which to list items, formatted as 2025-09-12T16:09:53Z."
+      explode: true
+      in: query
+      name: periodEnd
+      required: false
+      schema:
+        format: date-time
+        type: string
+      style: form
+    pageNumberQueryParam:
+      description: Page Number.
+      explode: true
+      in: query
+      name: pageNumber
+      required: false
+      schema:
+        type: integer
+      style: form
+    pageSizeQueryParam:
+      description: Page Size. Maximum allowed is 50.
+      explode: true
+      in: query
+      name: pageSize
+      required: false
+      schema:
+        type: integer
+      style: form
+    supportBundleIdPathParam:
+      description: Support Bundle Identifier.
+      explode: true
+      in: path
+      name: supportBundleId
+      required: true
+      schema:
+        type: string
+      style: simple
+    serviceAccountUsernamePathParam:
+      description: Component Service Account username.
+      explode: true
+      in: path
+      name: serviceAccountUsername
+      required: true
+      schema:
+        type: string
+      style: simple
+    snapshotIdPathParam:
+      description: Component Snapshot Identifier.
+      explode: true
+      in: path
+      name: snapshotId
+      required: true
+      schema:
+        format: uuid
+        type: string
+      style: simple
+    nodeIdPathParam:
+      description: Standalone Node Identifier.
+      explode: true
+      in: path
+      name: nodeId
+      required: true
+      schema:
+        format: uuid
+        type: string
+      style: simple
+    taskStatusQueryParam:
+      description: Filter tasks by status
+      in: query
+      name: status
+      required: false
+      schema:
+        type: string
+    taskTypeQueryParam:
+      description: Filter tasks by type
+      in: query
+      name: type
+      required: false
+      schema:
+        type: string
+    taskCreatedByQueryParam:
+      description: Filter tasks by creator (username or service account)
+      in: query
+      name: createdBy
+      required: false
+      schema:
+        type: string
+    taskNameQueryParam:
+      description: Filter tasks by name (internal name)
+      in: query
+      name: name
+      required: false
+      schema:
+        type: string
+    taskDescriptionQueryParam:
+      description: Filter tasks by description (public name for the task)
+      in: query
+      name: description
+      required: false
+      schema:
+        type: string
+    taskStartTimeGtQueryParam:
+      description: Filter tasks with start time greater than the specified timestamp
+        (ISO 8601 format)
+      in: query
+      name: startTimeGt
+      required: false
+      schema:
+        format: date-time
+        type: string
+    taskStartTimeLtQueryParam:
+      description: Filter tasks with start time less than the specified timestamp
+        (ISO 8601 format)
+      in: query
+      name: startTimeLt
+      required: false
+      schema:
+        format: date-time
+        type: string
+    taskUpdateTimeGtQueryParam:
+      description: Filter tasks with update time greater than the specified timestamp
+        (ISO 8601 format)
+      in: query
+      name: updateTimeGt
+      required: false
+      schema:
+        format: date-time
+        type: string
+    taskUpdateTimeLtQueryParam:
+      description: Filter tasks with update time less than the specified timestamp
+        (ISO 8601 format)
+      in: query
+      name: updateTimeLt
+      required: false
+      schema:
+        format: date-time
+        type: string
+    taskEndTimeGtQueryParam:
+      description: Filter tasks with end time greater than the specified timestamp
+        (ISO 8601 format)
+      in: query
+      name: endTimeGt
+      required: false
+      schema:
+        format: date-time
+        type: string
+    taskEndTimeLtQueryParam:
+      description: Filter tasks with end time less than the specified timestamp (ISO
+        8601 format)
+      in: query
+      name: endTimeLt
+      required: false
+      schema:
+        format: date-time
+        type: string
+    taskResourceIdQueryParam:
+      description: Filter tasks by resource ID
+      in: query
+      name: resourceId
+      required: false
+      schema:
+        type: string
+    taskResourceTypeQueryParam:
+      description: Filter tasks by resource type
+      in: query
+      name: resourceType
+      required: false
+      schema:
+        type: string
+    includeSystemTasksQueryParam:
+      description: Whether to include system/internal tasks in the response. Defaults
+        to false (only customer-visible tasks).
+      in: query
+      name: includeSystemTasks
+      required: false
+      schema:
+        default: false
+        type: boolean
+    taskIdPathParam:
+      description: Task Id
+      in: path
+      name: taskId
+      required: true
+      schema:
+        format: uuid
+        type: string
+  responses:
+    BadRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+      description: Bad request. Invalid input specification.
+    NotFound:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+      description: The specified resource was not found
+    Unauthorized:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+      description: Unauthorized
+    InternalServerError:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+      description: Internal server error
+    ServiceUnavailable:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+      description: Unauthorized
+  schemas:
+    Health:
+      example:
+        up: true
+      properties:
+        up:
+          type: boolean
+      type: object
+    ServiceStatus:
+      description: A common status object to define the health of a service.
+      enum:
+      - HEALTHY
+      - OFFLINE
+      type: string
+    TargetServiceType:
+      description: Target service type for the service account.
+      enum:
+      - SDDC_MANAGER
+      - VCENTER
+      type: string
+    ConfigSpec:
+      example:
+        sddcManager:
+          password: password
+          fqdn: fqdn
+          sslThumbprint: sslThumbprint
+          username: username
+        fqdn: fqdn
+        vspCluster:
+          fleetFqdn: fleetFqdn
+          sslThumbprint: sslThumbprint
+          platformFqdn: platformFqdn
+          instanceFqdn: instanceFqdn
+        vcenter:
+          password: password
+          fqdn: fqdn
+          sslThumbprint: sslThumbprint
+          username: username
+        fleetLcm:
+          password: password
+          fqdn: fqdn
+          sslThumbprint: sslThumbprint
+          opsToken: opsToken
+          username: username
+      properties:
+        sddcManager:
+          $ref: '#/components/schemas/SddcManagerEndpoint'
+        vspCluster:
+          $ref: '#/components/schemas/VspClusterEndpoint'
+        vcenter:
+          $ref: '#/components/schemas/VcenterEndpoint'
+        fleetLcm:
+          $ref: '#/components/schemas/FleetLcmEndpoint'
+        fqdn:
+          type: string
+      title: SDDC LCM configuration spec.
+      type: object
+    SddcManagerEndpoint:
+      example:
+        password: password
+        fqdn: fqdn
+        sslThumbprint: sslThumbprint
+        username: username
+      properties:
+        fqdn:
+          type: string
+        username:
+          type: string
+        password:
+          format: password
+          type: string
+        sslThumbprint:
+          type: string
+      required:
+      - fqdn
+      - password
+      - sslThumbprint
+      - username
+      title: SDDC Manager endpoint.
+      type: object
+    VspClusterEndpoint:
+      example:
+        fleetFqdn: fleetFqdn
+        sslThumbprint: sslThumbprint
+        platformFqdn: platformFqdn
+        instanceFqdn: instanceFqdn
+      properties:
+        platformFqdn:
+          type: string
+        fleetFqdn:
+          type: string
+        instanceFqdn:
+          type: string
+        sslThumbprint:
+          type: string
+      required:
+      - instanceFqdn
+      - platformFqdn
+      - sslThumbprint
+      title: VSP cluster endpoint.
+      type: object
+    VcenterEndpoint:
+      example:
+        password: password
+        fqdn: fqdn
+        sslThumbprint: sslThumbprint
+        username: username
+      properties:
+        fqdn:
+          type: string
+        username:
+          type: string
+        password:
+          format: password
+          type: string
+        sslThumbprint:
+          type: string
+      required:
+      - fqdn
+      - password
+      - sslThumbprint
+      - username
+      title: vCenter endpoint.
+      type: object
+    FleetLcmEndpoint:
+      example:
+        password: password
+        fqdn: fqdn
+        sslThumbprint: sslThumbprint
+        opsToken: opsToken
+        username: username
+      properties:
+        fqdn:
+          type: string
+        username:
+          type: string
+        password:
+          format: password
+          type: string
+        opsToken:
+          type: string
+        sslThumbprint:
+          type: string
+      required:
+      - fqdn
+      - sslThumbprint
+      title: Fleet LCM endpoint.
+      type: object
+    FleetDepotSpec:
+      example:
+        fqdn: fqdn
+        certificate: certificate
+      properties:
+        fqdn:
+          type: string
+        certificate:
+          description: PEM encoded certificate (chain).
+          type: string
+      required:
+      - certificate
+      - fqdn
+      title: Fleet Depot endpoint.
+      type: object
+    DepotComponentsSpec:
+      example:
+        componentVersions:
+        - component: component
+          version: version
+        - component: component
+          version: version
+        version: version
+        fleetDepotSpec:
+          fqdn: fqdn
+          certificate: certificate
+      properties:
+        fleetDepotSpec:
+          $ref: '#/components/schemas/FleetDepotSpec'
+        version:
+          type: string
+        componentVersions:
+          items:
+            $ref: '#/components/schemas/ComponentVersionSpec'
+          type: array
+      required:
+      - componentVersions
+      - fleetDepotSpec
+      title: Depot Components spec
+      type: object
+    ComponentVersionSpec:
+      example:
+        component: component
+        version: version
+      properties:
+        component:
+          type: string
+        version:
+          type: string
+      required:
+      - component
+      type: object
+    ResolvedComponentVersion:
+      example:
+        component: component
+        version: version
+        binaryUrl: binaryUrl
+      properties:
+        component:
+          type: string
+        version:
+          type: string
+        binaryUrl:
+          type: string
+      type: object
+    ResolvedComponentVersions:
+      example:
+        componentVersions:
+        - component: component
+          version: version
+          binaryUrl: binaryUrl
+        - component: component
+          version: version
+          binaryUrl: binaryUrl
+      properties:
+        componentVersions:
+          items:
+            $ref: '#/components/schemas/ResolvedComponentVersion'
+          type: array
+      type: object
+    Config:
+      example:
+        sddcManager:
+          fqdn: fqdn
+          certificate: certificate
+        vspClusters:
+        - fqdn: fqdn
+          certificate: certificate
+          id: id
+          type: MANAGEMENT
+        - fqdn: fqdn
+          certificate: certificate
+          id: id
+          type: MANAGEMENT
+        sddcGroupId: sddcGroupId
+        vcenter:
+          fqdn: fqdn
+          sslThumbprint: sslThumbprint
+          id: id
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        version: version
+        sddcGroupName: sddcGroupName
+        status: HEALTHY
+        fleetLcm:
+          fqdn: fqdn
+          certificate: certificate
+      properties:
+        id:
+          format: uuid
+          type: string
+        version:
+          type: string
+        status:
+          $ref: '#/components/schemas/ServiceStatus'
+        fleetLcm:
+          $ref: '#/components/schemas/FleetLcm'
+        sddcGroupId:
+          description: SDDC Group identifier.
+          type: string
+        sddcGroupName:
+          description: SDDC Group name.
+          type: string
+        sddcManager:
+          $ref: '#/components/schemas/SddcManager'
+        vcenter:
+          $ref: '#/components/schemas/Vcenter'
+        vspClusters:
+          items:
+            $ref: '#/components/schemas/VspCluster'
+          type: array
+      type: object
+    SddcManager:
+      example:
+        fqdn: fqdn
+        certificate: certificate
+      properties:
+        fqdn:
+          type: string
+        certificate:
+          description: PEM encoded certificate (chain).
+          type: string
+      type: object
+    FleetLcm:
+      example:
+        fqdn: fqdn
+        certificate: certificate
+      properties:
+        fqdn:
+          type: string
+        certificate:
+          description: PEM encoded certificate (chain).
+          type: string
+      type: object
+    ComponentSupportBundleSpec:
+      description: Component Support bundle Spec
+      example:
+        lookBackWindow: 0
+      properties:
+        lookBackWindow:
+          type: integer
+      type: object
+    SupportBundle:
+      example:
+        size: 0
+        createdTimestamp: 2000-01-23T04:56:07.000+00:00
+        name: name
+        id: id
+        url: https://openapi-generator.tech
+      properties:
+        id:
+          type: string
+        createdTimestamp:
+          description: Time when the operation is started.
+          format: date-time
+          type: string
+        size:
+          description: Size of support bundle in bytes
+          format: int64
+          type: integer
+        name:
+          description: File name of the support bundle
+          type: string
+        url:
+          description: Download URL of the support bundle from VMSP
+          format: uri
+          type: string
+      type: object
+    ComponentSpecs:
+      example:
+        componentSpecs:
+        - componentType: componentType
+          deploymentType: deploymentType
+          configSpec:
+            key: ""
+          nodeSpecs:
+          - configSpec:
+              key: ""
+            deploymentMode: DEPLOY_AND_MONITOR
+            nodeType: nodeType
+            repository:
+              downloadUrl: downloadUrl
+              certificate: certificate
+            version: version
+            deploymentSpec:
+              ipv4Settings:
+                address: address
+                netmask: netmask
+                addressType: addressType
+                gateway: gateway
+              password: password
+              fqdn: fqdn
+              ntpServers: ntpServers
+              dnsSuffix: dnsSuffix
+              deploymentOption: deploymentOption
+              networkName: networkName
+              ipv6Settings:
+                address: address
+                netmask: netmask
+                addressType: addressType
+                force: true
+                gateway: gateway
+              extraConfigProperties:
+                key: extraConfigProperties
+              dnsServers: dnsServers
+          - configSpec:
+              key: ""
+            deploymentMode: DEPLOY_AND_MONITOR
+            nodeType: nodeType
+            repository:
+              downloadUrl: downloadUrl
+              certificate: certificate
+            version: version
+            deploymentSpec:
+              ipv4Settings:
+                address: address
+                netmask: netmask
+                addressType: addressType
+                gateway: gateway
+              password: password
+              fqdn: fqdn
+              ntpServers: ntpServers
+              dnsSuffix: dnsSuffix
+              deploymentOption: deploymentOption
+              networkName: networkName
+              ipv6Settings:
+                address: address
+                netmask: netmask
+                addressType: addressType
+                force: true
+                gateway: gateway
+              extraConfigProperties:
+                key: extraConfigProperties
+              dnsServers: dnsServers
+        - componentType: componentType
+          deploymentType: deploymentType
+          configSpec:
+            key: ""
+          nodeSpecs:
+          - configSpec:
+              key: ""
+            deploymentMode: DEPLOY_AND_MONITOR
+            nodeType: nodeType
+            repository:
+              downloadUrl: downloadUrl
+              certificate: certificate
+            version: version
+            deploymentSpec:
+              ipv4Settings:
+                address: address
+                netmask: netmask
+                addressType: addressType
+                gateway: gateway
+              password: password
+              fqdn: fqdn
+              ntpServers: ntpServers
+              dnsSuffix: dnsSuffix
+              deploymentOption: deploymentOption
+              networkName: networkName
+              ipv6Settings:
+                address: address
+                netmask: netmask
+                addressType: addressType
+                force: true
+                gateway: gateway
+              extraConfigProperties:
+                key: extraConfigProperties
+              dnsServers: dnsServers
+          - configSpec:
+              key: ""
+            deploymentMode: DEPLOY_AND_MONITOR
+            nodeType: nodeType
+            repository:
+              downloadUrl: downloadUrl
+              certificate: certificate
+            version: version
+            deploymentSpec:
+              ipv4Settings:
+                address: address
+                netmask: netmask
+                addressType: addressType
+                gateway: gateway
+              password: password
+              fqdn: fqdn
+              ntpServers: ntpServers
+              dnsSuffix: dnsSuffix
+              deploymentOption: deploymentOption
+              networkName: networkName
+              ipv6Settings:
+                address: address
+                netmask: netmask
+                addressType: addressType
+                force: true
+                gateway: gateway
+              extraConfigProperties:
+                key: extraConfigProperties
+              dnsServers: dnsServers
+      properties:
+        componentSpecs:
+          items:
+            $ref: '#/components/schemas/ComponentSpec'
+          type: array
+      type: object
+    ComponentSpec:
+      description: Component Install Spec
+      discriminator:
+        mapping:
+          OvaComponentSpec: '#/components/schemas/OvaComponentSpec'
+          VspComponentSpec: '#/components/schemas/VspComponentSpec'
+          VspClusterSpec: '#/components/schemas/VspClusterSpec'
+          ComponentImportSpec: '#/components/schemas/ComponentImportSpec'
+        propertyName: deploymentType
+      oneOf:
+      - $ref: '#/components/schemas/OvaComponentSpec'
+      - $ref: '#/components/schemas/VspComponentSpec'
+      - $ref: '#/components/schemas/VspClusterSpec'
+      - $ref: '#/components/schemas/ComponentImportSpec'
+      type: object
+    VspClusterSpec:
+      properties:
+        deploymentType:
+          type: string
+        version:
+          type: string
+        repository:
+          $ref: '#/components/schemas/ComponentRepository'
+        platformFqdn:
+          type: string
+        systemUserPassword:
+          format: password
+          type: string
+        size:
+          type: string
+        ipv4Pool:
+          $ref: '#/components/schemas/VspClusterIPv4Pool'
+        ipv6Pool:
+          $ref: '#/components/schemas/VspClusterIPv6Pool'
+        internalClusterCidrIpv4:
+          type: string
+        internalClusterCidrIpv6:
+          type: string
+        fleetFqdn:
+          type: string
+        instanceFqdn:
+          type: string
+        name:
+          type: string
+        networkMoId:
+          type: string
+        gatewayCidrIpv4:
+          type: string
+        gatewayCidrIpv6:
+          type: string
+        dnsServers:
+          items:
+            type: string
+          nullable: true
+          type: array
+        ntpServers:
+          items:
+            type: string
+          nullable: true
+          type: array
+        clusterId:
+          format: uuid
+          type: string
+      required:
+      - deploymentType
+      type: object
+    VspClusterIPv4Pool:
+      properties:
+        cidr:
+          type: string
+        ipRange:
+          $ref: '#/components/schemas/VspClusterIpRange'
+        addresses:
+          items:
+            type: string
+          type: array
+        excludedAddresses:
+          items:
+            type: string
+          type: array
+      type: object
+    VspClusterIpRange:
+      properties:
+        startIpAddress:
+          type: string
+        endIpAddress:
+          type: string
+      type: object
+    VspClusterIPv6Pool:
+      properties:
+        cidr:
+          type: string
+        ipv6Range:
+          $ref: '#/components/schemas/VspClusterIpRangeV6'
+        addresses:
+          items:
+            type: string
+          type: array
+        excludedAddresses:
+          items:
+            type: string
+          type: array
+      type: object
+    VspClusterIpRangeV6:
+      properties:
+        startIpAddress:
+          type: string
+        endIpAddress:
+          type: string
+      type: object
+    VspComponentSpec:
+      properties:
+        componentId:
+          format: uuid
+          type: string
+        deploymentType:
+          type: string
+        componentType:
+          type: string
+        version:
+          type: string
+        size:
+          type: string
+        repository:
+          $ref: '#/components/schemas/ComponentRepository'
+        fqdn:
+          type: string
+        componentNamespace:
+          type: string
+        configSpec:
+          additionalProperties: true
+          type: object
+        vspClusterSpec:
+          $ref: '#/components/schemas/VspClusterSpec'
+      required:
+      - componentType
+      - deploymentType
+      - repository
+      - version
+      type: object
+    OvaComponentSpec:
+      example:
+        componentType: componentType
+        deploymentType: deploymentType
+        configSpec:
+          key: ""
+        nodeSpecs:
+        - configSpec:
+            key: ""
+          deploymentMode: DEPLOY_AND_MONITOR
+          nodeType: nodeType
+          repository:
+            downloadUrl: downloadUrl
+            certificate: certificate
+          version: version
+          deploymentSpec:
+            ipv4Settings:
+              address: address
+              netmask: netmask
+              addressType: addressType
+              gateway: gateway
+            password: password
+            fqdn: fqdn
+            ntpServers: ntpServers
+            dnsSuffix: dnsSuffix
+            deploymentOption: deploymentOption
+            networkName: networkName
+            ipv6Settings:
+              address: address
+              netmask: netmask
+              addressType: addressType
+              force: true
+              gateway: gateway
+            extraConfigProperties:
+              key: extraConfigProperties
+            dnsServers: dnsServers
+        - configSpec:
+            key: ""
+          deploymentMode: DEPLOY_AND_MONITOR
+          nodeType: nodeType
+          repository:
+            downloadUrl: downloadUrl
+            certificate: certificate
+          version: version
+          deploymentSpec:
+            ipv4Settings:
+              address: address
+              netmask: netmask
+              addressType: addressType
+              gateway: gateway
+            password: password
+            fqdn: fqdn
+            ntpServers: ntpServers
+            dnsSuffix: dnsSuffix
+            deploymentOption: deploymentOption
+            networkName: networkName
+            ipv6Settings:
+              address: address
+              netmask: netmask
+              addressType: addressType
+              force: true
+              gateway: gateway
+            extraConfigProperties:
+              key: extraConfigProperties
+            dnsServers: dnsServers
+      properties:
+        deploymentType:
+          type: string
+        componentType:
+          type: string
+        nodeSpecs:
+          items:
+            $ref: '#/components/schemas/OvaNodeSpec'
+          type: array
+        configSpec:
+          additionalProperties: true
+          type: object
+      required:
+      - componentType
+      - deploymentType
+      - nodeSpecs
+      type: object
+    OvaComponentUpdateSpec:
+      example:
+        componentType: componentType
+        deploymentType: deploymentType
+        configSpec:
+          key: ""
+        nodeSpecs:
+        - configSpec:
+            key: ""
+          deploymentMode: DEPLOY_AND_MONITOR
+          nodeType: nodeType
+          repository:
+            downloadUrl: downloadUrl
+            certificate: certificate
+          version: version
+          deploymentSpec:
+            ipv4Settings:
+              address: address
+              netmask: netmask
+              addressType: addressType
+              gateway: gateway
+            password: password
+            fqdn: fqdn
+            ntpServers: ntpServers
+            dnsSuffix: dnsSuffix
+            deploymentOption: deploymentOption
+            networkName: networkName
+            ipv6Settings:
+              address: address
+              netmask: netmask
+              addressType: addressType
+              force: true
+              gateway: gateway
+            extraConfigProperties:
+              key: extraConfigProperties
+            dnsServers: dnsServers
+        - configSpec:
+            key: ""
+          deploymentMode: DEPLOY_AND_MONITOR
+          nodeType: nodeType
+          repository:
+            downloadUrl: downloadUrl
+            certificate: certificate
+          version: version
+          deploymentSpec:
+            ipv4Settings:
+              address: address
+              netmask: netmask
+              addressType: addressType
+              gateway: gateway
+            password: password
+            fqdn: fqdn
+            ntpServers: ntpServers
+            dnsSuffix: dnsSuffix
+            deploymentOption: deploymentOption
+            networkName: networkName
+            ipv6Settings:
+              address: address
+              netmask: netmask
+              addressType: addressType
+              force: true
+              gateway: gateway
+            extraConfigProperties:
+              key: extraConfigProperties
+            dnsServers: dnsServers
+      properties:
+        deploymentType:
+          type: string
+        componentType:
+          type: string
+        nodeSpecs:
+          items:
+            $ref: '#/components/schemas/OvaNodeSpec'
+          type: array
+        configSpec:
+          additionalProperties: true
+          type: object
+      required:
+      - componentType
+      - deploymentType
+      - nodeSpecs
+      type: object
+    OvaNodeSpec:
+      example:
+        configSpec:
+          key: ""
+        deploymentMode: DEPLOY_AND_MONITOR
+        nodeType: nodeType
+        repository:
+          downloadUrl: downloadUrl
+          certificate: certificate
+        version: version
+        deploymentSpec:
+          ipv4Settings:
+            address: address
+            netmask: netmask
+            addressType: addressType
+            gateway: gateway
+          password: password
+          fqdn: fqdn
+          ntpServers: ntpServers
+          dnsSuffix: dnsSuffix
+          deploymentOption: deploymentOption
+          networkName: networkName
+          ipv6Settings:
+            address: address
+            netmask: netmask
+            addressType: addressType
+            force: true
+            gateway: gateway
+          extraConfigProperties:
+            key: extraConfigProperties
+          dnsServers: dnsServers
+      properties:
+        nodeType:
+          type: string
+        version:
+          type: string
+        repository:
+          $ref: '#/components/schemas/ComponentRepository'
+        deploymentSpec:
+          $ref: '#/components/schemas/OvaDeploymentSpec'
+        configSpec:
+          additionalProperties: true
+          type: object
+        deploymentMode:
+          enum:
+          - DEPLOY_AND_MONITOR
+          - DEPLOY_ONLY
+          - MONITOR_ONLY
+          type: string
+      required:
+      - deploymentSpec
+      - nodeType
+      - repository
+      - version
+      type: object
+    OvaDeploymentSpec:
+      example:
+        ipv4Settings:
+          address: address
+          netmask: netmask
+          addressType: addressType
+          gateway: gateway
+        password: password
+        fqdn: fqdn
+        ntpServers: ntpServers
+        dnsSuffix: dnsSuffix
+        deploymentOption: deploymentOption
+        networkName: networkName
+        ipv6Settings:
+          address: address
+          netmask: netmask
+          addressType: addressType
+          force: true
+          gateway: gateway
+        extraConfigProperties:
+          key: extraConfigProperties
+        dnsServers: dnsServers
+      properties:
+        fqdn:
+          type: string
+        password:
+          format: password
+          type: string
+        deploymentOption:
+          type: string
+        dnsServers:
+          type: string
+        ntpServers:
+          type: string
+        dnsSuffix:
+          type: string
+        ipv4Settings:
+          $ref: '#/components/schemas/IPv4Settings'
+        ipv6Settings:
+          $ref: '#/components/schemas/IPv6Settings'
+        networkName:
+          type: string
+        extraConfigProperties:
+          additionalProperties:
+            type: string
+          description: Extra OVF Properties to pass during OVA deployment.
+          type: object
+      type: object
+    IPv4Settings:
+      example:
+        address: address
+        netmask: netmask
+        addressType: addressType
+        gateway: gateway
+      properties:
+        addressType:
+          type: string
+        address:
+          type: string
+        gateway:
+          type: string
+        netmask:
+          type: string
+      type: object
+    IPv6Settings:
+      example:
+        address: address
+        netmask: netmask
+        addressType: addressType
+        force: true
+        gateway: gateway
+      properties:
+        force:
+          type: boolean
+        addressType:
+          type: string
+        address:
+          type: string
+        gateway:
+          type: string
+        netmask:
+          type: string
+      type: object
+    ComponentRepository:
+      example:
+        downloadUrl: downloadUrl
+        certificate: certificate
+      properties:
+        downloadUrl:
+          type: string
+        certificate:
+          description: PEM encoded certificate (chain).
+          type: string
+      type: object
+    ComponentConfigSpec:
+      additionalProperties: true
+      type: object
+    ComponentImportSpec:
+      description: Component Import Spec
+      properties:
+        deploymentType:
+          type: string
+        componentType:
+          type: string
+        version:
+          type: string
+        repository:
+          $ref: '#/components/schemas/ComponentRepository'
+        fqdn:
+          type: string
+        sslThumbprint:
+          type: string
+        certificate:
+          type: string
+        username:
+          type: string
+        password:
+          format: password
+          type: string
+        size:
+          type: string
+        vmId:
+          type: string
+      required:
+      - componentType
+      - deploymentType
+      - fqdn
+      - password
+      type: object
+    ComponentUpdateSpec:
+      description: Component deployment update spec
+      discriminator:
+        mapping:
+          OvaComponentUpdateSpec: '#/components/schemas/OvaComponentUpdateSpec'
+        propertyName: deploymentType
+      oneOf:
+      - $ref: '#/components/schemas/OvaComponentUpdateSpec'
+      type: object
+    ComponentStatusesSpec:
+      example:
+        componentIds:
+        - 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        - 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+      properties:
+        componentIds:
+          items:
+            format: uuid
+            type: string
+          type: array
+      type: object
+    Components:
+      example:
+        components:
+        - componentType: componentType
+          deploymentType: OVA
+          nodes:
+          - size: size
+            fqdn: fqdn
+            ipAddress: ipAddress
+            name: name
+            id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            nodeType: nodeType
+            version: version
+            status: status
+          - size: size
+            fqdn: fqdn
+            ipAddress: ipAddress
+            name: name
+            id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            nodeType: nodeType
+            version: version
+            status: status
+          size: size
+          fqdn: fqdn
+          scope: FLEET
+          certificate: certificate
+          vspCluster:
+            fqdn: fqdn
+            certificate: certificate
+            id: id
+            type: MANAGEMENT
+          vcenter:
+            fqdn: fqdn
+            sslThumbprint: sslThumbprint
+            id: id
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          version: version
+        - componentType: componentType
+          deploymentType: OVA
+          nodes:
+          - size: size
+            fqdn: fqdn
+            ipAddress: ipAddress
+            name: name
+            id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            nodeType: nodeType
+            version: version
+            status: status
+          - size: size
+            fqdn: fqdn
+            ipAddress: ipAddress
+            name: name
+            id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            nodeType: nodeType
+            version: version
+            status: status
+          size: size
+          fqdn: fqdn
+          scope: FLEET
+          certificate: certificate
+          vspCluster:
+            fqdn: fqdn
+            certificate: certificate
+            id: id
+            type: MANAGEMENT
+          vcenter:
+            fqdn: fqdn
+            sslThumbprint: sslThumbprint
+            id: id
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          version: version
+      properties:
+        components:
+          items:
+            $ref: '#/components/schemas/Component'
+          type: array
+      type: object
+    Component:
+      description: Installed Component subject to lifecycle.
+      example:
+        componentType: componentType
+        deploymentType: OVA
+        nodes:
+        - size: size
+          fqdn: fqdn
+          ipAddress: ipAddress
+          name: name
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          nodeType: nodeType
+          version: version
+          status: status
+        - size: size
+          fqdn: fqdn
+          ipAddress: ipAddress
+          name: name
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          nodeType: nodeType
+          version: version
+          status: status
+        size: size
+        fqdn: fqdn
+        scope: FLEET
+        certificate: certificate
+        vspCluster:
+          fqdn: fqdn
+          certificate: certificate
+          id: id
+          type: MANAGEMENT
+        vcenter:
+          fqdn: fqdn
+          sslThumbprint: sslThumbprint
+          id: id
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        version: version
+      properties:
+        id:
+          description: Component Identifier.
+          format: uuid
+          type: string
+        componentType:
+          description: Component Type.
+          type: string
+        deploymentType:
+          description: Deployment Type.
+          enum:
+          - OVA
+          - VSP
+          type: string
+        version:
+          description: Component Version.
+          type: string
+        size:
+          description: Component Size (e.g. Small/Medium/Large).
+          type: string
+        fqdn:
+          description: Component FQDN.
+          type: string
+        certificate:
+          description: PEM encoded certificate (chain).
+          type: string
+        nodes:
+          description: Nodes forming a Component (cluster) (mostly applicable for
+            OVA components or VSP cluster itself).
+          items:
+            $ref: '#/components/schemas/Node'
+          type: array
+        scope:
+          description: Scope of the component - either FLEET or INSTANCE level.
+          enum:
+          - FLEET
+          - INSTANCE
+          type: string
+        vcenter:
+          $ref: '#/components/schemas/Vcenter'
+        vspCluster:
+          $ref: '#/components/schemas/VspCluster'
+      title: Component
+      type: object
+    Nodes:
+      example:
+        nodes:
+        - size: size
+          fqdn: fqdn
+          ipAddress: ipAddress
+          name: name
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          nodeType: nodeType
+          version: version
+          status: status
+        - size: size
+          fqdn: fqdn
+          ipAddress: ipAddress
+          name: name
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          nodeType: nodeType
+          version: version
+          status: status
+        pageMetadata:
+          pageNumber: 0
+          totalPages: 5
+          pageSize: 6
+          totalElements: 1
+      properties:
+        nodes:
+          description: Nodes forming a Component (cluster) (mostly applicable for
+            OVA components or VSP cluster itself).
+          items:
+            $ref: '#/components/schemas/Node'
+          type: array
+        pageMetadata:
+          $ref: '#/components/schemas/PageMetadata'
+      type: object
+    Node:
+      example:
+        size: size
+        fqdn: fqdn
+        ipAddress: ipAddress
+        name: name
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        nodeType: nodeType
+        version: version
+        status: status
+      properties:
+        nodeType:
+          description: Type of the node.
+          type: string
+        id:
+          description: Node Id.
+          format: uuid
+          type: string
+        version:
+          description: Version of the node.
+          type: string
+        fqdn:
+          description: Node FQDN.
+          type: string
+        ipAddress:
+          description: Node Ip Address.
+          type: string
+        status:
+          description: The status of the node.
+          type: string
+        name:
+          description: Node name
+          type: string
+        size:
+          description: Node size.
+          type: string
+      type: object
+    Vcenter:
+      example:
+        fqdn: fqdn
+        sslThumbprint: sslThumbprint
+        id: id
+      properties:
+        id:
+          type: string
+        fqdn:
+          type: string
+        sslThumbprint:
+          description: The certificate's sha1 fingerprint
+          type: string
+      type: object
+    VspCluster:
+      example:
+        fqdn: fqdn
+        certificate: certificate
+        id: id
+        type: MANAGEMENT
+      properties:
+        id:
+          type: string
+        fqdn:
+          type: string
+        certificate:
+          description: PEM encoded certificate (chain).
+          type: string
+        type:
+          enum:
+          - MANAGEMENT
+          - CONSUMPTION
+          type: string
+      type: object
+    ComponentConfig:
+      description: Component's current configuration
+      discriminator:
+        mapping:
+          OvaComponentConfig: '#/components/schemas/OvaComponentConfig'
+          VspComponentConfig: '#/components/schemas/VspComponentConfig'
+          VspClusterConfig: '#/components/schemas/VspClusterConfig'
+        propertyName: type
+      oneOf:
+      - $ref: '#/components/schemas/OvaComponentConfig'
+      - $ref: '#/components/schemas/VspComponentConfig'
+      - $ref: '#/components/schemas/VspClusterConfig'
+      type: object
+    ComponentConfigUpdateSpec:
+      description: Component Config Update Spec
+      discriminator:
+        mapping:
+          OvaComponentConfigSpec: '#/components/schemas/OvaComponentConfigSpec'
+          VspComponentConfigSpec: '#/components/schemas/VspComponentConfigSpec'
+          VspClusterConfigSpec: '#/components/schemas/VspClusterConfigSpec'
+        propertyName: type
+      oneOf:
+      - $ref: '#/components/schemas/OvaComponentConfigSpec'
+      - $ref: '#/components/schemas/VspComponentConfigSpec'
+      - $ref: '#/components/schemas/VspClusterConfigSpec'
+      type: object
+    VcenterPlacement:
+      example:
+        cluster: cluster
+        datastore: datastore
+        vmFolder: vmFolder
+        vcenter:
+          fqdn: fqdn
+          sslThumbprint: sslThumbprint
+          id: id
+        datacenter: datacenter
+        network: ""
+        resourcePool: resourcePool
+      properties:
+        vcenter:
+          $ref: '#/components/schemas/Vcenter'
+        cluster:
+          description: vCenter Cluster
+          type: string
+        datacenter:
+          description: the vSphere datacenter
+          type: string
+        datastore:
+          description: the vSphere datastore
+          type: string
+        vmFolder:
+          description: the VM folder
+          type: string
+        network:
+          default: ""
+          description: the VM network
+          type: string
+        resourcePool:
+          description: the vSphere resource pool
+          type: string
+      type: object
+    OvaComponentConfig:
+      example:
+        size: size
+        ntpServers:
+        - ntpServers
+        - ntpServers
+        ceip: true
+        placement:
+          cluster: cluster
+          datastore: datastore
+          vmFolder: vmFolder
+          vcenter:
+            fqdn: fqdn
+            sslThumbprint: sslThumbprint
+            id: id
+          datacenter: datacenter
+          network: ""
+          resourcePool: resourcePool
+        type: type
+        dnsServers:
+        - dnsServers
+        - dnsServers
+      properties:
+        type:
+          type: string
+        size:
+          type: string
+        placement:
+          $ref: '#/components/schemas/VcenterPlacement'
+        dnsServers:
+          description: list of DNS nameservers
+          items:
+            type: string
+          maxLength: 3
+          type: array
+        ntpServers:
+          description: list of Ntp servers
+          items:
+            type: string
+          type: array
+        ceip:
+          description: CEIP status
+          type: boolean
+      required:
+      - type
+      type: object
+    OvaComponentConfigSpec:
+      description: OVA component config spec
+      example:
+        nodeSizes:
+        - nodeName: nodeName
+          numCores: 0
+          additionalDiskDatastoreId: additionalDiskDatastoreId
+          size: size
+          additionalDiskSize: 1
+          configMode: CONFIG_AND_PERSIST
+          memoryGb: 6
+          nodeType: nodeType
+          nodeId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        - nodeName: nodeName
+          numCores: 0
+          additionalDiskDatastoreId: additionalDiskDatastoreId
+          size: size
+          additionalDiskSize: 1
+          configMode: CONFIG_AND_PERSIST
+          memoryGb: 6
+          nodeType: nodeType
+          nodeId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        type: type
+      properties:
+        type:
+          type: string
+        nodeSizes:
+          items:
+            $ref: '#/components/schemas/OvaNodeSizeConfigSpec'
+          type: array
+      required:
+      - nodeSizes
+      - type
+      type: object
+    OvaNodeSizeConfigSpec:
+      description: OVA component disk spec
+      example:
+        nodeName: nodeName
+        numCores: 0
+        additionalDiskDatastoreId: additionalDiskDatastoreId
+        size: size
+        additionalDiskSize: 1
+        configMode: CONFIG_AND_PERSIST
+        memoryGb: 6
+        nodeType: nodeType
+        nodeId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+      properties:
+        nodeId:
+          description: ID of the node to resize
+          format: uuid
+          type: string
+        nodeName:
+          description: Node name
+          type: string
+        nodeType:
+          description: Node type
+          type: string
+        size:
+          description: Size of the node (e.g. Small/Medium/Large)
+          type: string
+        numCores:
+          type: integer
+        memoryGb:
+          type: integer
+        additionalDiskSize:
+          description: Size of the VMDK to be added to the node
+          format: int64
+          type: integer
+        additionalDiskDatastoreId:
+          description: Datastore Managed Object ID for the additional disk to land
+            on
+          type: string
+        configMode:
+          enum:
+          - CONFIG_AND_PERSIST
+          - CONFIG_ONLY
+          - PERSIST_ONLY
+          type: string
+      required:
+      - additionalDiskSize
+      - nodeId
+      - size
+      type: object
+    VspComponentConfig:
+      properties:
+        type:
+          type: string
+        size:
+          type: string
+        ceip:
+          description: CEIP status
+          type: boolean
+        configSpec:
+          additionalProperties: true
+          type: object
+        volumes:
+          items:
+            $ref: '#/components/schemas/VspVolume'
+          type: array
+      required:
+      - type
+      type: object
+    VspComponentConfigSpec:
+      description: VSP component config spec
+      properties:
+        type:
+          type: string
+        size:
+          type: string
+        volumes:
+          items:
+            $ref: '#/components/schemas/VspVolumeBase'
+          type: array
+        configSpec:
+          additionalProperties: true
+          type: object
+      required:
+      - type
+      type: object
+    VspClusterConfigBase:
+      description: VSP Cluster config spec
+      properties:
+        type:
+          type: string
+        size:
+          type: string
+        ipv4Pool:
+          description: list of cluster nodes IPv4 addresses
+          items:
+            type: string
+          type: array
+        ipv6Pool:
+          description: list of cluster nodes IPv6 addresses
+          items:
+            type: string
+          type: array
+        dnsServers:
+          description: list of DNS servers to be used by the cluster nodes
+          items:
+            type: string
+          maxLength: 3
+          type: array
+        ntpServers:
+          description: list of NTP servers to be used by the cluster nodes
+          items:
+            type: string
+          type: array
+        platformIngress:
+          $ref: '#/components/schemas/VspClusterIngress'
+        fleetIngress:
+          $ref: '#/components/schemas/VspClusterIngress'
+        instanceIngress:
+          $ref: '#/components/schemas/VspClusterIngress'
+        backupConfigSpec:
+          $ref: '#/components/schemas/BackupConfigSpec'
+        peerProxy:
+          $ref: '#/components/schemas/PeerProxy'
+        ceip:
+          description: CEIP status
+          type: boolean
+      required:
+      - type
+      title: VSP Cluster config spec
+      type: object
+    VspClusterConfig:
+      allOf:
+      - $ref: '#/components/schemas/VspClusterConfigBase'
+      - properties:
+          type:
+            type: string
+          volumes:
+            $ref: '#/components/schemas/VspVolumes'
+          placement:
+            $ref: '#/components/schemas/VcenterPlacement'
+          gateway:
+            description: Global address pool network gateway (IPv4)
+            type: string
+          prefix:
+            description: Global address pool network prefix (IPv4)
+            type: string
+          ipv6Gateway:
+            description: Global address pool network gateway (IPv6)
+            type: string
+          ipv6Prefix:
+            description: Global address pool network prefix (IPv6)
+            type: string
+        type: object
+      description: VSP Cluster config spec
+      title: VSP Cluster config spec
+    VspClusterConfigSpec:
+      allOf:
+      - $ref: '#/components/schemas/VspClusterConfigBase'
+      - properties:
+          type:
+            type: string
+          volumes:
+            $ref: '#/components/schemas/VspVolumesSpec'
+        type: object
+      description: VSP Cluster config spec
+      title: VSP Cluster config spec
+    VspClusterIngress:
+      properties:
+        fqdn:
+          type: string
+        certificate:
+          description: PEM formatted certificate chain of the VSP cluster
+          type: string
+        vipAddresses:
+          $ref: '#/components/schemas/VspClusterVipAddresses'
+      type: object
+    VspClusterVipAddresses:
+      properties:
+        ipv4Addresses:
+          description: IPv4 addresses
+          items:
+            type: string
+          type: array
+        ipv6Addresses:
+          description: IPv6 addresses
+          items:
+            type: string
+          type: array
+      type: object
+    PeerProxy:
+      description: Internet proxy configuration for VSP cluster
+      properties:
+        host:
+          description: "Internet proxy server host, e.g. proxy.example.com"
+          type: string
+        port:
+          description: "Internet proxy server port number, e.g. 3128"
+          type: integer
+        tlsEnabled:
+          description: Enable TLS for Internet Proxy Server
+          type: boolean
+        credentialsEnabled:
+          description: Enable credentials for Internet Proxy Server
+          type: boolean
+        username:
+          description: Username to connect to Internet Proxy Server
+          type: string
+        password:
+          description: Password to connect to Internet Proxy Server
+          format: password
+          type: string
+        encodedCertificate:
+          description: Base64 encoded Server certificate in PEM format for Internet
+            Proxy Server
+          type: string
+        excludeDomains:
+          description: Comma-separated list of Domains to exclude from Internet proxy
+            server
+          type: string
+        excludeIpAddresses:
+          description: Comma-separated list of IP Addresses to exclude from Internet
+            proxy server
+          type: string
+      type: object
+    VspVolumes:
+      items:
+        $ref: '#/components/schemas/VspVolume'
+      type: array
+    VspVolume:
+      allOf:
+      - $ref: '#/components/schemas/VspVolumeBase'
+      - properties:
+          name:
+            description: the volume's name
+            type: string
+          used:
+            description: consumed storage in bytes
+            format: int64
+            type: integer
+          totalCapacity:
+            description: the total capacity in bytes
+            format: int64
+            type: integer
+          count:
+            description: the number of volumes of the same type
+            format: int64
+            type: integer
+          description:
+            description: the volume's description
+            type: string
+        type: object
+    VspVolumesSpec:
+      items:
+        $ref: '#/components/schemas/VspVolumeBase'
+      type: array
+    VspVolumeBase:
+      properties:
+        id:
+          description: the volume's id
+          type: string
+        capacity:
+          description: size in bytes. must be multiple of KiB when updating the volume
+            capacity
+          format: int64
+          type: integer
+      type: object
+    ComponentCredentials:
+      description: Credentials for a component.
+      properties:
+        username:
+          type: string
+        password:
+          format: password
+          type: string
+      type: object
+    ComponentStatuses:
+      description: Component current statuses
+      example:
+        componentStatuses:
+        - id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          status: Unknown
+        - id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          status: Unknown
+      properties:
+        componentStatuses:
+          items:
+            $ref: '#/components/schemas/ComponentStatus'
+          type: array
+      type: object
+    ComponentStatus:
+      description: Component current status
+      example:
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        status: Unknown
+      properties:
+        id:
+          description: Component Identifier.
+          format: uuid
+          type: string
+        status:
+          description: The component status.
+          enum:
+          - Unknown
+          - NotRunning
+          - Running
+          type: string
+      type: object
+    BackupConfigSpec:
+      description: Backup configuration for a component/cluster.
+      properties:
+        encryptionPassphrase:
+          description: Passphrase for encrypting the backups.
+          type: string
+        fullSchedule:
+          $ref: '#/components/schemas/FullBackupConfigSpec'
+        incrementalSchedule:
+          $ref: '#/components/schemas/IncrementalBackupConfigSpec'
+        retention:
+          $ref: '#/components/schemas/BackupRetentionConfigSpec'
+        storage:
+          $ref: '#/components/schemas/BackupStorageConfigSpec'
+      type: object
+    FullBackupConfigSpec:
+      description: Configuration for full backups.
+      properties:
+        enabled:
+          description: Shows if the full backups are enabled.
+          type: boolean
+        schedule:
+          $ref: '#/components/schemas/BackupScheduleSpec'
+      type: object
+    BackupScheduleSpec:
+      description: Backup schedule configuration.
+      properties:
+        startTime:
+          description: The time of the day when the backup should be created.
+          format: time
+          type: string
+        days:
+          description: The days on which a backup should be created. Pass all values
+            for every day.
+          example:
+          - MON
+          - TUE
+          - WED
+          - THU
+          - FRI
+          - SAT
+          - SUN
+          items:
+            enum:
+            - MON
+            - TUE
+            - WED
+            - THU
+            - FRI
+            - SAT
+            - SUN
+            type: string
+          type: array
+      type: object
+    IncrementalBackupConfigSpec:
+      description: Configuration for incremental backups. Incremental backups require
+        full backups to be enabled.
+      properties:
+        enabled:
+          description: Shows if the incremental backups are enabled.
+          type: boolean
+        fallbackToFull:
+          description: Shows whether to fallback to a full backup.
+          type: boolean
+        interval:
+          default: 15
+          description: Interval in minutes for an incremental backup to be created.
+          minimum: 1
+          type: integer
+      type: object
+    BackupRetentionConfigSpec:
+      description: Retention configuration for backups. The properties are mutually
+        exclusive.
+      properties:
+        maxBackups:
+          description: Number of backups that would be kept.
+          minimum: 1
+          type: integer
+        maxAgeBackups:
+          description: Number of days for which a backup would be kept.
+          minimum: 1
+          type: integer
+      type: object
+    BackupStorageConfigSpec:
+      description: Storage configurations for backups.
+      properties:
+        sftp:
+          $ref: '#/components/schemas/SftpStorageConfigSpec'
+      type: object
+    SftpStorageConfigSpec:
+      description: Configuration for SFTP storage.
+      properties:
+        host:
+          description: The address of the SFTP server.
+          type: string
+        port:
+          description: The port of the SFTP server.
+          type: string
+        thumbprint:
+          description: The thumbprint of the SFTP server.
+          type: string
+        username:
+          description: The username used for authentication with the SFTP server.
+          type: string
+        password:
+          description: The password used for authentication with the SFTP server.
+          format: password
+          type: string
+        directory:
+          description: Directory on the SFTP server where the objects will be stored.
+          type: string
+      type: object
+    ComponentSnapshotSpec:
+      description: Create or revert Snapshot spec.
+      discriminator:
+        mapping:
+          ComponentSnapshotCreateSpec: '#/components/schemas/ComponentSnapshotCreateSpec'
+          ComponentSnapshotRevertSpec: '#/components/schemas/ComponentSnapshotRevertSpec'
+        propertyName: actionType
+      oneOf:
+      - $ref: '#/components/schemas/ComponentSnapshotCreateSpec'
+      - $ref: '#/components/schemas/ComponentSnapshotRevertSpec'
+      type: object
+    ComponentSnapshotCreateSpec:
+      description: Spec for creation of a Snapshot of a Component.
+      properties:
+        actionType:
+          type: string
+        snapshotPrefix:
+          description: User friendly prefix used for the Snapshot name.
+          type: string
+        snapshotDescription:
+          description: User friendly description of the Snapshot.
+          type: string
+        shouldSnapshotWithMemory:
+          description: Flag that indicates if the Snapshot has to be taken along with
+            memory of the Component.
+          type: boolean
+        shouldShutdownBeforeSnapshot:
+          description: Flag that indicates if the Component has to be gracefully shutdown
+            before taking the Snapshot.
+          type: boolean
+      required:
+      - actionType
+      - snapshotPrefix
+      type: object
+    ComponentSnapshotRevertSpec:
+      description: Spec for revert using a Snapshot of a Component.
+      properties:
+        actionType:
+          type: string
+        snapshotId:
+          format: uuid
+          type: string
+      required:
+      - actionType
+      - snapshotId
+      type: object
+    ComponentSnapshot:
+      description: Details of a Snapshot of a Component.
+      properties:
+        name:
+          description: "Snapshot name, formatted as 2025-09-12T16-09-53Z along with\
+            \ a prefix."
+          type: string
+        description:
+          description: User friendly description of the Snapshot.
+          type: string
+        snapshotId:
+          description: Snapshot ID.
+          format: uuid
+          type: string
+        componentType:
+          description: Component Type.
+          type: string
+        componentId:
+          description: Component ID.
+          format: uuid
+          type: string
+      type: object
+    BackupRestoreSpec:
+      description: Backup and Restore Spec
+      discriminator:
+        mapping:
+          ComponentsBackupSpec: '#/components/schemas/ComponentsBackupSpec'
+          ComponentsRestoreSpec: '#/components/schemas/ComponentsRestoreSpec'
+        propertyName: actionType
+      oneOf:
+      - $ref: '#/components/schemas/ComponentsBackupSpec'
+      - $ref: '#/components/schemas/ComponentsRestoreSpec'
+      type: object
+    ComponentsBackupSpec:
+      description: Request for backup of multiple Components.
+      example:
+        actionType: actionType
+        componentIds:
+        - componentIds
+        - componentIds
+      properties:
+        actionType:
+          type: string
+        componentIds:
+          description: List of Component IDs. Empty list means all Components.
+          items:
+            type: string
+          type: array
+      required:
+      - actionType
+      - componentIds
+      type: object
+    ComponentBackups:
+      example:
+        backups:
+        - path: path
+          componentType: vidb
+          componentId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          name: name
+          componentVersion: 9.1.0.0
+          points:
+          - points
+          - points
+        - path: path
+          componentType: vidb
+          componentId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          name: name
+          componentVersion: 9.1.0.0
+          points:
+          - points
+          - points
+      properties:
+        backups:
+          items:
+            $ref: '#/components/schemas/ComponentBackup'
+          type: array
+      type: object
+    ComponentBackup:
+      description: Details for a backup of a Component.
+      example:
+        path: path
+        componentType: vidb
+        componentId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        name: name
+        componentVersion: 9.1.0.0
+        points:
+        - points
+        - points
+      properties:
+        name:
+          description: "Backup date, formatted as 2025-09-12T16-09-53Z."
+          type: string
+        path:
+          description: Path to the backup directory.
+          type: string
+        points:
+          items:
+            description: "Restore point date/time, formatted as 2025-09-12T16-09-53Z."
+            type: string
+          type: array
+        componentType:
+          description: Component type.
+          example: vidb
+          type: string
+        componentId:
+          description: Component ID.
+          format: uuid
+          type: string
+        componentVersion:
+          description: Component version.
+          example: 9.1.0.0
+          type: string
+      type: object
+    ComponentsRestoreSpec:
+      description: Components restore specification
+      properties:
+        actionType:
+          type: string
+        components:
+          description: Components to restore.
+          items:
+            $ref: '#/components/schemas/RestoreBackupSpec'
+          type: array
+        encryptionPassphrase:
+          description: Passphrase for decrypting the backups.
+          type: string
+      required:
+      - actionType
+      - components
+      type: object
+    RestoreBackupSpec:
+      description: Restore backup specification.
+      properties:
+        componentId:
+          description: Component ID
+          type: string
+        componentType:
+          description: Component type
+          type: string
+        path:
+          description: Path to the backup directory.
+          type: string
+        point:
+          description: "Restore point date/time, formatted as 2025-09-12T16-09-53Z."
+          type: string
+      type: object
+    ComponentServiceAccountSpec:
+      description: Component service account creation specification.
+      properties:
+        username:
+          description: The user name of the service account.
+          type: string
+        role:
+          description: The role name of the service account.
+          type: string
+        targetServiceType:
+          $ref: '#/components/schemas/TargetServiceType'
+      required:
+      - username
+      type: object
+    ComponentServiceAccount:
+      description: Component service account creation specification.
+      properties:
+        username:
+          description: The user name of the service account.
+          type: string
+        role:
+          description: The role name of the service account.
+          type: string
+        password:
+          description: Password of the service account.
+          format: password
+          type: string
+      required:
+      - username
+      type: object
+    ComponentServiceAccountResponse:
+      description: Component service account response (password excluded for security).
+      properties:
+        username:
+          description: The user name of the service account.
+          type: string
+        role:
+          description: The role name of the service account.
+          type: string
+      type: object
+    ComponentSecret:
+      description: Component one-time secret.
+      properties:
+        value:
+          description: The value of the secret.
+          type: string
+      type: object
+    ValidationSeverity:
+      description: The severity of the validation.
+      enum:
+      - ERROR
+      - WARNING
+      type: string
+    ValidationErrorCode:
+      description: The error code of the validation.
+      enum:
+      - IMPORT_SPEC_FQDN
+      - VSP_COMPONENT_SPEC_FQDN
+      - IP_IN_USE
+      - VSP_COMPONENT_NETWORK_CONNECTIVITY
+      - VSP_CLUSTER_IP_POOL
+      - OVA_NODE_SPEC_FQDN
+      - OVA_NODE_SPEC_MISSING_ADDRESS
+      - VSP_PLATFORM_FQDN
+      - VSP_INSTANCE_FQDN
+      - VSP_FLEET_FQDN
+      - VSP_CLUSTER_SIZE
+      - VSP_COMPONENT_SIZE
+      - OVA_NODE_SIZES
+      - OVA_NODE_SIZE_VALUE
+      - OVA_NODE
+      - IMPORT_OPS_NETWORKS
+      - IMPORT_OPS_LOGS
+      - IMPORT_VCF_AUTOMATION
+      - INVALID_COMPONENT_TYPE
+      - VSP_VCFA_SIZES_MISMATCH
+      - INVALID_VCFA_VSP_CLUSTER
+      - INVALID_VCFA_CONFIG_SPEC
+      - VCFA_FQDN_RESOLVES_TO_IPV6
+      - VSP_COMPONENT_CONFIG_SPEC_SIZES_MISMATCH
+      - INVALID_PASSWORD
+      - PASSWORD_COMPLEXITY
+      - EXISTING_COMPONENT_WITH_TYPE
+      - DUPLICATE_COMPONENT_TYPE_SPEC
+      - NOT_PRIMARY_SDDC_LCM
+      - OPS_NETWORKS_INVALID_DEPLOYMENT_SIZE
+      - OPS_NETWORKS_INVALID_PLATFORM_NODE_COUNT
+      - COMPONENT_NOT_FOUND
+      - OPS_NETWORKS_INVALID_EXISTING_NODE_SIZE
+      - OPS_NETWORKS_INVALID_NEW_NODE_SIZE
+      - OPS_NETWORKS_INVALID_CLUSTER_NODE_COUNT
+      - OPS_CA_ENABLED
+      - OPS_REPLICA_NODE_ALREADY_EXISTS
+      type: string
+    Validation:
+      properties:
+        severity:
+          $ref: '#/components/schemas/ValidationSeverity'
+        errorCode:
+          $ref: '#/components/schemas/ValidationErrorCode'
+        message:
+          $ref: '#/components/schemas/LocalizableMessage'
+      type: object
+    ValidationResult:
+      properties:
+        type:
+          type: string
+        failedValidations:
+          description: A list of containing the result of each validation.
+          items:
+            $ref: '#/components/schemas/Validation'
+          type: array
+      type: object
+    LocalizableMessage:
+      example:
+        args:
+          cloudProxyFqdn: cloudProxy1.vsphere.local
+        localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+        defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+        id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+      properties:
+        id:
+          description: ID of the Localizable message.
+          example: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+          type: string
+        defaultMessage:
+          description: Default message in English.
+          example: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+          type: string
+        localizedMessage:
+          description: Localized message.
+          example: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+          type: string
+        args:
+          additionalProperties:
+            type: string
+          description: Key-Value pair arguments that will be substitited in the message.
+          example:
+            cloudProxyFqdn: cloudProxy1.vsphere.local
+          type: object
+      type: object
+    ComponentUpgradeSpec:
+      description: |
+        Payload for initiating a component upgrade operation. It encapsulates the desired component state,
+        deployment policies, lifecycle management options, and auditing information for the request.
+      example:
+        lcmPlatformSpec:
+          performBackup: false
+        correlationId: f0e9d8c7-b6a5-4321-fedc-ba9876543210
+        componentSpec:
+          software:
+            version: 9.1.0.0000.1234567
+          depot:
+            certificate:
+            - LS0tLS1CRUdJTiBDRVJUSUZJQ0FUR...
+            - MIIDMjCCAhegAwIBAgIQI...0tRU5EIENFUlRJRklDQVRF
+            url: https://fds.vsphere.com/component-x/v9.1.0/upgrade-manifest
+          userInput: "{}"
+          additionalInput: "{}"
+          policy: "{}"
+      properties:
+        componentSpec:
+          $ref: '#/components/schemas/ComponentDesiredSpec'
+        lcmPlatformSpec:
+          $ref: '#/components/schemas/LcmPlatformSpec'
+        correlationId:
+          description: |
+            A unique identifier for this specific upgrade request. Essential for tracing operations across distributed systems and logging.
+            This field will be used to find FUS task related with current SUS Task
+          example: f0e9d8c7-b6a5-4321-fedc-ba9876543210
+          format: uuid
+          type: string
+      required:
+      - componentSpec
+      type: object
+    ErrorResponse:
+      description: |
+        Provides detailed information about an error that occurred during a system operation.
+      example:
+        code: code
+        detail: detail
+        message:
+          args:
+            cloudProxyFqdn: cloudProxy1.vsphere.local
+          localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+          defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+          id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+        resolution:
+          args:
+            cloudProxyFqdn: cloudProxy1.vsphere.local
+          localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+          defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+          id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+        referenceId: referenceId
+        timestamp: 2000-01-23T04:56:07.000+00:00
+      properties:
+        code:
+          description: Unique error code for programmatic identification.
+          type: string
+        message:
+          $ref: '#/components/schemas/LocalizableMessage'
+        resolution:
+          $ref: '#/components/schemas/LocalizableMessage'
+        referenceId:
+          description: An identifier for tracing the error in the logs.
+          type: string
+        timestamp:
+          description: The date and time when the error occurred.
+          format: date-time
+          type: string
+        detail:
+          description: "Freeform extra information, such as raw error payloads or\
+            \ additional context."
+          type: string
+      required:
+      - code
+      - message
+      - referenceId
+      - resolution
+      - timestamp
+      type: object
+    Task:
+      description: "Represents a hierarchical task structure supporting nested sub-tasks\
+        \ and execution steps.\nFor complete examples demonstrating the hierarchical\
+        \ task model with sub-tasks, steps, and \nvarious execution scenarios, see:\
+        \ classpath:sample-task-example.yaml\n"
+      example:
+        resourceId: af6ef462-e192-4fe1-9522-67a50a2b3392
+        updatedBy: admin
+        parentTaskId: f81ec638-4452-4ae6-bffe-2ff284b43710
+        subTasks:
+        - null
+        - null
+        description:
+          args:
+            cloudProxyFqdn: cloudProxy1.vsphere.local
+          localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+          defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+          id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+        updateTime: 2000-01-23T04:56:07.000+00:00
+        type: type
+        additionalDetails: "{}"
+        cancellable: true
+        taskSummary:
+          totalSteps: 6
+          totalSubTasks: 0
+        result:
+          precheckReport:
+            description:
+              args:
+                cloudProxyFqdn: cloudProxy1.vsphere.local
+              localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+              defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+              id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+            reportUrl: reportUrl
+          precheckGroups:
+          - name:
+              args:
+                cloudProxyFqdn: cloudProxy1.vsphere.local
+              localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+              defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+              id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+            startTime: 2000-01-23T04:56:07.000+00:00
+            prechecks:
+            - resourceId: resourceId
+              issue:
+                id: VCF-ERROR-001
+                type: WARN
+                message:
+                  args:
+                    cloudProxyFqdn: cloudProxy1.vsphere.local
+                  localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+                  defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+                  id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+                resolution:
+                  args:
+                    cloudProxyFqdn: cloudProxy1.vsphere.local
+                  localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+                  defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+                  id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+              name:
+                args:
+                  cloudProxyFqdn: cloudProxy1.vsphere.local
+                localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+                defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+                id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+              resourceName: resourceName
+              startTime: 2000-01-23T04:56:07.000+00:00
+              id: SYSTEM_HEALTH_CHECK
+              endTime: 2000-01-23T04:56:07.000+00:00
+              status: null
+            - resourceId: resourceId
+              issue:
+                id: VCF-ERROR-001
+                type: WARN
+                message:
+                  args:
+                    cloudProxyFqdn: cloudProxy1.vsphere.local
+                  localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+                  defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+                  id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+                resolution:
+                  args:
+                    cloudProxyFqdn: cloudProxy1.vsphere.local
+                  localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+                  defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+                  id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+              name:
+                args:
+                  cloudProxyFqdn: cloudProxy1.vsphere.local
+                localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+                defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+                id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+              resourceName: resourceName
+              startTime: 2000-01-23T04:56:07.000+00:00
+              id: SYSTEM_HEALTH_CHECK
+              endTime: 2000-01-23T04:56:07.000+00:00
+              status: null
+            id: SYSTEM_HEALTH_CHECK
+            endTime: 2000-01-23T04:56:07.000+00:00
+            status: null
+          - name:
+              args:
+                cloudProxyFqdn: cloudProxy1.vsphere.local
+              localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+              defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+              id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+            startTime: 2000-01-23T04:56:07.000+00:00
+            prechecks:
+            - resourceId: resourceId
+              issue:
+                id: VCF-ERROR-001
+                type: WARN
+                message:
+                  args:
+                    cloudProxyFqdn: cloudProxy1.vsphere.local
+                  localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+                  defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+                  id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+                resolution:
+                  args:
+                    cloudProxyFqdn: cloudProxy1.vsphere.local
+                  localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+                  defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+                  id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+              name:
+                args:
+                  cloudProxyFqdn: cloudProxy1.vsphere.local
+                localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+                defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+                id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+              resourceName: resourceName
+              startTime: 2000-01-23T04:56:07.000+00:00
+              id: SYSTEM_HEALTH_CHECK
+              endTime: 2000-01-23T04:56:07.000+00:00
+              status: null
+            - resourceId: resourceId
+              issue:
+                id: VCF-ERROR-001
+                type: WARN
+                message:
+                  args:
+                    cloudProxyFqdn: cloudProxy1.vsphere.local
+                  localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+                  defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+                  id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+                resolution:
+                  args:
+                    cloudProxyFqdn: cloudProxy1.vsphere.local
+                  localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+                  defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+                  id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+              name:
+                args:
+                  cloudProxyFqdn: cloudProxy1.vsphere.local
+                localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+                defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+                id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+              resourceName: resourceName
+              startTime: 2000-01-23T04:56:07.000+00:00
+              id: SYSTEM_HEALTH_CHECK
+              endTime: 2000-01-23T04:56:07.000+00:00
+              status: null
+            id: SYSTEM_HEALTH_CHECK
+            endTime: 2000-01-23T04:56:07.000+00:00
+            status: null
+          type: type
+          status: PENDING
+        retriable: true
+        createdBy: admin
+        createTime: 2000-01-23T04:56:07.000+00:00
+        name: vcfa_90_to_91_upgrade
+        stages:
+        - name: package-deploy
+          description:
+            args:
+              cloudProxyFqdn: cloudProxy1.vsphere.local
+            localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+            defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+            id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+          messages:
+          - level: INFO
+            message:
+              args:
+                cloudProxyFqdn: cloudProxy1.vsphere.local
+              localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+              defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+              id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+            timestamp: 2000-01-23T04:56:07.000+00:00
+            stageId: stage-upgrade-binary
+          - level: INFO
+            message:
+              args:
+                cloudProxyFqdn: cloudProxy1.vsphere.local
+              localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+              defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+              id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+            timestamp: 2000-01-23T04:56:07.000+00:00
+            stageId: stage-upgrade-binary
+          updateTime: 2000-01-23T04:56:07.000+00:00
+          startTime: 2000-01-23T04:56:07.000+00:00
+          id: id
+          endTime: 2000-01-23T04:56:07.000+00:00
+          status: PENDING
+        - name: package-deploy
+          description:
+            args:
+              cloudProxyFqdn: cloudProxy1.vsphere.local
+            localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+            defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+            id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+          messages:
+          - level: INFO
+            message:
+              args:
+                cloudProxyFqdn: cloudProxy1.vsphere.local
+              localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+              defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+              id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+            timestamp: 2000-01-23T04:56:07.000+00:00
+            stageId: stage-upgrade-binary
+          - level: INFO
+            message:
+              args:
+                cloudProxyFqdn: cloudProxy1.vsphere.local
+              localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+              defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+              id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+            timestamp: 2000-01-23T04:56:07.000+00:00
+            stageId: stage-upgrade-binary
+          updateTime: 2000-01-23T04:56:07.000+00:00
+          startTime: 2000-01-23T04:56:07.000+00:00
+          id: id
+          endTime: 2000-01-23T04:56:07.000+00:00
+          status: PENDING
+        messages:
+        - level: INFO
+          message:
+            args:
+              cloudProxyFqdn: cloudProxy1.vsphere.local
+            localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+            defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+            id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+          timestamp: 2000-01-23T04:56:07.000+00:00
+        - level: INFO
+          message:
+            args:
+              cloudProxyFqdn: cloudProxy1.vsphere.local
+            localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+            defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+            id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+          timestamp: 2000-01-23T04:56:07.000+00:00
+        startTime: 2000-01-23T04:56:07.000+00:00
+        correlationId: 39ab89c8-a945-4290-9327-13c5bd3f595c
+        id: f47ac10b-58cc-4372-a567-0e02b2c3d479
+        endTime: 2000-01-23T04:56:07.000+00:00
+        status: PENDING
+        resourceType: COMPONENT
+      properties:
+        id:
+          description: Unique identifier for the task (UUID format)
+          example: f47ac10b-58cc-4372-a567-0e02b2c3d479
+          type: string
+        name:
+          description: Unique name of the task
+          example: vcfa_90_to_91_upgrade
+          type: string
+        description:
+          $ref: '#/components/schemas/LocalizableMessage'
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+        type:
+          description: "Type of the task, example precheck, apply, validate, etc."
+          type: string
+        createdBy:
+          description: username or service account that triggered the task.
+          example: admin
+          type: string
+        updatedBy:
+          description: username or service account that updated the task.
+          example: admin
+          type: string
+        resourceId:
+          description: ID of resource on which the task is triggered
+          example: af6ef462-e192-4fe1-9522-67a50a2b3392
+          type: string
+        resourceType:
+          description: Type of resource on which the task is triggered
+          example: COMPONENT
+          type: string
+        createTime:
+          description: ISO 8601 timestamp when this Task was created
+          format: date-time
+          type: string
+        startTime:
+          description: ISO 8601 timestamp when this Task was started
+          format: date-time
+          type: string
+        updateTime:
+          description: ISO 8601 timestamp when this Task was updated
+          format: date-time
+          type: string
+        endTime:
+          description: ISO 8601 timestamp when this Task was completed
+          format: date-time
+          type: string
+        correlationId:
+          description: ID used to correlate the task with other systems
+          example: 39ab89c8-a945-4290-9327-13c5bd3f595c
+          type: string
+        parentTaskId:
+          description: ID of parent task
+          example: f81ec638-4452-4ae6-bffe-2ff284b43710
+          type: string
+        retriable:
+          description: Indicates if this task is in a state that can be retried
+          example: true
+          type: boolean
+        cancellable:
+          description: Indicates if this task is in a state that can be cancelled
+          example: true
+          type: boolean
+        taskSummary:
+          $ref: '#/components/schemas/Task_taskSummary'
+        stages:
+          description: list of steps being executed in the Task workflow.
+          items:
+            $ref: '#/components/schemas/TaskStage'
+          type: array
+        subTasks:
+          description: |
+            list of sub tasks within this parent task. Each sub task can have its own steps and can be executed independently.
+            See classpath:sample-task-example.yaml for comprehensive examples of hierarchical task structures.
+          items:
+            $ref: '#/components/schemas/Task'
+          type: array
+        messages:
+          description: list of messages at task level
+          items:
+            $ref: '#/components/schemas/TaskMessage'
+          type: array
+        result:
+          $ref: '#/components/schemas/Task_result'
+        additionalDetails:
+          description: A map of task-specific details. This can be used to store any
+            additional information about the task that is relevant to a specific task.
+          type: object
+      required:
+      - id
+      type: object
+    PrecheckResult:
+      example:
+        precheckReport:
+          description:
+            args:
+              cloudProxyFqdn: cloudProxy1.vsphere.local
+            localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+            defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+            id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+          reportUrl: reportUrl
+        precheckGroups:
+        - name:
+            args:
+              cloudProxyFqdn: cloudProxy1.vsphere.local
+            localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+            defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+            id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+          startTime: 2000-01-23T04:56:07.000+00:00
+          prechecks:
+          - resourceId: resourceId
+            issue:
+              id: VCF-ERROR-001
+              type: WARN
+              message:
+                args:
+                  cloudProxyFqdn: cloudProxy1.vsphere.local
+                localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+                defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+                id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+              resolution:
+                args:
+                  cloudProxyFqdn: cloudProxy1.vsphere.local
+                localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+                defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+                id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+            name:
+              args:
+                cloudProxyFqdn: cloudProxy1.vsphere.local
+              localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+              defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+              id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+            resourceName: resourceName
+            startTime: 2000-01-23T04:56:07.000+00:00
+            id: SYSTEM_HEALTH_CHECK
+            endTime: 2000-01-23T04:56:07.000+00:00
+            status: null
+          - resourceId: resourceId
+            issue:
+              id: VCF-ERROR-001
+              type: WARN
+              message:
+                args:
+                  cloudProxyFqdn: cloudProxy1.vsphere.local
+                localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+                defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+                id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+              resolution:
+                args:
+                  cloudProxyFqdn: cloudProxy1.vsphere.local
+                localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+                defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+                id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+            name:
+              args:
+                cloudProxyFqdn: cloudProxy1.vsphere.local
+              localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+              defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+              id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+            resourceName: resourceName
+            startTime: 2000-01-23T04:56:07.000+00:00
+            id: SYSTEM_HEALTH_CHECK
+            endTime: 2000-01-23T04:56:07.000+00:00
+            status: null
+          id: SYSTEM_HEALTH_CHECK
+          endTime: 2000-01-23T04:56:07.000+00:00
+          status: null
+        - name:
+            args:
+              cloudProxyFqdn: cloudProxy1.vsphere.local
+            localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+            defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+            id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+          startTime: 2000-01-23T04:56:07.000+00:00
+          prechecks:
+          - resourceId: resourceId
+            issue:
+              id: VCF-ERROR-001
+              type: WARN
+              message:
+                args:
+                  cloudProxyFqdn: cloudProxy1.vsphere.local
+                localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+                defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+                id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+              resolution:
+                args:
+                  cloudProxyFqdn: cloudProxy1.vsphere.local
+                localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+                defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+                id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+            name:
+              args:
+                cloudProxyFqdn: cloudProxy1.vsphere.local
+              localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+              defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+              id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+            resourceName: resourceName
+            startTime: 2000-01-23T04:56:07.000+00:00
+            id: SYSTEM_HEALTH_CHECK
+            endTime: 2000-01-23T04:56:07.000+00:00
+            status: null
+          - resourceId: resourceId
+            issue:
+              id: VCF-ERROR-001
+              type: WARN
+              message:
+                args:
+                  cloudProxyFqdn: cloudProxy1.vsphere.local
+                localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+                defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+                id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+              resolution:
+                args:
+                  cloudProxyFqdn: cloudProxy1.vsphere.local
+                localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+                defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+                id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+            name:
+              args:
+                cloudProxyFqdn: cloudProxy1.vsphere.local
+              localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+              defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+              id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+            resourceName: resourceName
+            startTime: 2000-01-23T04:56:07.000+00:00
+            id: SYSTEM_HEALTH_CHECK
+            endTime: 2000-01-23T04:56:07.000+00:00
+            status: null
+          id: SYSTEM_HEALTH_CHECK
+          endTime: 2000-01-23T04:56:07.000+00:00
+          status: null
+        type: type
+        status: PENDING
+      properties:
+        type:
+          type: string
+        status:
+          $ref: '#/components/schemas/PrecheckStatus'
+        precheckGroups:
+          description: A list of detailed results for each individual precheck that
+            was executed.
+          items:
+            $ref: '#/components/schemas/PrecheckGroup'
+          type: array
+        precheckReport:
+          $ref: '#/components/schemas/PrecheckReport'
+      required:
+      - precheckGroups
+      - status
+      type: object
+    PageMetadata:
+      description: Retrieves the parameters needed to help pagination on client.
+      example:
+        pageNumber: 0
+        totalPages: 5
+        pageSize: 6
+        totalElements: 1
+      properties:
+        pageNumber:
+          type: integer
+        pageSize:
+          type: integer
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+      type: object
+    InventoryDatastores:
+      properties:
+        datastores:
+          items:
+            $ref: '#/components/schemas/InventoryDatastore'
+          type: array
+        pageMetadata:
+          $ref: '#/components/schemas/PageMetadata'
+      type: object
+    InventoryDatastore:
+      description: Inventory vSphere Datastore from SDDC LCM infrastructure.
+      properties:
+        id:
+          description: vSphere Datastore Managed Object ID.
+          example: datastore-21
+          type: string
+        name:
+          description: Name of the Datastore.
+          example: vSan Datastore 1
+          type: string
+        capacity:
+          description: Capacity of the datastore.
+          example: 1024
+          format: int64
+          type: integer
+        used:
+          description: Used storage.
+          example: 512
+          format: int64
+          type: integer
+        isDefault:
+          description: Whether the datastore is the default.
+          type: boolean
+      type: object
+    PageOfTaskSummary:
+      description: Component workflow input parameter.
+      example:
+        elements:
+        - resourceId: af6ef462-e192-4fe1-9522-67a50a2b3392
+          updatedBy: admin
+          parentTaskId: f81ec638-4452-4ae6-bffe-2ff284b43710
+          description:
+            args:
+              cloudProxyFqdn: cloudProxy1.vsphere.local
+            localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+            defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+            id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+          updateTime: 2000-01-23T04:56:07.000+00:00
+          type: type
+          cancellable: true
+          retriable: true
+          createdBy: admin
+          createTime: 2000-01-23T04:56:07.000+00:00
+          name: vcfa_90_to_91_upgrade
+          startTime: 2000-01-23T04:56:07.000+00:00
+          correlationId: 39ab89c8-a945-4290-9327-13c5bd3f595c
+          id: f47ac10b-58cc-4372-a567-0e02b2c3d479
+          endTime: 2000-01-23T04:56:07.000+00:00
+          status: PENDING
+          resourceType: COMPONENT
+        - resourceId: af6ef462-e192-4fe1-9522-67a50a2b3392
+          updatedBy: admin
+          parentTaskId: f81ec638-4452-4ae6-bffe-2ff284b43710
+          description:
+            args:
+              cloudProxyFqdn: cloudProxy1.vsphere.local
+            localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+            defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+            id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+          updateTime: 2000-01-23T04:56:07.000+00:00
+          type: type
+          cancellable: true
+          retriable: true
+          createdBy: admin
+          createTime: 2000-01-23T04:56:07.000+00:00
+          name: vcfa_90_to_91_upgrade
+          startTime: 2000-01-23T04:56:07.000+00:00
+          correlationId: 39ab89c8-a945-4290-9327-13c5bd3f595c
+          id: f47ac10b-58cc-4372-a567-0e02b2c3d479
+          endTime: 2000-01-23T04:56:07.000+00:00
+          status: PENDING
+          resourceType: COMPONENT
+        pageMetadata:
+          pageNumber: 0
+          totalPages: 5
+          pageSize: 6
+          totalElements: 1
+      properties:
+        elements:
+          items:
+            $ref: '#/components/schemas/TaskSummary'
+          type: array
+        pageMetadata:
+          $ref: '#/components/schemas/PageMetadata'
+      type: object
+    TaskSummary:
+      description: "Represents a hierarchical task structure supporting nested sub-tasks\
+        \ and execution steps.\nFor complete examples demonstrating the hierarchical\
+        \ task model with sub-tasks, steps, and \nvarious execution scenarios, see:\
+        \ classpath:sample-task-example.yaml\n"
+      example:
+        resourceId: af6ef462-e192-4fe1-9522-67a50a2b3392
+        updatedBy: admin
+        parentTaskId: f81ec638-4452-4ae6-bffe-2ff284b43710
+        description:
+          args:
+            cloudProxyFqdn: cloudProxy1.vsphere.local
+          localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+          defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+          id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+        updateTime: 2000-01-23T04:56:07.000+00:00
+        type: type
+        cancellable: true
+        retriable: true
+        createdBy: admin
+        createTime: 2000-01-23T04:56:07.000+00:00
+        name: vcfa_90_to_91_upgrade
+        startTime: 2000-01-23T04:56:07.000+00:00
+        correlationId: 39ab89c8-a945-4290-9327-13c5bd3f595c
+        id: f47ac10b-58cc-4372-a567-0e02b2c3d479
+        endTime: 2000-01-23T04:56:07.000+00:00
+        status: PENDING
+        resourceType: COMPONENT
+      properties:
+        id:
+          description: Unique identifier for the task (UUID format)
+          example: f47ac10b-58cc-4372-a567-0e02b2c3d479
+          type: string
+        name:
+          description: Unique name of the task
+          example: vcfa_90_to_91_upgrade
+          type: string
+        description:
+          $ref: '#/components/schemas/LocalizableMessage'
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+        type:
+          description: "Type of the task, example precheck, apply, validate, etc."
+          type: string
+        createdBy:
+          description: username or service account that triggered the task.
+          example: admin
+          type: string
+        updatedBy:
+          description: username or service account that updated the task.
+          example: admin
+          type: string
+        resourceId:
+          description: ID of resource on which the task is triggered
+          example: af6ef462-e192-4fe1-9522-67a50a2b3392
+          type: string
+        resourceType:
+          description: Type of resource on which the task is triggered
+          example: COMPONENT
+          type: string
+        createTime:
+          description: ISO 8601 timestamp when this Task was created
+          format: date-time
+          type: string
+        startTime:
+          description: ISO 8601 timestamp when this Task was started
+          format: date-time
+          type: string
+        updateTime:
+          description: ISO 8601 timestamp when this Task was updated
+          format: date-time
+          type: string
+        endTime:
+          description: ISO 8601 timestamp when this Task was completed
+          format: date-time
+          type: string
+        correlationId:
+          description: ID used to correlate the task with other systems
+          example: 39ab89c8-a945-4290-9327-13c5bd3f595c
+          type: string
+        parentTaskId:
+          description: ID of parent task
+          example: f81ec638-4452-4ae6-bffe-2ff284b43710
+          type: string
+        retriable:
+          description: Indicates if this task is in a state that can be retried
+          example: true
+          type: boolean
+        cancellable:
+          description: Indicates if this task is in a state that can be cancelled
+          example: true
+          type: boolean
+      required:
+      - id
+      type: object
+    TaskStatus:
+      description: A common status object to define the lifecycle state of an operation
+      enum:
+      - PENDING
+      - SCHEDULED
+      - RUNNING
+      - SUCCEEDED
+      - FAILED
+      - CANCELED
+      type: string
+    TaskStage:
+      example:
+        name: package-deploy
+        description:
+          args:
+            cloudProxyFqdn: cloudProxy1.vsphere.local
+          localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+          defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+          id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+        messages:
+        - level: INFO
+          message:
+            args:
+              cloudProxyFqdn: cloudProxy1.vsphere.local
+            localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+            defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+            id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+          timestamp: 2000-01-23T04:56:07.000+00:00
+          stageId: stage-upgrade-binary
+        - level: INFO
+          message:
+            args:
+              cloudProxyFqdn: cloudProxy1.vsphere.local
+            localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+            defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+            id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+          timestamp: 2000-01-23T04:56:07.000+00:00
+          stageId: stage-upgrade-binary
+        updateTime: 2000-01-23T04:56:07.000+00:00
+        startTime: 2000-01-23T04:56:07.000+00:00
+        id: id
+        endTime: 2000-01-23T04:56:07.000+00:00
+        status: PENDING
+      properties:
+        id:
+          description: ID of step
+          type: string
+        name:
+          description: name of step
+          example: package-deploy
+          type: string
+        description:
+          $ref: '#/components/schemas/LocalizableMessage'
+        status:
+          $ref: '#/components/schemas/TaskStageStatus'
+        updateTime:
+          description: ISO 8601 timestamp when the step was updated
+          format: date-time
+          type: string
+        startTime:
+          description: ISO 8601 timestamp when step started
+          format: date-time
+          type: string
+        endTime:
+          description: ISO 8601 timestamp when step ended
+          format: date-time
+          type: string
+        messages:
+          description: list of messages
+          items:
+            $ref: '#/components/schemas/TaskStageMessage'
+          type: array
+      type: object
+    TaskStageStatus:
+      description: Defines possible task step states
+      enum:
+      - PENDING
+      - RUNNING
+      - SUCCEEDED
+      - FAILED
+      - CANCELED
+      - SKIPPED
+      type: string
+    TaskStageMessage:
+      allOf:
+      - $ref: '#/components/schemas/TaskMessage'
+      - properties:
+          stageId:
+            example: stage-upgrade-binary
+            type: string
+        type: object
+      example:
+        level: INFO
+        message:
+          args:
+            cloudProxyFqdn: cloudProxy1.vsphere.local
+          localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+          defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+          id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+        timestamp: 2000-01-23T04:56:07.000+00:00
+        stageId: stage-upgrade-binary
+    TaskMessage:
+      example:
+        level: INFO
+        message:
+          args:
+            cloudProxyFqdn: cloudProxy1.vsphere.local
+          localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+          defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+          id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+        timestamp: 2000-01-23T04:56:07.000+00:00
+      properties:
+        timestamp:
+          format: date-time
+          type: string
+        level:
+          enum:
+          - INFO
+          - WARN
+          - ERROR
+          type: string
+        message:
+          $ref: '#/components/schemas/LocalizableMessage'
+      type: object
+    PrecheckStatus:
+      description: Defines possible task step states
+      enum:
+      - PENDING
+      - RUNNING
+      - SUCCEEDED
+      - FAILED
+      - SKIPPED
+      type: string
+    PrecheckGroup:
+      description: Represents a group of prechecks
+      example:
+        name:
+          args:
+            cloudProxyFqdn: cloudProxy1.vsphere.local
+          localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+          defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+          id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+        startTime: 2000-01-23T04:56:07.000+00:00
+        prechecks:
+        - resourceId: resourceId
+          issue:
+            id: VCF-ERROR-001
+            type: WARN
+            message:
+              args:
+                cloudProxyFqdn: cloudProxy1.vsphere.local
+              localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+              defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+              id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+            resolution:
+              args:
+                cloudProxyFqdn: cloudProxy1.vsphere.local
+              localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+              defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+              id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+          name:
+            args:
+              cloudProxyFqdn: cloudProxy1.vsphere.local
+            localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+            defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+            id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+          resourceName: resourceName
+          startTime: 2000-01-23T04:56:07.000+00:00
+          id: SYSTEM_HEALTH_CHECK
+          endTime: 2000-01-23T04:56:07.000+00:00
+          status: null
+        - resourceId: resourceId
+          issue:
+            id: VCF-ERROR-001
+            type: WARN
+            message:
+              args:
+                cloudProxyFqdn: cloudProxy1.vsphere.local
+              localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+              defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+              id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+            resolution:
+              args:
+                cloudProxyFqdn: cloudProxy1.vsphere.local
+              localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+              defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+              id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+          name:
+            args:
+              cloudProxyFqdn: cloudProxy1.vsphere.local
+            localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+            defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+            id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+          resourceName: resourceName
+          startTime: 2000-01-23T04:56:07.000+00:00
+          id: SYSTEM_HEALTH_CHECK
+          endTime: 2000-01-23T04:56:07.000+00:00
+          status: null
+        id: SYSTEM_HEALTH_CHECK
+        endTime: 2000-01-23T04:56:07.000+00:00
+        status: null
+      properties:
+        id:
+          description: "A unique, human-readable identifier representing the **type\
+            \ or category of this specific precheck**. This ID allows for consistent\
+            \ identification of the precheck being run across different executions.\
+            \ Examples: 'SYSTEM_HEALTH_CHECK', 'APUAT_CHECK', 'RESOURCE_ALLOCATION_CHECK'."
+          example: SYSTEM_HEALTH_CHECK
+          type: string
+        name:
+          $ref: '#/components/schemas/LocalizableMessage'
+        status:
+          $ref: '#/components/schemas/PrecheckStatus'
+        startTime:
+          description: The timestamp (ISO 8601 format) when this precheck execution
+            started.
+          format: date-time
+          type: string
+        endTime:
+          description: The timestamp (ISO 8601 format) when this precheck execution
+            completed.
+          format: date-time
+          type: string
+        prechecks:
+          description: "A list of problems, warnings, or errors identified during\
+            \ this precheck execution."
+          items:
+            $ref: '#/components/schemas/Precheck'
+          type: array
+      required:
+      - endTime
+      - id
+      - name
+      - startTime
+      - status
+      type: object
+    Precheck:
+      description: "Represents the comprehensive outcome of a single precheck execution,\
+        \ including its details, status, and any identified issues."
+      example:
+        resourceId: resourceId
+        issue:
+          id: VCF-ERROR-001
+          type: WARN
+          message:
+            args:
+              cloudProxyFqdn: cloudProxy1.vsphere.local
+            localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+            defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+            id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+          resolution:
+            args:
+              cloudProxyFqdn: cloudProxy1.vsphere.local
+            localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+            defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+            id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+        name:
+          args:
+            cloudProxyFqdn: cloudProxy1.vsphere.local
+          localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+          defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+          id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+        resourceName: resourceName
+        startTime: 2000-01-23T04:56:07.000+00:00
+        id: SYSTEM_HEALTH_CHECK
+        endTime: 2000-01-23T04:56:07.000+00:00
+        status: null
+      properties:
+        id:
+          description: "A unique, human-readable identifier representing the **type\
+            \ or category of this specific precheck**. This ID allows for consistent\
+            \ identification of the precheck being run across different executions.\
+            \ Examples: 'SYSTEM_HEALTH_CHECK', 'APUAT_CHECK', 'RESOURCE_ALLOCATION_CHECK'."
+          example: SYSTEM_HEALTH_CHECK
+          type: string
+        resourceId:
+          description: An identifier for the specific resource against which this
+            precheck was run.
+          type: string
+        resourceName:
+          description: Name of the resource on which precheck was run
+          type: string
+        name:
+          $ref: '#/components/schemas/LocalizableMessage'
+        status:
+          $ref: '#/components/schemas/PrecheckStatus'
+        issue:
+          $ref: '#/components/schemas/PrecheckIssue'
+        startTime:
+          description: The timestamp (ISO 8601 format) when this precheck execution
+            started.
+          format: date-time
+          type: string
+        endTime:
+          description: The timestamp (ISO 8601 format) when this precheck execution
+            completed.
+          format: date-time
+          type: string
+      required:
+      - endTime
+      - id
+      - name
+      - startTime
+      - status
+      type: object
+    PrecheckIssue:
+      description: "Represents a single problem, either a warning or an error, found\
+        \ during a precheck."
+      example:
+        id: VCF-ERROR-001
+        type: WARN
+        message:
+          args:
+            cloudProxyFqdn: cloudProxy1.vsphere.local
+          localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+          defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+          id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+        resolution:
+          args:
+            cloudProxyFqdn: cloudProxy1.vsphere.local
+          localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+          defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+          id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+      properties:
+        id:
+          description: "A unique, human-readable identifier for this specific *type*\
+            \ of precheck issue. This ID allows for consistent referencing across\
+            \ precheck reports and can be used to link to internal documentation or\
+            \ knowledge base articles for troubleshooting and resolution (e.g., 'VCF-ERROR-001'\
+            \ for a health check error, 'VCF-DB-001' for a database connection warning)."
+          example: VCF-ERROR-001
+          type: string
+        type:
+          description: "The severity of the issue, indicating whether it's a non-blocking\
+            \ warning (WARN) or a critical error (ERROR) that prevents the operation,\
+            \ or that the operation was skipped (SKIPPED)."
+          enum:
+          - WARN
+          - ERROR
+          - SKIPPED
+          type: string
+        message:
+          $ref: '#/components/schemas/LocalizableMessage'
+        resolution:
+          $ref: '#/components/schemas/LocalizableMessage'
+      required:
+      - id
+      - message
+      - type
+      type: object
+    PrecheckReport:
+      description: Provides a link to an external or more detailed report associated
+        with a specific precheck result.
+      example:
+        description:
+          args:
+            cloudProxyFqdn: cloudProxy1.vsphere.local
+          localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+          defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+          id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+        reportUrl: reportUrl
+      properties:
+        description:
+          $ref: '#/components/schemas/LocalizableMessage'
+        reportUrl:
+          description: "The URL where the full, detailed report for this precheck\
+            \ result can be accessed."
+          type: string
+      required:
+      - reportUrl
+      type: object
+    OpsLogsUpgradeResult:
+      properties:
+        type:
+          type: string
+        upgradeReportUrl:
+          description: The URL to the VCF Operations for Logs upgrade report with
+            guidance \ on log configuration changes recommended after the upgrade.
+          format: uri
+          type: string
+      type: object
+    ComponentDesiredSpec:
+      description: |
+        Specifications related to the component's desired configuration and the source for its upgrade artifacts.
+      example:
+        software:
+          version: 9.1.0.0000.1234567
+        depot:
+          certificate:
+          - LS0tLS1CRUdJTiBDRVJUSUZJQ0FUR...
+          - MIIDMjCCAhegAwIBAgIQI...0tRU5EIENFUlRJRklDQVRF
+          url: https://fds.vsphere.com/component-x/v9.1.0/upgrade-manifest
+        userInput: "{}"
+        additionalInput: "{}"
+        policy: "{}"
+      properties:
+        software:
+          $ref: '#/components/schemas/SoftwareSpec'
+        policy:
+          description: |
+            Specific policies to apply during the component's upgrade lifecycle.
+            This object allows for arbitrary key-value pairs specific to the component or operation.
+          type: object
+        depot:
+          $ref: '#/components/schemas/DepotSpec'
+        userInput:
+          description: |
+            User-input specific configuration required for component upgrade.
+            This object allows for arbitrary key-value pairs specific to the component or operation.
+          type: object
+        additionalInput:
+          description: |
+            Additional inputs required for component upgrade.
+            This object allows for arbitrary key-value pairs specific to the component or operation.
+          type: object
+      required:
+      - depot
+      - software
+      type: object
+    SoftwareSpec:
+      description: The desired state specifications for the component post-upgrade.
+      example:
+        version: 9.1.0.0000.1234567
+      properties:
+        version:
+          description: The exact target version to which the component should be upgraded.
+          example: 9.1.0.0000.1234567
+          type: string
+      required:
+      - version
+      type: object
+    PolicySpec:
+      description: |
+        Specific policies to apply during the component's upgrade lifecycle.
+        This object allows for arbitrary key-value pairs specific to the component or operation.
+      type: object
+    DepotSpec:
+      description: |
+        Details for accessing the software depot where the component's upgrade manifest or package is located.
+      example:
+        certificate:
+        - LS0tLS1CRUdJTiBDRVJUSUZJQ0FUR...
+        - MIIDMjCCAhegAwIBAgIQI...0tRU5EIENFUlRJRklDQVRF
+        url: https://fds.vsphere.com/component-x/v9.1.0/upgrade-manifest
+      properties:
+        url:
+          description: |
+            The URL pointing to the component's upgrade manifest, package, or the root of its upgrade repository in the depot.
+          example: https://fds.vsphere.com/component-x/v9.1.0/upgrade-manifest
+          format: uri
+          type: string
+        certificate:
+          description: |
+            A list of base64-encoded strings representing certificates (e.g., PEM format) required to authenticate with the depot.
+          example:
+          - LS0tLS1CRUdJTiBDRVJUSUZJQ0FUR...
+          - MIIDMjCCAhegAwIBAgIQI...0tRU5EIENFUlRJRklDQVRF
+          items:
+            type: string
+          type: array
+      required:
+      - url
+      type: object
+    UserInputSpec:
+      description: |
+        User-input specific configuration required for component upgrade.
+        This object allows for arbitrary key-value pairs specific to the component or operation.
+      type: object
+    AdditionalInputSpec:
+      description: |
+        Additional inputs required for component upgrade.
+        This object allows for arbitrary key-value pairs specific to the component or operation.
+      type: object
+    LcmPlatformSpec:
+      description: |
+        Lifecycle Management (LCM) specific options controlling the behavior of the upgrade process itself.
+      example:
+        performBackup: false
+      properties:
+        performBackup:
+          default: false
+          description: |
+            If true, the system will attempt to create a backup of the component's current state before proceeding with the upgrade.
+          example: false
+          type: boolean
+      required:
+      - performBackup
+      type: object
+    Task_taskSummary:
+      description: |
+        Summary information about sub tasks.
+        See sample-task-example.yaml for examples of how this summary is calculated.
+      example:
+        totalSteps: 6
+        totalSubTasks: 0
+      properties:
+        totalSubTasks:
+          description: Total number of sub tasks in this task
+          type: integer
+        totalSteps:
+          description: Total number of steps across all sub tasks and this task
+          type: integer
+      readOnly: true
+      type: object
+    Task_result:
+      discriminator:
+        mapping:
+          PRECHECK: '#/components/schemas/PrecheckResult'
+          OPS_LOGS_UPGRADE: '#/components/schemas/OpsLogsUpgradeResult'
+          VALIDATION: '#/components/schemas/ValidationResult'
+        propertyName: type
+      oneOf:
+      - $ref: '#/components/schemas/PrecheckResult'
+      - $ref: '#/components/schemas/OpsLogsUpgradeResult'
+      - $ref: '#/components/schemas/ValidationResult'
+  securitySchemes:
+    bearerToken:
+      bearerFormat: JWT
+      description: Bearer token using a JWT
+      scheme: Bearer
+      type: http

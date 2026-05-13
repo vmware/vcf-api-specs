@@ -1,0 +1,282 @@
+# API component schema definitions.
+PrometheusResponse:
+  type: object
+  required:
+    - status
+    - data
+  description: Standard Prometheus response.
+  properties:
+    status:
+      $ref: '#/StatusEnum'
+    data:
+      type: object
+      description: Loose object reference for circumventing OpenAPI Generator's oneOf() problem for client SDK
+    pageInfo:
+      $ref: '#/PageInfo'
+      description: Pagination metadata for paginated responses. Only present for paginated APIs.
+    errorType:
+      type: string
+      description: |
+        Type of an error.
+        This field is set only if status is "error". The data field may still hold additional data.
+    error:
+      type: string
+      description: |
+        Error while querying to the metrics.
+        This field is set only if status is "error". The data field may still hold additional data.
+    warnings:
+      type: array
+      description: |
+        Warnings generated during API execution.
+        This field is set only if there were warnings while executing the request.
+        The data field will still hold additional data.
+      items:
+        type: string
+    infos:
+      type: array
+      description: |
+        Info generated during API execution.
+        This field is set only if there were info-level messages while executing the request.
+      items:
+        type: string
+
+PrometheusResponseData:
+  type: object
+  oneOf:
+    - $ref: '#/Data'
+    - $ref: '#/MetricMetadataResponse'
+
+Data:
+  type: object
+  required:
+    - resultType
+    - result
+  properties:
+    resultType:
+      $ref: '#/ResultTypeEnum'
+    result:
+      type: object
+      description: Loose object reference for circumventing OpenAPI Generator's oneOf() problem for client SDK
+  examples:
+    Matrix:
+      resultType: matrix
+      result:
+        - metric: jvm_gc_collection_seconds_count
+          value:
+            - [ 1739780151.435, "23" ]
+            - [ 1739780161.435, "25" ]
+            - [ 1739780171.435, "28" ]
+        - metric: jvm_gc_collection_seconds
+          value:
+            - [ 1739780151.435, "45456" ]
+            - [ 1739780161.435, "45459" ]
+            - [ 1739780171.435, "45453" ]
+    Vector:
+      resultType: vector
+      result:
+        - metric: jvm_gc_collection_seconds_count
+          value: [ 1739780151.435, "23" ]
+        - metric: jvm_gc_collection_seconds
+          value: [ 1739780151.435, "456745" ]
+    Scalar:
+      resultType: scalar
+      result: [ 1739780151.435, "23.4" ]
+    StringResult:
+      resultType: string
+      result: [ 1739780151.435, "value" ]
+
+# Range Vectors.
+Matrix:
+  title: Matrix
+  description: |
+    Represents a Range Vector which is a set of time series containing a range of data points over time for each
+    time series.
+  type: array
+  items:
+    $ref: '#/Series'
+
+Series:
+  type: object
+  required:
+    - metric
+  description: List of data points for a metric.
+  properties:
+    metric:
+      type: object
+      additionalProperties:
+        type: string
+    values:
+      type: array
+      items:
+        type: array
+        items:
+          type: object
+        minItems: 2
+        maxItems: 2
+        additionalItems: false
+        description: Array containing timestamp (number) and metric value (string)
+
+# This is a copy to support array types in metric tag values.
+# JIRA: https://vmw-jira.broadcom.net/browse/VCOPS-41847
+# VODAP Adapter uses the OpenAPI spec generated models for response parsing
+# The "data-->result" is an Object Type.
+# The Client SDK parses the DQS response as an object.
+# The VODAP Adapter then models this "object" response into the "Series" model defined here.
+# This serialization is done to better leverage the generated model's fields, instead of playing with string keys
+# in Map datastructures.
+# The Series model above defines metrics tags as a String key, value pair.
+# It is possible to have an array value for a metric tag.
+# Below we mark the possible values as "object" type.
+SeriesAdapter:
+  type: object
+  required:
+    - metric
+  description: List of data points for a metric.
+  properties:
+    metric:
+      type: object
+      additionalProperties:
+        type: object
+    values:
+      type: array
+      items:
+        type: array
+        items:
+          type: object
+        minItems: 2
+        maxItems: 2
+        description: Array containing timestamp (number) and metric value (string)
+
+# Instant Vectors.
+Vector:
+  title: Vector
+  description: |
+    Represents an Instant Vector which is a set of time series containing a single sample for each time series,
+    all sharing the same timestamp.
+  type: array
+  items:
+    $ref: '#/Sample'
+
+Sample:
+  type: object
+  required:
+    - metric
+  description: Single data point for a metric.
+  properties:
+    metric:
+      type: object
+      additionalProperties:
+        type: string
+    value:
+      type: array
+      items:
+        type: object
+      minItems: 2
+      maxItems: 2
+      additionalItems: false
+      description: Array containing timestamp (number) and metric value (string)
+
+# Scalar.
+Scalar:
+  type: array
+  items:
+    type: object
+  minItems: 2
+  maxItems: 2
+  additionalItems: false
+  description: Array containing timestamp (number) and metric value (string)
+
+# String.
+StringResult:
+  type: array
+  items:
+    type: object
+  minItems: 2
+  maxItems: 2
+  additionalItems: false
+  description: Array containing timestamp (number) and value (string)
+
+StatusEnum:
+  type: string
+  description: API execution status.
+  enum: [ success, error ]
+
+ResultTypeEnum:
+  type: string
+  description: Type of a result.
+  enum: [ matrix, vector, scalar, string ]
+
+MetricMetadataResponse:
+  type: object
+  additionalProperties:
+    $ref: '#/MetricMetadata'
+
+MetricMetadata:
+  type: array
+  items:
+    $ref: '#/MetricMetadataItem'
+
+MetricMetadataItem:
+  type: object
+  properties:
+    type:
+      type: string
+      description: The metric type (e.g., counter, gauge, etc.).
+      example: cpu.usage.HOST
+    help:
+      type: string
+      description: Description of the metric.
+      example: CPU Usage Host is the measurement of how much of the CPU's capacity is being utilized by the host system.
+    unit:
+      type: string
+      description: Unit of the metric (can be empty).
+      example: percentage
+  required:
+    - type
+    - help
+    - unit
+
+VcMetricsConfigRequestBody:
+  type: object
+  properties:
+    standard:
+      type: boolean
+      description: Enable/disable VC standard metrics.
+    verbose:
+      type: boolean
+      description: Enable/disable VC verbose metrics.
+    esxTopHostMoids:
+      type: array
+      items:
+        $ref: '#/EsxTopHostMoidOperation'
+  example:
+    verbose: false
+
+EsxTopHostMoidOperation:
+  type: object
+  required:
+    - moid
+    - operation
+  properties:
+    moid:
+      type: string
+      description: The ESX top host MOID
+      example: "host-1"
+    operation:
+      type: string
+      description: The operation to perform on the MOID
+      enum: [ADD, REMOVE]
+      example: "ADD"
+
+PageInfo:
+  type: object
+  description: Pagination metadata for paginated responses.
+  properties:
+    nextPageToken:
+      type: string
+      description: Token for the next page of results. If null, there are no more pages.
+      example: "eyJuYW1lIjoiY3B1LnVzYWdlIiwidGltZXN0YW1wIjoxNjAwMDAwMDAwfQ=="
+    pageSize:
+      type: integer
+      description: Number of results requested per page.
+      example: 50

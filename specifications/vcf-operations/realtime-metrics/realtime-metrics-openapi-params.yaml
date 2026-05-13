@@ -1,0 +1,153 @@
+# API parameter definitions.
+queryQueryParam:
+  name: query
+  in: query
+  description: The PromQL query for execution.
+  required: true
+  style: form
+  explode: true
+  schema:
+    type: string
+    examples:
+      SimplePromQL: jvm_gc_collection_seconds_count{service="server"}
+      RangePromQL: jvm_gc_collection_seconds_count{service="server"}[5m]
+      RatePromQL: rate(jvm_gc_collection_seconds_count[5m])
+
+policyQueryParam:
+  name: policy
+  in: query
+  description: |
+    Name of the policy for which the aggregated or rolled-up data to be queried.
+  required: true
+  style: form
+  explode: true
+  schema:
+    type: string
+    examples:
+      troubleshootingPolicy: TROUBLESHOOTING
+      monitoringPolicy: MONITORING
+
+timeQueryParam:
+  name: time
+  in: query
+  description: |
+    Evaluation timestamp in Unix epoch seconds or RFC3339 format.
+    The current server time is used if the time parameter is unset.
+  required: false
+  style: form
+  explode: true
+  schema:
+    type: string
+    examples:
+      TimeInEpoch: 1739780198
+      TimeInRFC3339: 2025-02-17T08:17:04+00:00
+
+timeoutQueryParam:
+  name: timeout
+  in: query
+  description: Evaluation timeout in duration.
+  required: false
+  style: form
+  explode: true
+  schema:
+    type: string
+    examples:
+      TimeoutInSeconds: 1s
+      TimeoutInHour: 4h
+
+startQueryParam:
+  name: start
+  in: query
+  description: Start timestamp in Unix epoch seconds or RFC3339 format.
+  required: true
+  style: form
+  explode: true
+  schema:
+    type: string
+    examples:
+      TimeInEpoch: 1739780198
+      TimeInRFC3339: 2025-02-17T08:17:04+00:00
+
+endQueryParam:
+  name: end
+  in: query
+  description: End timestamp in Unix epoch seconds or RFC3339 format.
+  required: true
+  style: form
+  explode: true
+  schema:
+    type: string
+    examples:
+      TimeInEpoch: 1739780198
+      TimeInRFC3339: 2025-02-17T08:17:04+00:00
+
+stepQueryParam:
+  name: step
+  in: query
+  description: Query resolution step width in duration format or float number of seconds.
+  required: true
+  style: form
+  explode: true
+  schema:
+    type: string
+    examples:
+      StepInSeconds: 1s
+      StepInHour: 4h
+      StepInFloatSeconds: 300.5
+
+limitQueryParam:
+  name: limit
+  in: query
+  description: |
+    Maximum number of returned series. Doesn't affect scalars or strings but truncates the number of series for matrices
+    and vectors. If not set, default limit is applied.
+  required: false
+  style: form
+  explode: true
+  schema:
+    type: integer
+    format: int32
+  example: 100
+
+sourceIdQueryParam:
+  name: sourceId
+  in: query
+  description: Source Id against which we need to query data for, like VC Instance UUID, NSX Id etc.
+  required: false
+  style: form
+  explode: true
+  schema:
+    type: string
+    example: 59e196ae-45c9-4bff-8176-5e6812435f8a
+
+externalTagsFilterQueryParam:
+  name: externalTagsFilter
+  in: query
+  description: Additionally passed tag filters which are needed to be applied on provided promql in request.
+  required: false
+  style: form
+  explode: true
+  schema:
+    type: string
+    example: "{\"host\":\"host-15\", \"vm\"=\"vm-25\"}"
+
+metricNameQueryParam:
+  name: metric
+  in: query
+  description: Metric name.
+  required: false
+  style: form
+  explode: true
+  schema:
+    type: string
+    example: cpu.usage.HOST
+
+vcIdPathParam:
+  name: vcId
+  in: path
+  description: UUID of the VC.
+  required: true
+  schema:
+    type: string
+    format: uuid
+    example: 1725ff48-ab45-4bb5-9d02-88745177dedb

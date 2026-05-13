@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Copyright (c) 2025 Broadcom. All Rights Reserved.
+The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+
+SPDX-License-Identifier: Apache-2.0-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.vmware.custom_sdk</groupId>
+        <artifactId>vcf-custom-sdk-java</artifactId>
+        <version>0.0.1</version>
+        <relativePath>../../../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>ssoclient</artifactId>
+
+    <properties>
+        <ssoclient.wsdl.root>${wsdl.root}/ssoclient</ssoclient.wsdl.root>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>jakarta.xml.ws</groupId>
+            <artifactId>jakarta.xml.ws-api</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.cxf</groupId>
+                <artifactId>cxf-codegen-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>generate-bindings</id>
+                        <configuration>
+                            <wsdlRoot>${ssoclient.wsdl.root}</wsdlRoot>
+                            <includes>
+                                <include>*.wsdl</include>
+                            </includes>
+                            <defaultOptions>
+                                <wsdlLocation>STSService.wsdl</wsdlLocation>
+                                <extraargs>
+                                    <extraarg>-suppress-generated-date</extraarg>
+                                    <extraarg>-validate=none</extraarg>
+                                </extraargs>
+                            </defaultOptions>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+
+        <resources>
+            <resource>
+                <directory>${ssoclient.wsdl.root}</directory>
+            </resource>
+        </resources>
+    </build>
+
+</project>

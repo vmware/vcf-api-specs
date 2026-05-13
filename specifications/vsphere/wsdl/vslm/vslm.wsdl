@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!--
-   	Copyright (c) 2005-2025
+   	Copyright (c) 2005-2026
 	Broadcom. All Rights Reserved.
 	The term "Broadcom" refers to Broadcom Inc.
 	and/or its subsidiaries.
@@ -35,6 +35,7 @@
          <element name="HostNotReachableFault" type="vim25:HostNotReachable"/>
          <element name="InvalidArgumentFault" type="vim25:InvalidArgument"/>
          <element name="InvalidRequestFault" type="vim25:InvalidRequest"/>
+         <element name="InvalidTokenFault" type="vim25:InvalidToken"/>
          <element name="InvalidTypeFault" type="vim25:InvalidType"/>
          <element name="ManagedObjectNotFoundFault" type="vim25:ManagedObjectNotFound"/>
          <element name="MethodNotFoundFault" type="vim25:MethodNotFound"/>
@@ -3398,6 +3399,9 @@
    </message>
    <message name="InvalidRequestFaultMsg">
       <part name="fault" element="vslm:InvalidRequestFault" />
+   </message>
+   <message name="InvalidTokenFaultMsg">
+      <part name="fault" element="vslm:InvalidTokenFault" />
    </message>
    <message name="InvalidTypeFaultMsg">
       <part name="fault" element="vslm:InvalidTypeFault" />

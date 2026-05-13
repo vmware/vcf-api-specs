@@ -100,6 +100,8 @@
     <xs:restriction base="xs:string">
       <xs:enumeration value="http://rsa.com/schemas/attr-names/2009/01/GroupIdentity"/>
       <xs:enumeration value="http://vmware.com/schemas/attr-names/2011/07/isSolution"/>
+      <xs:enumeration value="http://vmware.com/schemas/attr-names/2025/05/isServiceAccount"/>
+      <xs:enumeration value="http://vmware.com/schemas/attr-names/2025/06/delegatePrincipalType"/>
       <xs:enumeration value="http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname"/>
       <xs:enumeration value="http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname"/>
     </xs:restriction>

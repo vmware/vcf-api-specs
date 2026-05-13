@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!--
-   	Copyright (c) 2005-2025
+   	Copyright (c) 2005-2026
 	Broadcom. All Rights Reserved.
 	The term "Broadcom" refers to Broadcom Inc.
 	and/or its subsidiaries.
@@ -114,6 +114,7 @@
          <enumeration value="datastore" />
          <enumeration value="vsanObjectId" />
          <enumeration value="fileShareId" />
+         <enumeration value="cluster" />
          <enumeration value="unknown" />
       </restriction>
    </simpleType>
@@ -725,6 +726,7 @@
          <extension base="vim25:DynamicData">
             <sequence>
                <element name="hub" type="pbm:PbmPlacementHub" />
+               <element name="hubInfo" type="pbm:PbmPlacementHubInfo" minOccurs="0" />
                <element name="matchingResources" type="pbm:PbmPlacementMatchingResources" minOccurs="0" maxOccurs="unbounded" />
                <element name="howMany" type="xsd:long" minOccurs="0" />
                <element name="utilization" type="pbm:PbmPlacementResourceUtilization" minOccurs="0" maxOccurs="unbounded" />
@@ -776,6 +778,15 @@
          <element name="PbmPlacementHub" type="pbm:PbmPlacementHub" minOccurs="0" maxOccurs="unbounded" />
       </sequence>
    </complexType>
+   <complexType name="PbmPlacementHubInfo">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="zoneClusters" type="pbm:PbmServerObjectRef" minOccurs="0" maxOccurs="unbounded" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
    <complexType name="PbmPlacementRequirement">
       <complexContent>
          <extension base="vim25:DynamicData">
@@ -807,6 +818,15 @@
          <element name="PbmPlacementResourceUtilization" type="pbm:PbmPlacementResourceUtilization" minOccurs="0" maxOccurs="unbounded" />
       </sequence>
    </complexType>
+   <complexType name="PbmPlacementZoneTopologyRequirement">
+      <complexContent>
+         <extension base="pbm:PbmPlacementCapabilityProfileRequirement">
+            <sequence>
+               <element name="clusters" type="pbm:PbmServerObjectRef" minOccurs="0" maxOccurs="unbounded" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
    <simpleType name="PbmAssociateAndApplyPolicyStatusPolicyStatus">
       <restriction base="xsd:string">
          <enumeration value="success" />
@@ -825,6 +845,8 @@
                <element name="isDefault" type="xsd:boolean" />
                <element name="systemCreatedProfileType" type="xsd:string" minOccurs="0" />
                <element name="lineOfService" type="xsd:string" minOccurs="0" />
+               <element name="k8sCompliantName" type="xsd:string" minOccurs="0" />
+               <element name="otherK8sCompliantNames" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
             </sequence>
          </extension>
       </complexContent>
@@ -843,6 +865,7 @@
          <enumeration value="PmemDefaultProfile" />
          <enumeration value="VmcManagementProfile" />
          <enumeration value="VsanMaxDefaultProfile" />
+         <enumeration value="VsanEsaAutoManagedRaidProfile" />
       </restriction>
    </simpleType>
    <complexType name="PbmCapabilityProfileCreateSpec">
@@ -854,6 +877,7 @@
                <element name="category" type="xsd:string" minOccurs="0" />
                <element name="resourceType" type="pbm:PbmProfileResourceType" />
                <element name="constraints" type="pbm:PbmCapabilityConstraints" />
+               <element name="k8sCompliantName" type="xsd:string" minOccurs="0" />
             </sequence>
          </extension>
       </complexContent>
@@ -918,6 +942,7 @@
       <restriction base="xsd:string">
          <enumeration value="CREATE" />
          <enumeration value="REGISTER" />
+         <enumeration value="UNREGISTER" />
          <enumeration value="RECONFIGURE" />
          <enumeration value="MIGRATE" />
          <enumeration value="CLONE" />
@@ -974,6 +999,17 @@
       <sequence>
          <element name="PbmProfileId" type="pbm:PbmProfileId" minOccurs="0" maxOccurs="unbounded" />
       </sequence>
+   </complexType>
+   <complexType name="PbmProfileK8sCompliantNameSpec">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="profileId" type="xsd:string" />
+               <element name="k8sCompliantName" type="xsd:string" />
+               <element name="otherK8sCompliantNames" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
+            </sequence>
+         </extension>
+      </complexContent>
    </complexType>
    <complexType name="PbmProfileOperationOutcome">
       <complexContent>

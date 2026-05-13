@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!--
-   	Copyright (c) 2005-2025
+   	Copyright (c) 2005-2026
 	Broadcom. All Rights Reserved.
 	The term "Broadcom" refers to Broadcom Inc.
 	and/or its subsidiaries.
@@ -18,6 +18,13 @@
    <import namespace="urn:reflect" schemaLocation="reflect-types.xsd" />
    <import namespace="urn:vim25" schemaLocation="query-types.xsd" />
    <import namespace="urn:vim25" schemaLocation="vim-types.xsd" />
+   <simpleType name="DpDiskAlreadyClaimedReason">
+      <restriction base="xsd:string">
+         <enumeration value="maxVendorsExceeded" />
+         <enumeration value="alreadyInUse" />
+         <enumeration value="diskAlreadyClaimedReasonUnknown" />
+      </restriction>
+   </simpleType>
    <simpleType name="DpInvalidProtectionReason">
       <restriction base="xsd:string">
          <enumeration value="protectionDegraded" />
@@ -77,6 +84,13 @@
          <enumeration value="VsanNativeSnapshot" />
          <enumeration value="SparseDiskEnhancement" />
          <enumeration value="VSphereDpCapabilities_Unknown" />
+      </restriction>
+   </simpleType>
+   <simpleType name="DpVSphereDataProtectionCapabilities90U1">
+      <restriction base="xsd:string">
+         <enumeration value="MultiInitiator" />
+         <enumeration value="VsanDataIntegrity" />
+         <enumeration value="PolicyEngine" />
       </restriction>
    </simpleType>
    <simpleType name="DpVssBackupContext">
@@ -411,6 +425,45 @@
          <enumeration value="vsansitemaintenance" />
       </restriction>
    </simpleType>
+   <simpleType name="VsanCapabilityType91">
+      <restriction base="xsd:string">
+         <enumeration value="vsanhcimeshdit" />
+         <enumeration value="vsanhcimeshmixmode" />
+         <enumeration value="vsanxvchcimeshscv2" />
+         <enumeration value="dataserviceprecheck" />
+         <enumeration value="vsansitemmandtakeover" />
+         <enumeration value="vsanscclientv2" />
+         <enumeration value="vsan2globaldedupv2" />
+         <enumeration value="perfsvcdhciv2" />
+         <enumeration value="automanagedraid" />
+         <enumeration value="vsanvmdiskplacementxvc" />
+         <enumeration value="vsaneffectivecapacity" />
+         <enumeration value="immutablesnapshot" />
+         <enumeration value="vsan2globaldedupencryption" />
+         <enumeration value="vsan2compressionconfig" />
+         <enumeration value="fileservicefds" />
+         <enumeration value="vsancyberrecovery" />
+      </restriction>
+   </simpleType>
+   <complexType name="VsanClientServerHciMeshDitEncryptionHealthSummary">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="clusterUuid" type="xsd:string" />
+               <element name="clusterName" type="xsd:string" />
+               <element name="ownerVc" type="xsd:string" minOccurs="0" />
+               <element name="isLocalOwnerVc" type="xsd:boolean" minOccurs="0" />
+               <element name="health" type="xsd:string" />
+               <element name="issues" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfVsanClientServerHciMeshDitEncryptionHealthSummary">
+      <sequence>
+         <element name="VsanClientServerHciMeshDitEncryptionHealthSummary" type="vsan:VsanClientServerHciMeshDitEncryptionHealthSummary" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
    <complexType name="VsanClusterDitEncryptionHealthSummary">
       <complexContent>
          <extension base="vim25:DynamicData">
@@ -452,6 +505,18 @@
             <sequence>
                <element name="dedupConfigHealth" type="vsan:VsanHostGlobalDedupConfigHealthSummary" minOccurs="0" maxOccurs="unbounded" />
                <element name="dedupStoreHealth" type="xsd:string" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="VsanClusterHciMeshDitEncryptionHealthSummary">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="overallHealth" type="xsd:string" />
+               <element name="hostClientClusterSummary" type="vsan:VsanHostHciMeshDitEncryptionHealthSummary" minOccurs="0" maxOccurs="unbounded" />
+               <element name="hostServerClusterSummary" type="vsan:VsanHostHciMeshDitEncryptionHealthSummary" minOccurs="0" maxOccurs="unbounded" />
+               <element name="serverClusterSummary" type="vsan:VsanClientServerHciMeshDitEncryptionHealthSummary" minOccurs="0" maxOccurs="unbounded" />
             </sequence>
          </extension>
       </complexContent>
@@ -516,6 +581,7 @@
                <element name="task" type="vim25:ManagedObjectReference" minOccurs="0" />
                <element name="diskNames" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
                <element name="includeHealthRemediation" type="xsd:boolean" minOccurs="0" />
+               <element name="excludeChecks" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
             </sequence>
          </extension>
       </complexContent>
@@ -543,6 +609,49 @@
          </extension>
       </complexContent>
    </complexType>
+   <complexType name="VsanComponentBasicInfo">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="uuid" type="xsd:string" />
+               <element name="componentState" type="xsd:string" />
+               <element name="hostName" type="xsd:string" />
+               <element name="hostNodeUuid" type="xsd:string" />
+               <element name="faultDomainUuid" type="xsd:string" minOccurs="0" />
+               <element name="faultDomainName" type="xsd:string" minOccurs="0" />
+               <element name="cacheDiskInfo" type="vsan:DiskInfo" minOccurs="0" />
+               <element name="capacityDiskInfo" type="vsan:DiskInfo" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="VsanComponentPlacement">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="type" type="xsd:string" />
+               <element name="children" type="vsan:VsanComponentPlacement" minOccurs="0" maxOccurs="unbounded" />
+               <element name="basicInfo" type="vsan:VsanComponentBasicInfo" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfVsanComponentPlacement">
+      <sequence>
+         <element name="VsanComponentPlacement" type="vsan:VsanComponentPlacement" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <simpleType name="VsanComponentStates">
+      <restriction base="xsd:string">
+         <enumeration value="ACTIVE" />
+         <enumeration value="ACTIVE_STALE" />
+         <enumeration value="ABSENT" />
+         <enumeration value="ABSENT_RESYNC" />
+         <enumeration value="DEGRADED" />
+         <enumeration value="RECONFIG" />
+         <enumeration value="UNKNOWN" />
+      </restriction>
+   </simpleType>
    <complexType name="VsanConfigGeneration">
       <complexContent>
          <extension base="vim25:DynamicData">
@@ -592,6 +701,20 @@
          <element name="VsanDiagnosticsThreshold" type="vsan:VsanDiagnosticsThreshold" minOccurs="0" maxOccurs="unbounded" />
       </sequence>
    </complexType>
+   <complexType name="VsanEffectiveSpaceUsage">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="totalUsableB" type="xsd:long" />
+               <element name="freeUsableB" type="xsd:long" />
+               <element name="actualWrittenB" type="xsd:long" minOccurs="0" />
+               <element name="overReservedB" type="xsd:long" minOccurs="0" />
+               <element name="totalProvisionB" type="xsd:long" minOccurs="0" />
+               <element name="snapshotSpace" type="vsan:VsanSnapshotSpace" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
    <complexType name="VsanEntitySpaceUsage">
       <complexContent>
          <extension base="vim25:DynamicData">
@@ -610,6 +733,25 @@
          <element name="VsanEntitySpaceUsage" type="vsan:VsanEntitySpaceUsage" minOccurs="0" maxOccurs="unbounded" />
       </sequence>
    </complexType>
+   <simpleType name="VsanHciMeshDitEncryptionIssue">
+      <restriction base="xsd:string">
+         <enumeration value="hostHasNoHciMeshDitEncConfigForTheServerCluster" />
+         <enumeration value="hostHasNoHciMeshDitEncConfigForTheClientCluster" />
+         <enumeration value="clusterServerHciMeshDitEncIsEnabledButTheHostIsNot" />
+         <enumeration value="clusterClientHciMeshDitEncIsEnabledButTheHostIsNot" />
+         <enumeration value="hostServerHciMeshDitEncIsEnabledButTheClusterIsNot" />
+         <enumeration value="hostClientHciMeshDitEncIsEnabledButTheClusterIsNot" />
+         <enumeration value="hostServerHciMeshDitEncIsNotInSettledState" />
+         <enumeration value="hostHasDifferentServerHciMeshDitEncRekeyInterval" />
+         <enumeration value="hostClientHciMeshDitEncStateIsNotSettled" />
+         <enumeration value="clientHostIncapable" />
+         <enumeration value="serverHostIncapable" />
+         <enumeration value="clientHciMeshDitEncIsEnabledButTheServerIsNot" />
+         <enumeration value="serverHciMeshDitEncIsEnabledButTheClientIsNot" />
+         <enumeration value="serverHciMeshDitEncIsNotSettled" />
+         <enumeration value="VsanHciMeshDitEncryptionIssue_Unknown" />
+      </restriction>
+   </simpleType>
    <complexType name="VsanHealthActionBase">
       <complexContent>
          <extension base="vim25:DynamicData">
@@ -690,6 +832,17 @@
       <sequence>
          <element name="VsanHealthDataDrivenAction" type="vsan:VsanHealthDataDrivenAction" minOccurs="0" maxOccurs="unbounded" />
       </sequence>
+   </complexType>
+   <complexType name="VsanHealthStatusCounts">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="error" type="xsd:int" />
+               <element name="warning" type="xsd:int" />
+               <element name="info" type="xsd:int" />
+            </sequence>
+         </extension>
+      </complexContent>
    </complexType>
    <complexType name="VsanHealthTroubleshooting">
       <complexContent>
@@ -808,6 +961,7 @@
          <extension base="vim25:DynamicData">
             <sequence>
                <element name="knownSpbmProfileUuids" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
+               <element name="includeEffectiveCapacity" type="xsd:boolean" minOccurs="0" />
             </sequence>
          </extension>
       </complexContent>
@@ -828,6 +982,48 @@
    <complexType name="ArrayOfVsanClusterObjectExtAttrs">
       <sequence>
          <element name="VsanClusterObjectExtAttrs" type="vsan:VsanClusterObjectExtAttrs" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="VsanObjectPlacement">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="details" type="vsan:VsanObjectPlacementDetails" minOccurs="0" maxOccurs="unbounded" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfVsanObjectPlacement">
+      <sequence>
+         <element name="VsanObjectPlacement" type="vsan:VsanObjectPlacement" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="VsanObjectPlacementDetails">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="uuid" type="xsd:string" />
+               <element name="type" type="xsd:string" />
+               <element name="name" type="xsd:string" minOccurs="0" />
+               <element name="isRemote" type="xsd:boolean" />
+               <element name="vm" type="vim25:ManagedObjectReference" minOccurs="0" />
+               <element name="spbmProfileUuid" type="xsd:string" minOccurs="0" />
+               <element name="spbmProfileName" type="xsd:string" minOccurs="0" />
+               <element name="isLocalPolicy" type="xsd:boolean" minOccurs="0" />
+               <element name="remoteDatastoreUuid" type="xsd:string" minOccurs="0" />
+               <element name="remoteDatastoreName" type="xsd:string" minOccurs="0" />
+               <element name="remoteCluster" type="vim25:ManagedObjectReference" minOccurs="0" />
+               <element name="remoteClusterName" type="xsd:string" minOccurs="0" />
+               <element name="remoteVc" type="xsd:string" minOccurs="0" />
+               <element name="healthState" type="xsd:string" minOccurs="0" />
+               <element name="components" type="vsan:VsanComponentPlacement" minOccurs="0" maxOccurs="unbounded" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfVsanObjectPlacementDetails">
+      <sequence>
+         <element name="VsanObjectPlacementDetails" type="vsan:VsanObjectPlacementDetails" minOccurs="0" maxOccurs="unbounded" />
       </sequence>
    </complexType>
    <simpleType name="VsanObjectTypeEnum90">
@@ -908,6 +1104,24 @@
          <element name="VsanPerfHotspotEntitiesMetrics" type="vsan:VsanPerfHotspotEntitiesMetrics" minOccurs="0" maxOccurs="unbounded" />
       </sequence>
    </complexType>
+   <complexType name="VsanPerfHotspotEntityType">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="name" type="xsd:string" />
+               <element name="id" type="xsd:string" />
+               <element name="sortingMetrics" type="vim25:VsanPerfMetricId" minOccurs="0" maxOccurs="unbounded" />
+               <element name="originalEntityTypes" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
+               <element name="description" type="xsd:string" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfVsanPerfHotspotEntityType">
+      <sequence>
+         <element name="VsanPerfHotspotEntityType" type="vsan:VsanPerfHotspotEntityType" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
    <complexType name="VsanPerfHotspotQuerySpec">
       <complexContent>
          <extension base="vim25:DynamicData">
@@ -974,6 +1188,15 @@
          </extension>
       </complexContent>
    </complexType>
+   <complexType name="VsanQueryPhysicalPlacementSpecs">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="vms" type="vim25:ManagedObjectReference" minOccurs="0" maxOccurs="unbounded" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
    <simpleType name="VsanRelayoutObjectsErrorCode">
       <restriction base="xsd:string">
          <enumeration value="outOfResources" />
@@ -987,6 +1210,17 @@
             <sequence>
                <element name="startTime" type="xsd:dateTime" minOccurs="0" />
                <element name="endTime" type="xsd:dateTime" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="VsanSnapshotSpace">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="snapshotCount" type="xsd:int" minOccurs="0" />
+               <element name="actualSnapshotUsedB" type="xsd:long" minOccurs="0" />
+               <element name="fullyInflatedSnapshotUsedB" type="xsd:long" minOccurs="0" />
             </sequence>
          </extension>
       </complexContent>
@@ -1202,10 +1436,29 @@
          </extension>
       </complexContent>
    </complexType>
+   <complexType name="CnsBlockCreateSpec">
+      <complexContent>
+         <extension base="vsan:CnsBaseCreateSpec">
+            <sequence>
+               <element name="cryptoSpec" type="vim25:CryptoSpec" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
    <complexType name="CnsBlockVolumeRelocateSpec">
       <complexContent>
          <extension base="vsan:CnsVolumeRelocateSpec">
             <sequence>
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="CnsCloneVolumeSource">
+      <complexContent>
+         <extension base="vsan:CnsVolumeSource">
+            <sequence>
+               <element name="volumeId" type="vsan:CnsVolumeId" />
+               <element name="keepAfterDeleteVm" type="xsd:boolean" minOccurs="0" />
             </sequence>
          </extension>
       </complexContent>
@@ -1371,6 +1624,7 @@
             <sequence>
                <element name="datastore" type="vim25:ManagedObjectReference" />
                <element name="placementFaults" type="vsan:LocalizedMethodFault" minOccurs="0" maxOccurs="unbounded" />
+               <element name="clusters" type="vim25:ManagedObjectReference" minOccurs="0" maxOccurs="unbounded" />
             </sequence>
          </extension>
       </complexContent>
@@ -1437,6 +1691,7 @@
             <sequence>
                <element name="volumeId" type="vsan:CnsVolumeId" />
                <element name="description" type="xsd:string" />
+               <element name="snapshotId" type="vsan:CnsSnapshotId" minOccurs="0" />
             </sequence>
          </extension>
       </complexContent>
@@ -1476,9 +1731,52 @@
             <sequence>
                <element name="volumeId" type="vsan:CnsVolumeId" minOccurs="0" />
                <element name="snapshotId" type="vsan:CnsSnapshotId" minOccurs="0" />
+               <element name="linkedClone" type="xsd:boolean" minOccurs="0" />
             </sequence>
          </extension>
       </complexContent>
+   </complexType>
+   <simpleType name="CnsSyncVolumeMode">
+      <restriction base="xsd:string">
+         <enumeration value="SPACE_USAGE" />
+      </restriction>
+   </simpleType>
+   <complexType name="CnsSyncVolumeSpec">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="volumeId" type="vsan:CnsVolumeId" />
+               <element name="datastore" type="vim25:ManagedObjectReference" minOccurs="0" />
+               <element name="syncMode" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfCnsSyncVolumeSpec">
+      <sequence>
+         <element name="CnsSyncVolumeSpec" type="vsan:CnsSyncVolumeSpec" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <simpleType name="CnsUnregisterTargetVolumeType">
+      <restriction base="xsd:string">
+         <enumeration value="FCD" />
+         <enumeration value="LEGACY_DISK" />
+      </restriction>
+   </simpleType>
+   <complexType name="CnsUnregisterVolumeSpec">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="volumeId" type="vsan:CnsVolumeId" />
+               <element name="targetVolumeType" type="xsd:string" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfCnsUnregisterVolumeSpec">
+      <sequence>
+         <element name="CnsUnregisterVolumeSpec" type="vsan:CnsUnregisterVolumeSpec" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
    </complexType>
    <complexType name="CnsVSANFileCreateSpec">
       <complexContent>
@@ -1534,6 +1832,12 @@
             <sequence>
                <element name="volumeId" type="vsan:CnsVolumeId" />
                <element name="vm" type="vim25:ManagedObjectReference" />
+               <element name="diskMode" type="xsd:string" minOccurs="0" />
+               <element name="sharing" type="xsd:string" minOccurs="0" />
+               <element name="controllerKey" type="xsd:int" minOccurs="0" />
+               <element name="unitNumber" type="xsd:int" minOccurs="0" />
+               <element name="backingTypeName" type="xsd:string" minOccurs="0" />
+               <element name="volumeEncrypted" type="xsd:boolean" minOccurs="0" />
             </sequence>
          </extension>
       </complexContent>
@@ -1552,6 +1856,17 @@
          </extension>
       </complexContent>
    </complexType>
+   <simpleType name="CnsVolumeBackingType">
+      <restriction base="xsd:string">
+         <enumeration value="FlatVer1BackingInfo" />
+         <enumeration value="FlatVer2BackingInfo" />
+         <enumeration value="SparseVer1BackingInfo" />
+         <enumeration value="SparseVer2BackingInfo" />
+         <enumeration value="RawDiskMappingVer1BackingInfo" />
+         <enumeration value="SeSparseBackingInfo" />
+         <enumeration value="LocalPMemBackingInfo" />
+      </restriction>
+   </simpleType>
    <complexType name="CnsVolumeCreateResult">
       <complexContent>
          <extension base="vsan:CnsVolumeOperationResult">
@@ -1568,10 +1883,12 @@
             <sequence>
                <element name="name" type="xsd:string" />
                <element name="volumeType" type="xsd:string" />
+               <element name="volumeId" type="vsan:CnsVolumeId" minOccurs="0" />
                <element name="datastores" type="vim25:ManagedObjectReference" minOccurs="0" maxOccurs="unbounded" />
                <element name="metadata" type="vsan:CnsVolumeMetadata" minOccurs="0" />
                <element name="backingObjectDetails" type="vsan:CnsBackingObjectDetails" />
                <element name="profile" type="vim25:VirtualMachineProfileSpec" minOccurs="0" maxOccurs="unbounded" />
+               <element name="activeClusters" type="vim25:ManagedObjectReference" minOccurs="0" maxOccurs="unbounded" />
                <element name="createSpec" type="vsan:CnsBaseCreateSpec" minOccurs="0" />
                <element name="volumeSource" type="vsan:CnsVolumeSource" minOccurs="0" />
             </sequence>
@@ -1581,6 +1898,22 @@
    <complexType name="ArrayOfCnsVolumeCreateSpec">
       <sequence>
          <element name="CnsVolumeCreateSpec" type="vsan:CnsVolumeCreateSpec" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="CnsVolumeCryptoUpdateSpec">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="volumeId" type="vsan:CnsVolumeId" />
+               <element name="profile" type="vim25:VirtualMachineProfileSpec" minOccurs="0" maxOccurs="unbounded" />
+               <element name="disksCrypto" type="vim25:DiskCryptoSpec" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfCnsVolumeCryptoUpdateSpec">
+      <sequence>
+         <element name="CnsVolumeCryptoUpdateSpec" type="vsan:CnsVolumeCryptoUpdateSpec" minOccurs="0" maxOccurs="unbounded" />
       </sequence>
    </complexType>
    <complexType name="CnsVolumeExtendSpec">
@@ -1794,6 +2127,16 @@
             <sequence>
                <element name="volumeId" type="vsan:CnsVolumeId" minOccurs="0" />
                <element name="SnapshotId" type="vsan:CnsSnapshotId" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="CnsVolumeAlreadyExistsFault">
+      <complexContent>
+         <extension base="vsan:CnsFault">
+            <sequence>
+               <element name="volumeId" type="vsan:CnsVolumeId" />
+               <element name="datastore" type="vim25:ManagedObjectReference" minOccurs="0" />
             </sequence>
          </extension>
       </complexContent>
@@ -2326,6 +2669,16 @@
          <element name="VsanHclNicInfo" type="vsan:VsanHclNicInfo" minOccurs="0" maxOccurs="unbounded" />
       </sequence>
    </complexType>
+   <complexType name="VsanHealthObjectStats">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="numAutoManagedObjects" type="xsd:long" />
+               <element name="numFTT3ManagedObjects" type="xsd:long" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
    <complexType name="VsanHealthQuerySpec">
       <complexContent>
          <extension base="vim25:DynamicData">
@@ -2381,6 +2734,45 @@
    <complexType name="ArrayOfVsanHostGlobalDedupConfigHealthSummary">
       <sequence>
          <element name="VsanHostGlobalDedupConfigHealthSummary" type="vsan:VsanHostGlobalDedupConfigHealthSummary" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="VsanHostHciMeshDitEncryptionHealth">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="clusterUuid" type="xsd:string" />
+               <element name="clusterName" type="xsd:string" />
+               <element name="ownerVc" type="xsd:string" minOccurs="0" />
+               <element name="isLocalOwnerVc" type="xsd:boolean" minOccurs="0" />
+               <element name="health" type="xsd:string" />
+               <element name="issues" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfVsanHostHciMeshDitEncryptionHealth">
+      <sequence>
+         <element name="VsanHostHciMeshDitEncryptionHealth" type="vsan:VsanHostHciMeshDitEncryptionHealth" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="VsanHostHciMeshDitEncryptionHealthSummary">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="hostname" type="xsd:string" />
+               <element name="clusterUuid" type="xsd:string" />
+               <element name="clusterName" type="xsd:string" />
+               <element name="ownerVc" type="xsd:string" />
+               <element name="isLocalOwnerVc" type="xsd:boolean" minOccurs="0" />
+               <element name="capable" type="xsd:boolean" minOccurs="0" />
+               <element name="clusterHealths" type="vsan:VsanHostHciMeshDitEncryptionHealth" minOccurs="0" maxOccurs="unbounded" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfVsanHostHciMeshDitEncryptionHealthSummary">
+      <sequence>
+         <element name="VsanHostHciMeshDitEncryptionHealthSummary" type="vsan:VsanHostHciMeshDitEncryptionHealthSummary" minOccurs="0" maxOccurs="unbounded" />
       </sequence>
    </complexType>
    <complexType name="VsanHostHwDeviceId">
@@ -2499,6 +2891,22 @@
    <complexType name="ArrayOfVsanKmsHealth">
       <sequence>
          <element name="VsanKmsHealth" type="vsan:VsanKmsHealth" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="VsanLicensedDiskResult">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="uuid" type="xsd:string" />
+               <element name="name" type="xsd:string" />
+               <element name="capacity" type="xsd:long" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfVsanLicensedDiskResult">
+      <sequence>
+         <element name="VsanLicensedDiskResult" type="vsan:VsanLicensedDiskResult" minOccurs="0" maxOccurs="unbounded" />
       </sequence>
    </complexType>
    <complexType name="VsanNetworkDiagnosticsHealthInfo">
@@ -2659,6 +3067,25 @@
          </extension>
       </complexContent>
    </complexType>
+   <complexType name="VsanAutoRAIDConfig">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="assumeAutoManagedRAID" type="xsd:boolean" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="VsanAutoRAIDInfo">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="hostFailuresToTolerate" type="xsd:long" />
+               <element name="subFailuresToTolerate" type="xsd:long" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
    <complexType name="VsanCapacityReservationInfo">
       <complexContent>
          <extension base="vim25:DynamicData">
@@ -2683,6 +3110,15 @@
          <extension base="vsan:VsanDatastoreSpec">
             <sequence>
                <element name="clusters" type="vim25:ManagedObjectReference" maxOccurs="unbounded" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="VsanClientUnicastConfig">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="unicastInfo" type="vsan:VsanHostClientClusterUnicastInfo" minOccurs="0" maxOccurs="unbounded" />
             </sequence>
          </extension>
       </complexContent>
@@ -2712,6 +3148,15 @@
       <sequence>
          <element name="ClusterRuntimeInfo" type="vsan:ClusterRuntimeInfo" minOccurs="0" maxOccurs="unbounded" />
       </sequence>
+   </complexType>
+   <complexType name="VsanCyberRecoveryConfig">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="enabled" type="xsd:boolean" />
+            </sequence>
+         </extension>
+      </complexContent>
    </complexType>
    <complexType name="VsanDataEfficiencyConfigEx">
       <complexContent>
@@ -2753,6 +3198,7 @@
             <sequence>
                <element name="enabled" type="xsd:boolean" minOccurs="0" />
                <element name="rekeyInterval" type="xsd:int" minOccurs="0" />
+               <element name="state" type="xsd:string" minOccurs="0" />
             </sequence>
          </extension>
       </complexContent>
@@ -2860,6 +3306,17 @@
          <element name="VsanDiskGroupResourceCheckResult" type="vsan:VsanDiskGroupResourceCheckResult" minOccurs="0" maxOccurs="unbounded" />
       </sequence>
    </complexType>
+   <complexType name="DiskInfo">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="diskUuid" type="xsd:string" />
+               <element name="diskName" type="xsd:string" />
+               <element name="isSsd" type="xsd:boolean" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
    <complexType name="VsanDiskResourceCheckResult">
       <complexContent>
          <extension base="vsan:EntityResourceCheckDetails">
@@ -2872,6 +3329,17 @@
       <sequence>
          <element name="VsanDiskResourceCheckResult" type="vsan:VsanDiskResourceCheckResult" minOccurs="0" maxOccurs="unbounded" />
       </sequence>
+   </complexType>
+   <complexType name="DpDaemonHealth">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="host" type="vim25:ManagedObjectReference" />
+               <element name="name" type="xsd:string" />
+               <element name="status" type="xsd:string" />
+            </sequence>
+         </extension>
+      </complexContent>
    </complexType>
    <complexType name="VSANEntityCompatibilityResult">
       <complexContent>
@@ -3267,6 +3735,25 @@
    <complexType name="ArrayOfVsanHostResourceCheckResult">
       <sequence>
          <element name="VsanHostResourceCheckResult" type="vsan:VsanHostResourceCheckResult" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="VsanHostSiteMaintenanceStatus">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="host" type="vim25:ManagedObjectReference" />
+               <element name="state" type="xsd:string" minOccurs="0" />
+               <element name="startTime" type="xsd:dateTime" minOccurs="0" />
+               <element name="hostCount" type="xsd:long" minOccurs="0" />
+               <element name="hosts" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
+               <element name="statusUpdateTime" type="xsd:long" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfVsanHostSiteMaintenanceStatus">
+      <sequence>
+         <element name="VsanHostSiteMaintenanceStatus" type="vsan:VsanHostSiteMaintenanceStatus" minOccurs="0" maxOccurs="unbounded" />
       </sequence>
    </complexType>
    <complexType name="VsanIODiagnosticsFailedCheck">
@@ -3734,6 +4221,17 @@
          <enumeration value="checkServerVcenter" />
       </restriction>
    </simpleType>
+   <simpleType name="VimVsanMountPrecheckTypeDIT">
+      <restriction base="xsd:string">
+         <enumeration value="serverClusterConsistency" />
+         <enumeration value="clientRemoteDITCapability" />
+         <enumeration value="serverRemoteDITCapability" />
+         <enumeration value="rekeyIntervalValid" />
+         <enumeration value="datastoreBelongToServerCluster" />
+         <enumeration value="remoteDITInfoRetrieval" />
+         <enumeration value="remoteDITVersionCheck" />
+      </restriction>
+   </simpleType>
    <complexType name="VsanObjectHealthTelemetrySummary">
       <complexContent>
          <extension base="vim25:DynamicData">
@@ -4043,6 +4541,7 @@
                <element name="hostUuid" type="xsd:string" />
                <element name="nodeType" type="xsd:string" minOccurs="0" />
                <element name="unicastSpec" type="vsan:VsanUnicastAddressInfo" minOccurs="0" maxOccurs="unbounded" />
+               <element name="thumbprintList" type="vim25:VirtualMachineCertThumbprint" minOccurs="0" maxOccurs="unbounded" />
             </sequence>
          </extension>
       </complexContent>
@@ -4062,6 +4561,91 @@
          </extension>
       </complexContent>
    </complexType>
+   <complexType name="VsanSiteMaintenanceCheckTaskDetails">
+      <complexContent>
+         <extension base="vsan:VsanResourceCheckTaskDetails">
+            <sequence>
+               <element name="cluster" type="vim25:ManagedObjectReference" />
+               <element name="siteMaintenanceSpec" type="vsan:VsanSiteMaintenanceSpec" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="VsanSiteMaintenanceInfo">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="faultDomainName" type="xsd:string" />
+               <element name="state" type="xsd:string" />
+               <element name="trackingTask" type="vim25:ManagedObjectReference" minOccurs="0" />
+               <element name="hostStatus" type="vsan:VsanHostSiteMaintenanceStatus" minOccurs="0" maxOccurs="unbounded" />
+               <element name="statusUpdateTime" type="xsd:long" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfVsanSiteMaintenanceInfo">
+      <sequence>
+         <element name="VsanSiteMaintenanceInfo" type="vsan:VsanSiteMaintenanceInfo" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="VsanSiteMaintenancePrecheckDetail">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="testName" type="xsd:string" />
+               <element name="testStatus" type="xsd:string" />
+               <element name="message" type="vim25:LocalizableMessage" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfVsanSiteMaintenancePrecheckDetail">
+      <sequence>
+         <element name="VsanSiteMaintenancePrecheckDetail" type="vsan:VsanSiteMaintenancePrecheckDetail" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="VsanSiteMaintenancePrecheckStatus">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="timestamp" type="xsd:dateTime" />
+               <element name="status" type="xsd:string" />
+               <element name="taskDetails" type="vsan:VsanSiteMaintenanceCheckTaskDetails" minOccurs="0" />
+               <element name="resourceCheckResult" type="vsan:VsanSiteMaintenanceResourceCheckResult" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="VsanSiteMaintenanceResourceCheckResult">
+      <complexContent>
+         <extension base="vsan:VsanResourceCheckVsanResult">
+            <sequence>
+               <element name="vmToMigrate" type="vim25:ManagedObjectReference" minOccurs="0" maxOccurs="unbounded" />
+               <element name="vmToPowerOffInfo" type="vsan:VsanSiteMaintenanceVMPowerOffInfo" minOccurs="0" maxOccurs="unbounded" />
+               <element name="checkDetails" type="vsan:VsanSiteMaintenancePrecheckDetail" minOccurs="0" maxOccurs="unbounded" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="VsanSiteMaintenanceSpec">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="faultDomainName" type="xsd:string" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <simpleType name="VsanSiteMaintenanceState">
+      <restriction base="xsd:string">
+         <enumeration value="notInMaintenanceMode" />
+         <enumeration value="inMaintenanceMode" />
+         <enumeration value="enteringMaintenanceMode" />
+         <enumeration value="exitingMaintenanceMode" />
+         <enumeration value="SiteMaintenanceState_Unknown" />
+      </restriction>
+   </simpleType>
    <complexType name="VsanSnapServiceConfig">
       <complexContent>
          <extension base="vim25:DynamicData">
@@ -4112,6 +4696,48 @@
          <element name="VsanStoragePoolResourceCheckResult" type="vsan:VsanStoragePoolResourceCheckResult" minOccurs="0" maxOccurs="unbounded" />
       </sequence>
    </complexType>
+   <complexType name="VsanSiteMaintenanceVMPowerOffInfo">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="vmToPowerOff" type="vim25:ManagedObjectReference" minOccurs="0" maxOccurs="unbounded" />
+               <element name="reason" type="vim25:LocalizableMessage" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfVsanSiteMaintenanceVMPowerOffInfo">
+      <sequence>
+         <element name="VsanSiteMaintenanceVMPowerOffInfo" type="vsan:VsanSiteMaintenanceVMPowerOffInfo" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="VsanVbossConfig">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="enabled" type="xsd:boolean" />
+               <element name="configs" type="vsan:VsanVbossObjectStoreConfig" minOccurs="0" maxOccurs="unbounded" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="VsanVbossObjectStoreConfig">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="id" type="xsd:string" />
+               <element name="secretKey" type="xsd:string" minOccurs="0" />
+               <element name="volumeUuids" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
+               <element name="properties" type="xsd:string" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfVsanVbossObjectStoreConfig">
+      <sequence>
+         <element name="VsanVbossObjectStoreConfig" type="vsan:VsanVbossObjectStoreConfig" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
    <complexType name="VcRemoteVsanServerClusterConfig">
       <complexContent>
          <extension base="vim25:DynamicData">
@@ -4128,6 +4754,8 @@
                <element name="clusterUuid" type="xsd:string" />
                <element name="networkTopology" type="xsd:string" minOccurs="0" />
                <element name="siteAffinity" type="vsan:RemoteVsanSiteAffinity" minOccurs="0" maxOccurs="unbounded" />
+               <element name="ownerVc" type="xsd:string" minOccurs="0" />
+               <element name="ditConfig" type="vsan:VsanDataInTransitEncryptionConfig" minOccurs="0" />
             </sequence>
          </extension>
       </complexContent>
@@ -4399,6 +5027,7 @@
       <restriction base="xsd:string">
          <enumeration value="diskGroup" />
          <enumeration value="singleTier" />
+         <enumeration value="cyberRecoveryTier" />
          <enumeration value="VsanDiskCompatibilityType_Unknown" />
       </restriction>
    </simpleType>
@@ -4443,6 +5072,8 @@
                <element name="hclDiskClaimEnabled" type="xsd:boolean" minOccurs="0" />
                <element name="datastoreDefaultPolicySelectionConfig" type="vsan:VsanDatastoreDefaultPolicySelectionConfig" minOccurs="0" />
                <element name="diskConfiguration" type="vsan:VsanEsaDiskConfiguration" minOccurs="0" />
+               <element name="autoRAIDConfig" type="vsan:VsanAutoRAIDConfig" minOccurs="0" />
+               <element name="deleteStoragePoolDiskSpec" type="vsan:VsanDeleteStoragePoolDiskSpec" minOccurs="0" />
             </sequence>
          </extension>
       </complexContent>
@@ -4454,6 +5085,7 @@
                <element name="hclDiskClaimEnabled" type="xsd:boolean" minOccurs="0" />
                <element name="datastoreDefaultPolicySelectionConfig" type="vsan:VsanDatastoreDefaultPolicySelectionConfig" minOccurs="0" />
                <element name="diskConfiguration" type="vsan:VsanEsaDiskConfiguration" minOccurs="0" />
+               <element name="autoRAIDConfig" type="vsan:VsanAutoRAIDConfig" minOccurs="0" />
             </sequence>
          </extension>
       </complexContent>
@@ -4515,6 +5147,7 @@
                <element name="domainConfigWarning" type="xsd:string" minOccurs="0" />
                <element name="ntpConfigWarning" type="xsd:string" minOccurs="0" />
                <element name="svsConfigIssue" type="xsd:string" minOccurs="0" />
+               <element name="nsxConfigIssue" type="xsd:string" minOccurs="0" />
             </sequence>
          </extension>
       </complexContent>
@@ -4543,6 +5176,15 @@
          </extension>
       </complexContent>
    </complexType>
+   <simpleType name="VimVsanVsanHciMeshConfigLimits">
+      <restriction base="xsd:string">
+         <enumeration value="MaxClientClusters" />
+         <enumeration value="MaxServerClusters" />
+         <enumeration value="MaxClientVcenters" />
+         <enumeration value="MaxServerVcenters" />
+         <enumeration value="ConfigLimitType_unknown" />
+      </restriction>
+   </simpleType>
    <complexType name="VsanHclDeviceConstraint">
       <complexContent>
          <extension base="vim25:DynamicData">
@@ -4698,6 +5340,7 @@
          <enumeration value="VsanEsaPreChecks" />
          <enumeration value="vcsaInstallerForVsanEsa" />
          <enumeration value="upgradePreCheckForVCF" />
+         <enumeration value="snapshotCreationPrecheck" />
          <enumeration value="VsanHealthPerspective_Unknown" />
       </restriction>
    </simpleType>
@@ -4917,6 +5560,7 @@
                <element name="creator" type="xsd:string" minOccurs="0" />
                <element name="snapshotType" type="xsd:string" minOccurs="0" />
                <element name="cookie" type="xsd:string" minOccurs="0" />
+               <element name="immutableTag" type="xsd:string" minOccurs="0" />
             </sequence>
          </extension>
       </complexContent>
@@ -5003,6 +5647,8 @@
          <enumeration value="pgSnapshotsHealth" />
          <enumeration value="vmSnapshotsHealth" />
          <enumeration value="vmMembershipChanges" />
+         <enumeration value="dpObjsInfo" />
+         <enumeration value="generalHealth" />
          <enumeration value="VsanSnapHealthType_Unknown" />
       </restriction>
    </simpleType>
@@ -5029,6 +5675,7 @@
                <element name="snapshotId" type="xsd:int" />
                <element name="snapshotType" type="xsd:string" />
                <element name="snapshotPath" type="xsd:string" minOccurs="0" />
+               <element name="snapshotTagsInfo" type="vim25:KeyValue" minOccurs="0" maxOccurs="unbounded" />
             </sequence>
          </extension>
       </complexContent>
@@ -5056,6 +5703,7 @@
                <element name="snapshotType" type="xsd:string" minOccurs="0" />
                <element name="creator" type="xsd:string" minOccurs="0" />
                <element name="includeDescriptorPath" type="xsd:boolean" minOccurs="0" />
+               <element name="snapshotTagMask" type="xsd:int" minOccurs="0" />
             </sequence>
          </extension>
       </complexContent>
@@ -5077,6 +5725,9 @@
                <element name="overallRatio" type="xsd:float" minOccurs="0" />
                <element name="compressionRatio" type="xsd:float" minOccurs="0" />
                <element name="dedupRatio" type="xsd:float" minOccurs="0" />
+               <element name="dedupEnabledRatio" type="xsd:float" minOccurs="0" />
+               <element name="thinProvisionRatio" type="xsd:float" minOccurs="0" />
+               <element name="snapshotSavingRatio" type="xsd:float" minOccurs="0" />
             </sequence>
          </extension>
       </complexContent>
@@ -5154,6 +5805,14 @@
          <enumeration value="VsanUpdateItemType_Unknown" />
       </restriction>
    </simpleType>
+   <complexType name="VsanValidationItem">
+      <complexContent>
+         <extension base="vim25:ClusterComputeResourceValidationResultBase">
+            <sequence>
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
    <complexType name="VsanVcStretchedClusterConfigSpec">
       <complexContent>
          <extension base="vim25:DynamicData">
@@ -5405,6 +6064,8 @@
                <element name="vsanFormatVersion" type="xsd:string" minOccurs="0" />
                <element name="minVsanFormatVersion" type="xsd:string" minOccurs="0" />
                <element name="datastore" type="vim25:ManagedObjectReference" minOccurs="0" maxOccurs="unbounded" />
+               <element name="unicastInfo" type="vsan:VsanHostClientClusterUnicastInfo" minOccurs="0" />
+               <element name="saGeneration" type="xsd:long" minOccurs="0" />
             </sequence>
          </extension>
       </complexContent>
@@ -5532,6 +6193,14 @@
          <enumeration value="ComplianceResourceCheckStatusType_Unknown" />
       </restriction>
    </simpleType>
+   <complexType name="VsanVbossClusterConfig">
+      <complexContent>
+         <extension base="vsan:VsanVbossConfig">
+            <sequence>
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
    <simpleType name="VimVsanClusterVsanManagedStorageType">
       <restriction base="xsd:string">
          <enumeration value="vsandirect" />
@@ -5590,6 +6259,46 @@
    <complexType name="ArrayOfVsanAddStoragePoolDiskSpec">
       <sequence>
          <element name="VsanAddStoragePoolDiskSpec" type="vsan:VsanAddStoragePoolDiskSpec" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="VsanHostClientClusterUnicastConfig">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="remoteUnicastConfig" type="vsan:VsanHostClientClusterUnicastInfo" minOccurs="0" maxOccurs="unbounded" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="VsanHostClientClusterUnicastInfo">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="clusterUuid" type="xsd:string" />
+               <element name="unicastInfo" type="vsan:VsanHostClientHostUnicastInfo" minOccurs="0" maxOccurs="unbounded" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfVsanHostClientClusterUnicastInfo">
+      <sequence>
+         <element name="VsanHostClientClusterUnicastInfo" type="vsan:VsanHostClientClusterUnicastInfo" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="VsanHostClientHostUnicastInfo">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="hostUuid" type="xsd:string" />
+               <element name="unicastSpec" type="vsan:VsanUnicastAddressInfo" minOccurs="0" maxOccurs="unbounded" />
+               <element name="thumbprintList" type="vim25:VirtualMachineCertThumbprint" minOccurs="0" maxOccurs="unbounded" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfVsanHostClientHostUnicastInfo">
+      <sequence>
+         <element name="VsanHostClientHostUnicastInfo" type="vsan:VsanHostClientHostUnicastInfo" minOccurs="0" maxOccurs="unbounded" />
       </sequence>
    </complexType>
    <complexType name="VsanComplianceDetail">
@@ -5651,6 +6360,11 @@
                <element name="serverClusterConfigs" type="vsan:RemoteVsanServerClusterConfig" minOccurs="0" maxOccurs="unbounded" />
                <element name="snapServiceConfig" type="vsan:VsanSnapServiceConfig" minOccurs="0" />
                <element name="deconvergedNetConfig" type="vsan:VsanDeconvergedNetConfig" minOccurs="0" />
+               <element name="remoteDITInfos" type="vsan:VsanInTransitEncryptionInfo" minOccurs="0" maxOccurs="unbounded" />
+               <element name="clientUnicastConfig" type="vsan:VsanHostClientClusterUnicastConfig" minOccurs="0" />
+               <element name="siteTakeoverConfig" type="vsan:VsanSiteTakeoverConfig" minOccurs="0" />
+               <element name="vbossHostConfig" type="vsan:VsanVbossHostConfig" minOccurs="0" />
+               <element name="autoRAIDConfig" type="vsan:VsanAutoRAIDConfig" minOccurs="0" />
             </sequence>
          </extension>
       </complexContent>
@@ -5674,9 +6388,16 @@
                <element name="enabled" type="xsd:boolean" minOccurs="0" />
                <element name="rekeyInterval" type="xsd:int" minOccurs="0" />
                <element name="transitionState" type="xsd:string" minOccurs="0" />
+               <element name="serverClusterUuid" type="xsd:string" minOccurs="0" />
+               <element name="clientClusterUuid" type="xsd:string" minOccurs="0" />
             </sequence>
          </extension>
       </complexContent>
+   </complexType>
+   <complexType name="ArrayOfVsanInTransitEncryptionInfo">
+      <sequence>
+         <element name="VsanInTransitEncryptionInfo" type="vsan:VsanInTransitEncryptionInfo" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
    </complexType>
    <complexType name="VsanDeleteStoragePoolDiskSpec">
       <complexContent>
@@ -5862,6 +6583,15 @@
          </extension>
       </complexContent>
    </complexType>
+   <complexType name="VsanSiteTakeoverConfig">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="takeoverTimestamp" type="xsd:long" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
    <simpleType name="VsanHostStatsType">
       <restriction base="xsd:string">
          <enumeration value="resyncIopsInfo" />
@@ -5965,6 +6695,14 @@
             <sequence>
                <element name="diskUuids" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
                <element name="diskFormatVersion" type="xsd:long" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="VsanVbossHostConfig">
+      <complexContent>
+         <extension base="vsan:VsanVbossConfig">
+            <sequence>
             </sequence>
          </extension>
       </complexContent>
@@ -6377,6 +7115,8 @@
          <element name="ditEncryptionHealth" type="vsan:VsanClusterDitEncryptionHealthSummary" minOccurs="0" />
          <element name="healthScore" type="xsd:int" minOccurs="0" />
          <element name="globalDedupHealth" type="vsan:VsanClusterGlobalDedupHealthSummary" minOccurs="0" />
+         <element name="hciMeshDitEncryptionHealth" type="vsan:VsanClusterHciMeshDitEncryptionHealthSummary" minOccurs="0" />
+         <element name="healthStatusCounts" type="vsan:VsanHealthStatusCounts" minOccurs="0" />
       </sequence>
    </group>
    <group name="VsanClusterHealthSystemVersionResultGroup1">
@@ -6476,6 +7216,7 @@
       <sequence>
          <element name="advancedGraphs" type="vim25:VsanPerfGraph" minOccurs="0" maxOccurs="unbounded" />
          <element name="verboseGraphs" type="vim25:VsanPerfGraph" minOccurs="0" maxOccurs="unbounded" />
+         <element name="hotspotGraphs" type="vim25:VsanPerfGraph" minOccurs="0" maxOccurs="unbounded" />
       </sequence>
    </group>
    <group name="VsanPerfGraphGroup1">
@@ -6516,6 +7257,7 @@
          <element name="uncommittedB" type="xsd:long" minOccurs="0" />
          <element name="capacityHealthThreshold" type="vsan:VsanHealthThreshold" minOccurs="0" />
          <element name="spaceEfficiencyRatio" type="vsan:VsanSpaceEfficiencyRatio" minOccurs="0" />
+         <element name="effectiveSpaceUsage" type="vsan:VsanEffectiveSpaceUsage" minOccurs="0" />
       </sequence>
    </group>
    <group name="VsanStorageWorkloadTypeGroup1">
@@ -6622,6 +7364,8 @@
          <element name="objectFormatChangeRequiredUuids" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
          <element name="objectsRelayoutBytes" type="xsd:long" minOccurs="0" />
          <element name="globalDedupStoreHealth" type="xsd:string" minOccurs="0" />
+         <element name="objectStats" type="vsan:VsanHealthObjectStats" minOccurs="0" />
+         <element name="vsanObjectsForObjectStoreVolumes" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
       </sequence>
    </group>
    <group name="VsanPhysicalDiskHealthGroup1">
@@ -6644,6 +7388,11 @@
          <element name="maxMetadataComponents" type="xsd:long" minOccurs="0" />
          <element name="pendingClusterDekId" type="xsd:string" minOccurs="0" />
          <element name="dmekVerifierHealth" type="xsd:boolean" minOccurs="0" />
+      </sequence>
+   </group>
+   <group name="VsanPhysicalDiskHealthSummaryGroup1">
+      <sequence>
+         <element name="licensedDisks" type="vsan:VsanLicensedDiskResult" minOccurs="0" maxOccurs="unbounded" />
       </sequence>
    </group>
    <group name="VsanConfigInfoExGroup1">
@@ -6673,6 +7422,7 @@
          <element name="snapServiceConfig" type="vsan:VsanSnapServiceConfig" minOccurs="0" />
          <element name="deconvergedNetConfig" type="vsan:VsanDeconvergedNetConfig" minOccurs="0" />
          <element name="siteFaultDomainConfig" type="vsan:VsanSiteFaultDomainConfig" minOccurs="0" />
+         <element name="vbossClusterConfig" type="vsan:VsanVbossClusterConfig" minOccurs="0" />
       </sequence>
    </group>
    <group name="VimVsanDataEfficiencyCapacityStateGroup1">
@@ -6682,6 +7432,7 @@
          <element name="esaDedupSpaceSaving" type="xsd:long" minOccurs="0" />
          <element name="esaCompressionSpaceSaving" type="xsd:long" minOccurs="0" />
          <element name="totalSpaceUsedWithoutOverhead" type="xsd:long" minOccurs="0" />
+         <element name="dedupEnabledObjectSpaceUsed" type="xsd:long" minOccurs="0" />
       </sequence>
    </group>
    <group name="VimVsanReconfigSpecGroup1">
@@ -6708,6 +7459,7 @@
          <element name="serverClusterConfig" type="vsan:VcRemoteVsanServerClusterConfig" minOccurs="0" />
          <element name="snapServiceConfig" type="vsan:VsanSnapServiceConfig" minOccurs="0" />
          <element name="deconvergedNetConfig" type="vsan:VsanDeconvergedNetConfig" minOccurs="0" />
+         <element name="vbossClusterConfig" type="vsan:VsanVbossClusterConfig" minOccurs="0" />
       </sequence>
    </group>
    <group name="VsanPrepareVsanForVcsaSpecGroup1">

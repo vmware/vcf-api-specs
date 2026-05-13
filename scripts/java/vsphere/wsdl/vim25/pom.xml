@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Copyright (c) 2025 Broadcom. All Rights Reserved.
+The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+
+SPDX-License-Identifier: Apache-2.0-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.vmware.custom_sdk</groupId>
+        <artifactId>vcf-custom-sdk-java</artifactId>
+        <version>0.0.1</version>
+        <relativePath>../../../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>vim25</artifactId>
+
+    <properties>
+        <vim.wsdl.root>${wsdl.root}/vim</vim.wsdl.root>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>jakarta.jws</groupId>
+            <artifactId>jakarta.jws-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.xml.ws</groupId>
+            <artifactId>jakarta.xml.ws-api</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.cxf</groupId>
+                <artifactId>cxf-codegen-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>generate-bindings</id>
+                        <configuration>
+                            <wsdlRoot>${vim.wsdl.root}</wsdlRoot>
+                            <wsdlOptions>
+                                <wsdlOption>
+                                    <wsdl>${vim.wsdl.root}/vsphere.wsdl</wsdl>
+                                    <wsdlLocation>vsphere.wsdl</wsdlLocation>
+                                    <extraargs>
+                                        <extraarg>-suppress-generated-date</extraarg>
+                                        <extraarg>-p</extraarg>
+                                        <extraarg>urn:vim25=${vcf.sdk.groupId}.vim25</extraarg>
+                                        <extraarg>-p</extraarg>
+                                        <extraarg>urn:vsan=${vcf.sdk.groupId}.vsan.sdk</extraarg>
+                                        <extraarg>-xjc-episode</extraarg>
+                                        <extraarg>-xjc${project.build.directory}/${episode.file.name}</extraarg>
+                                    </extraargs>
+                                </wsdlOption>
+                            </wsdlOptions>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <!--
+                Using the xml-maven-plugin to add if-exists="true" to all bindings tags of the episode file.
+                This plugin should be removed once we move to CXF 4.1.0 or above,
+                as the newer major versions use JAXB 4 where if-exists="true" is added by default.
+                With the removal of this plugin, add-if-exists.xslt should be deleted as well.
+                -->
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>xml-maven-plugin</artifactId>
+                <version>1.2.0</version>
+                <executions>
+                    <execution>
+                        <id>transform-episode</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>transform</goal>
+                        </goals>
+                        <configuration>
+                            <transformationSets>
+                                <transformationSet>
+                                    <dir>${project.build.directory}</dir>
+                                    <includes>
+                                        <include>${episode.file.name}</include>
+                                    </includes>
+                                    <stylesheet>${basedir}/add-if-exists.xslt</stylesheet>
+                                    <outputDir>${project.build.directory}</outputDir>
+                                </transformationSet>
+                            </transformationSets>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>vim25/**</exclude>
+                        <exclude>vsan/**</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <configuration>
+                            <excludes>
+                                <exclude>vim25/**</exclude>
+                                <exclude>vsan/**</exclude>
+                            </excludes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+
+        <resources>
+            <resource>
+                <directory>${vim.wsdl.root}</directory>
+                <excludes>
+                    <exclude>**/*.java</exclude>
+                </excludes>
+            </resource>
+        </resources>
+    </build>
+
+</project>

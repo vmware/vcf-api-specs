@@ -20,6 +20,6 @@ For example in `/vsphere/wsdl` folder there are sub-folders for `vim`, `spbm`, `
 Some APIs are exposed using more than one protocol, like the vim25 API has
 SOAP and REST like presentations described with `/wsdl` and `/openapi` respectively.
 In those cases, sub-folders for each API description format exists like 
-`specifications/vsphere/openapi/vi-json/vi_json.yaml` and `specifications/vsphere/wsdl/*`.
+`specifications/vsphere/openapi/vi-json/vi-json.yaml` and `specifications/vsphere/wsdl/*`.
 The VI/JSON (OpenAPI) is the recommended or preferred alternative to SOAP (WSDL).
 

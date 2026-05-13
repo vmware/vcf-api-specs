@@ -1,0 +1,239 @@
+#
+#  Copyright © 2025-26 Broadcom Inc. and/or its subsidiaries. All Rights Reserved.
+#
+
+openapi: 3.0.2
+info:
+  title: Realtime Metrics APIs
+  version: 9.1.0.0
+  license:
+    name: 'Copyright © 2025-26 Broadcom Inc. and/or its subsidiaries. All Rights Reserved.'
+  description: |
+    The Real-time Metrics component provides Prometheus-compatible APIs for querying real-time metrics collected from VMware vCenter environments. These APIs enable you to execute PromQL queries, retrieve metric metadata, and manage vCenter metrics configuration.
+
+    ## Authentication
+
+    All API requests require a valid JWT Bearer token in the Authorization header. Access is restricted to resources that the authenticated user is authorized to view or modify.
+
+    ### Obtaining a Token
+
+    1. **Acquire an OpsToken** by calling:
+       ```
+       POST https://<vcf-operations-fqdn>/suite-api/api/auth/token/acquire
+       Content-Type: application/json
+
+       {
+         "username": "<username>",
+         "password": "<password>"
+       }
+       ```
+       This returns an OpsToken in the response.
+
+    2. **Get the VODAP Service Key** by calling the integrations API (find the key where type = VCF_VODAP):
+       ```
+       GET https://<vcf-operations-fqdn>/suite-api/api/integrations/services
+       Authorization: OpsToken <ops-token>
+       ```
+
+    3. **Exchange the Service Key for a JWT Token** by calling the VCF Operations API:
+       ```
+       POST https://<vcf-operations-fqdn>/suite-api/api/auth/token/exchange
+       Content-Type: application/json
+       Authorization: OpsToken <ops-token>
+
+       {
+         "serviceKeys": ["<vodap-service-key>"]
+       }
+       ```
+
+    ### Using the Token
+
+    Include the JWT token in the Authorization header:
+    ```
+    Authorization: Bearer <jwt-token>
+    ```
+servers:
+  - url: 'http://localhost:8080/'
+paths:
+  '/api/v1/query':
+    get:
+      tags:
+        - prometheus-expression
+      description: Executes a PromQL query and returns the result.
+      operationId: query
+      parameters:
+        - $ref: '#/components/parameters/queryQueryParam'
+        - $ref: '#/components/parameters/sourceIdQueryParam'
+        - $ref: '#/components/parameters/timeQueryParam'
+        - $ref: '#/components/parameters/timeoutQueryParam'
+        - $ref: '#/components/parameters/limitQueryParam'
+        - $ref: '#/components/parameters/externalTagsFilterQueryParam'
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PrometheusResponse"
+        '400':
+          description: Bad request.
+          x-vmw-compiler-skip: true
+        '401':
+          description: Unauthorized.
+          x-vmw-compiler-skip: true
+        '403':
+          description: Forbidden.
+          x-vmw-compiler-skip: true
+        '422':
+          description: Unprocessable Entity.
+          x-vmw-compiler-skip: true
+        '503':
+          description: Service Unavailable.
+          x-vmw-compiler-skip: true
+  '/api/v1/query_range':
+    get:
+      tags:
+        - prometheus-expression
+      description: Executes a PromQL query over a specified time range and returns the result.
+      operationId: queryRange
+      parameters:
+        - $ref: '#/components/parameters/queryQueryParam'
+        - $ref: '#/components/parameters/sourceIdQueryParam'
+        - $ref: '#/components/parameters/timeoutQueryParam'
+        - $ref: '#/components/parameters/startQueryParam'
+        - $ref: '#/components/parameters/endQueryParam'
+        - $ref: '#/components/parameters/stepQueryParam'
+        - $ref: '#/components/parameters/limitQueryParam'
+        - $ref: '#/components/parameters/externalTagsFilterQueryParam'
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PrometheusResponse"
+        '400':
+          description: Bad request.
+          x-vmw-compiler-skip: true
+        '401':
+          description: Unauthorized.
+          x-vmw-compiler-skip: true
+        '403':
+          description: Forbidden.
+          x-vmw-compiler-skip: true
+        '422':
+          description: Unprocessable Entity.
+          x-vmw-compiler-skip: true
+        '503':
+          description: Service Unavailable.
+          x-vmw-compiler-skip: true
+  '/api/v1/metadata':
+    get:
+      tags:
+        - metadata
+      description: Returns metadata about metrics currently scraped from targets.
+      operationId: queryMetricMetadata
+      parameters:
+        - $ref: '#/components/parameters/metricNameQueryParam'
+        - $ref: '#/components/parameters/limitQueryParam'
+        - $ref: '#/components/parameters/sourceIdQueryParam'
+      responses:
+        200:
+          description: OK.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PrometheusResponse"
+        '400':
+          description: Bad request.
+          x-vmw-compiler-skip: true
+        '401':
+          description: Unauthorized.
+          x-vmw-compiler-skip: true
+        '403':
+          description: Forbidden.
+          x-vmw-compiler-skip: true
+        '503':
+          description: Service Unavailable.
+          x-vmw-compiler-skip: true
+  '/api/v1/vcenters/{vcId}/metrics_config':
+    put:
+      tags:
+        - vcMetricsConfig
+      description: |
+        Updates the metrics collection configuration for a specific vCenter Server.
+
+        This endpoint allows you to control which metrics are collected from the vCenter by:
+        - Enable/Disable metrics collection profiles (STANDARD or VERBOSE).
+        - Managing ESXi Top metrics collection by adding or removing specific ESXi host MOIDs.
+      operationId: updateVcMetricsConfig
+      parameters:
+        - $ref: '#/components/parameters/vcIdPathParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VcMetricsConfigRequestBody"
+      responses:
+        200:
+          description: OK.
+        '400':
+          description: Bad request.
+          x-vmw-compiler-skip: true
+        '401':
+          description: Unauthorized.
+          x-vmw-compiler-skip: true
+        '403':
+          description: Forbidden.
+          x-vmw-compiler-skip: true
+        '503':
+          description: Service Unavailable.
+          x-vmw-compiler-skip: true
+components:
+  parameters:
+    queryQueryParam:
+      $ref: 'realtime-metrics-openapi-params.yaml#/queryQueryParam'
+    sourceIdQueryParam:
+      $ref: 'realtime-metrics-openapi-params.yaml#/sourceIdQueryParam'
+    timeQueryParam:
+      $ref: 'realtime-metrics-openapi-params.yaml#/timeQueryParam'
+    timeoutQueryParam:
+      $ref: 'realtime-metrics-openapi-params.yaml#/timeoutQueryParam'
+    startQueryParam:
+      $ref: 'realtime-metrics-openapi-params.yaml#/startQueryParam'
+    endQueryParam:
+      $ref: 'realtime-metrics-openapi-params.yaml#/endQueryParam'
+    stepQueryParam:
+      $ref: 'realtime-metrics-openapi-params.yaml#/stepQueryParam'
+    limitQueryParam:
+      $ref: 'realtime-metrics-openapi-params.yaml#/limitQueryParam'
+    externalTagsFilterQueryParam:
+      $ref: 'realtime-metrics-openapi-params.yaml#/externalTagsFilterQueryParam'
+    metricNameQueryParam:
+      $ref: 'realtime-metrics-openapi-params.yaml#/metricNameQueryParam'
+    vcIdPathParam:
+      $ref: 'realtime-metrics-openapi-params.yaml#/vcIdPathParam'
+  schemas:
+    PrometheusResponse:
+      $ref: 'realtime-metrics-openapi-defs.yaml#/PrometheusResponse'
+    Data:
+      $ref: 'realtime-metrics-openapi-defs.yaml#/Data'
+    Matrix:
+      $ref: 'realtime-metrics-openapi-defs.yaml#/Matrix'
+    Vector:
+      $ref: 'realtime-metrics-openapi-defs.yaml#/Vector'
+    Scalar:
+      $ref: 'realtime-metrics-openapi-defs.yaml#/Scalar'
+    StringResult:
+      $ref: 'realtime-metrics-openapi-defs.yaml#/StringResult'
+    SeriesAdapter:
+      $ref: 'realtime-metrics-openapi-defs.yaml#/SeriesAdapter'
+    VcMetricsConfigRequestBody:
+      $ref: 'realtime-metrics-openapi-defs.yaml#/VcMetricsConfigRequestBody'
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+security:
+  - bearerAuth: []

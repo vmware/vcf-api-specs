@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!--
-   	Copyright (c) 2005-2025
+   	Copyright (c) 2005-2026
 	Broadcom. All Rights Reserved.
 	The term "Broadcom" refers to Broadcom Inc.
 	and/or its subsidiaries.
@@ -81,6 +81,7 @@
                <element name="ipPool" type="vim25:IpPool" minOccurs="0" />
                <element name="resourcePools" type="eam:AgencyVMResourcePool" minOccurs="0" maxOccurs="unbounded" />
                <element name="folders" type="eam:AgencyVMFolder" minOccurs="0" maxOccurs="unbounded" />
+               <element name="omitDRSBlocking" type="xsd:boolean" minOccurs="0" />
             </sequence>
          </extension>
       </complexContent>
@@ -988,6 +989,14 @@
          </extension>
       </complexContent>
    </complexType>
+   <complexType name="ClusterAgentClusterTransitionFailed">
+      <complexContent>
+         <extension base="eam:ClusterAgentAgentIssue">
+            <sequence>
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
    <complexType name="ClusterAgentHostInMaintenanceMode">
       <complexContent>
          <extension base="eam:ClusterAgentVmIssue">
@@ -1060,6 +1069,14 @@
    <complexType name="ClusterAgentTransitionFailed">
       <complexContent>
          <extension base="eam:ClusterAgentAgentIssue">
+            <sequence>
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ClusterAgentVmHookDynamicUpdateFailed">
+      <complexContent>
+         <extension base="eam:ClusterAgentVmHookFailed">
             <sequence>
             </sequence>
          </extension>
@@ -1290,6 +1307,53 @@
          </extension>
       </complexContent>
    </complexType>
+   <complexType name="HooksDynamicUpdateSpec">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="vm" type="vim25:ManagedObjectReference" />
+               <element name="hookType" type="xsd:string" />
+               <element name="alternativeVmSpec" type="eam:SolutionsAlternativeVmSpec" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <simpleType name="SolutionsAuthenticationScheme">
+      <restriction base="xsd:string">
+         <enumeration value="NONE" />
+         <enumeration value="VMWARE_SESSION_ID" />
+      </restriction>
+   </simpleType>
+   <simpleType name="SolutionsRedeploymentPolicy">
+      <restriction base="xsd:string">
+         <enumeration value="RECREATE" />
+         <enumeration value="BLUE_GREEN" />
+      </restriction>
+   </simpleType>
+   <complexType name="SolutionsRemediationPolicy">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="SolutionsParallelRemediationPolicy">
+      <complexContent>
+         <extension base="eam:SolutionsRemediationPolicy">
+            <sequence>
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="SolutionsSequentialRemediationPolicy">
+      <complexContent>
+         <extension base="eam:SolutionsRemediationPolicy">
+            <sequence>
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
    <complexType name="SolutionsVMSource">
       <complexContent>
          <extension base="vim25:DynamicData">
@@ -1305,6 +1369,7 @@
                <element name="ovfUrl" type="xsd:string" />
                <element name="certificateValidation" type="xsd:boolean" minOccurs="0" />
                <element name="certificatePEM" type="xsd:string" minOccurs="0" />
+               <element name="authenticationScheme" type="xsd:string" minOccurs="0" />
             </sequence>
          </extension>
       </complexContent>
@@ -1371,6 +1436,7 @@
       <complexContent>
          <extension base="eam:SolutionsTypeSpecificSolutionConfig">
             <sequence>
+               <element name="omitDRSBlocking" type="xsd:boolean" minOccurs="0" />
                <element name="preferHostConfiguration" type="xsd:boolean" minOccurs="0" />
                <element name="networks" type="vim25:ManagedObjectReference" minOccurs="0" maxOccurs="unbounded" />
                <element name="datastores" type="vim25:ManagedObjectReference" minOccurs="0" maxOccurs="unbounded" />
@@ -1399,6 +1465,36 @@
          <element name="SolutionsVMNetworkMapping" type="eam:SolutionsVMNetworkMapping" minOccurs="0" maxOccurs="unbounded" />
       </sequence>
    </complexType>
+   <simpleType name="SolutionsVmSelectionType">
+      <restriction base="xsd:string">
+         <enumeration value="VM_EXTRA_CONFIG" />
+      </restriction>
+   </simpleType>
+   <complexType name="SolutionsVmSelectionSpec">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="selectionType" type="xsd:string" />
+               <element name="extraConfigValue" type="xsd:string" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="SolutionsAlternativeVmSpec">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="selectionCriteria" type="eam:SolutionsVmSelectionSpec" />
+               <element name="devices" type="vim25:VirtualMachineConfigSpec" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfSolutionsAlternativeVmSpec">
+      <sequence>
+         <element name="SolutionsAlternativeVmSpec" type="eam:SolutionsAlternativeVmSpec" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
    <complexType name="SolutionsClusterBoundSolutionConfig">
       <complexContent>
          <extension base="eam:SolutionsTypeSpecificSolutionConfig">
@@ -1408,6 +1504,8 @@
                <element name="vmNetworks" type="eam:SolutionsVMNetworkMapping" minOccurs="0" maxOccurs="unbounded" />
                <element name="datastores" type="vim25:ManagedObjectReference" minOccurs="0" maxOccurs="unbounded" />
                <element name="devices" type="vim25:VirtualMachineConfigSpec" minOccurs="0" />
+               <element name="remediationPolicy" type="eam:SolutionsRemediationPolicy" minOccurs="0" />
+               <element name="alternativeVmSpecs" type="eam:SolutionsAlternativeVmSpec" minOccurs="0" maxOccurs="unbounded" />
             </sequence>
          </extension>
       </complexContent>
@@ -1472,6 +1570,7 @@
                <element name="typeSpecificConfig" type="eam:SolutionsTypeSpecificSolutionConfig" />
                <element name="hooks" type="eam:SolutionsHookConfig" minOccurs="0" maxOccurs="unbounded" />
                <element name="vmResourceSpec" type="eam:SolutionsVmResourceSpec" minOccurs="0" />
+               <element name="redeploymentPolicy" type="xsd:string" minOccurs="0" />
             </sequence>
          </extension>
       </complexContent>
@@ -1487,6 +1586,33 @@
             <sequence>
                <element name="solution" type="xsd:string" />
                <element name="agencyId" type="xsd:string" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="SolutionsVmSelectionSpecMapping">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="vmId" type="vim25:ManagedObjectReference" />
+               <element name="vmSelectionSpec" type="eam:SolutionsVmSelectionSpec" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfSolutionsVmSelectionSpecMapping">
+      <sequence>
+         <element name="SolutionsVmSelectionSpecMapping" type="eam:SolutionsVmSelectionSpecMapping" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="SolutionsMultiSourceTransitionSpec">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="solution" type="xsd:string" />
+               <element name="agencyIds" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
+               <element name="sourceVmSelectionSpecs" type="eam:SolutionsVmSelectionSpecMapping" minOccurs="0" maxOccurs="unbounded" />
+               <element name="module" type="xsd:string" minOccurs="0" />
             </sequence>
          </extension>
       </complexContent>
@@ -1509,6 +1635,18 @@
             <sequence>
                <element name="desiredState" type="eam:SolutionsSolutionConfig" maxOccurs="unbounded" />
                <element name="transitionSpec" type="eam:SolutionsTransitionSpec" minOccurs="0" />
+               <element name="multiSourceTransitionSpec" type="eam:SolutionsMultiSourceTransitionSpec" minOccurs="0" />
+               <element name="clusterTransitionSpec" type="eam:SolutionsClusterTransitionSpec" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="SolutionsClusterTransitionSpec">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="solution" type="xsd:string" />
+               <element name="sourceCluster" type="vim25:ManagedObjectReference" />
             </sequence>
          </extension>
       </complexContent>
@@ -1523,6 +1661,7 @@
          <enumeration value="INVALID_FOLDER" />
          <enumeration value="INVALID_PROPERTIES" />
          <enumeration value="INVALID_TRANSITION" />
+         <enumeration value="INVALID_CLUSTER_TRANSITION" />
       </restriction>
    </simpleType>
    <complexType name="SolutionsComplianceSpec">
@@ -1558,6 +1697,7 @@
          <enumeration value="WORKING" />
          <enumeration value="ISSUE" />
          <enumeration value="IN_HOOK" />
+         <enumeration value="BLOCKED" />
          <enumeration value="OBSOLETE_SPEC" />
          <enumeration value="NO_SPEC" />
       </restriction>
@@ -1570,6 +1710,7 @@
                <element name="solution" type="xsd:string" />
                <element name="config" type="eam:SolutionsHookConfig" />
                <element name="raisedAt" type="xsd:dateTime" />
+               <element name="dynamicUpdateProcessed" type="xsd:boolean" />
             </sequence>
          </extension>
       </complexContent>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!--
-   	Copyright (c) 2005-2025
+   	Copyright (c) 2005-2026
 	Broadcom. All Rights Reserved.
 	The term "Broadcom" refers to Broadcom Inc.
 	and/or its subsidiaries.
@@ -92,6 +92,48 @@
          </extension>
       </complexContent>
    </complexType>
+   <complexType name="AuthenticationRequired">
+      <complexContent>
+         <extension base="vim25:RuntimeFault">
+            <sequence>
+               <element name="authenticate" type="vim25:AuthenticationRequiredChallenge" maxOccurs="unbounded" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <simpleType name="AuthenticationRequiredAuthenticationScheme">
+      <restriction base="xsd:string">
+         <enumeration value="Basic" />
+         <enumeration value="Bearer" />
+      </restriction>
+   </simpleType>
+   <simpleType name="AuthenticationRequiredErrorType">
+      <restriction base="xsd:string">
+         <enumeration value="invalid_request" />
+         <enumeration value="invalid_token" />
+         <enumeration value="insufficient_scope" />
+         <enumeration value="registration_required" />
+      </restriction>
+   </simpleType>
+   <complexType name="AuthenticationRequiredChallenge">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="scheme" type="xsd:string" />
+               <element name="realm" type="xsd:string" minOccurs="0" />
+               <element name="error" type="xsd:string" minOccurs="0" />
+               <element name="errorDescription" type="xsd:string" minOccurs="0" />
+               <element name="ovl" type="xsd:string" minOccurs="0" />
+               <element name="oidcConfigUrl" type="xsd:string" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfAuthenticationRequiredChallenge">
+      <sequence>
+         <element name="AuthenticationRequiredChallenge" type="vim25:AuthenticationRequiredChallenge" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
    <complexType name="HostCommunication">
       <complexContent>
          <extension base="vim25:RuntimeFault">
@@ -126,6 +168,14 @@
       </complexContent>
    </complexType>
    <complexType name="InvalidRequest">
+      <complexContent>
+         <extension base="vim25:RuntimeFault">
+            <sequence>
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="InvalidToken">
       <complexContent>
          <extension base="vim25:RuntimeFault">
             <sequence>
@@ -194,6 +244,14 @@
       </complexContent>
    </complexType>
    <complexType name="SecurityError">
+      <complexContent>
+         <extension base="vim25:RuntimeFault">
+            <sequence>
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="SessionNotFound">
       <complexContent>
          <extension base="vim25:RuntimeFault">
             <sequence>

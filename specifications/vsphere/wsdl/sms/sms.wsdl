@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!--
-   	Copyright (c) 2005-2025
+   	Copyright (c) 2005-2026
 	Broadcom. All Rights Reserved.
 	The term "Broadcom" refers to Broadcom Inc.
 	and/or its subsidiaries.
@@ -30,11 +30,13 @@
          <element name="versionURI" type="xsd:string" />
          <element name="MethodFaultFault" type="vim25:MethodFault"/>
          <element name="RuntimeFaultFault" type="vim25:RuntimeFault"/>
+         <element name="AuthenticationRequiredFault" type="vim25:AuthenticationRequired"/>
          <element name="HostCommunicationFault" type="vim25:HostCommunication"/>
          <element name="HostNotConnectedFault" type="vim25:HostNotConnected"/>
          <element name="HostNotReachableFault" type="vim25:HostNotReachable"/>
          <element name="InvalidArgumentFault" type="vim25:InvalidArgument"/>
          <element name="InvalidRequestFault" type="vim25:InvalidRequest"/>
+         <element name="InvalidTokenFault" type="vim25:InvalidToken"/>
          <element name="InvalidTypeFault" type="vim25:InvalidType"/>
          <element name="ManagedObjectNotFoundFault" type="vim25:ManagedObjectNotFound"/>
          <element name="MethodNotFoundFault" type="vim25:MethodNotFound"/>
@@ -43,6 +45,7 @@
          <element name="NotSupportedFault" type="vim25:NotSupported"/>
          <element name="RequestCanceledFault" type="vim25:RequestCanceled"/>
          <element name="SecurityErrorFault" type="vim25:SecurityError"/>
+         <element name="SessionNotFoundFault" type="vim25:SessionNotFound"/>
          <element name="SystemErrorFault" type="vim25:SystemError"/>
          <element name="UnexpectedFaultFault" type="vim25:UnexpectedFault"/>
          <element name="InvalidCollectorVersionFault" type="vim25:InvalidCollectorVersion"/>
@@ -3585,6 +3588,9 @@
    <message name="RuntimeFaultFaultMsg">
       <part name="fault" element="sms:RuntimeFaultFault" />
    </message>
+   <message name="AuthenticationRequiredFaultMsg">
+      <part name="fault" element="sms:AuthenticationRequiredFault" />
+   </message>
    <message name="HostCommunicationFaultMsg">
       <part name="fault" element="sms:HostCommunicationFault" />
    </message>
@@ -3599,6 +3605,9 @@
    </message>
    <message name="InvalidRequestFaultMsg">
       <part name="fault" element="sms:InvalidRequestFault" />
+   </message>
+   <message name="InvalidTokenFaultMsg">
+      <part name="fault" element="sms:InvalidTokenFault" />
    </message>
    <message name="InvalidTypeFaultMsg">
       <part name="fault" element="sms:InvalidTypeFault" />
@@ -3623,6 +3632,9 @@
    </message>
    <message name="SecurityErrorFaultMsg">
       <part name="fault" element="sms:SecurityErrorFault" />
+   </message>
+   <message name="SessionNotFoundFaultMsg">
+      <part name="fault" element="sms:SessionNotFoundFault" />
    </message>
    <message name="SystemErrorFaultMsg">
       <part name="fault" element="sms:SystemErrorFault" />
@@ -3983,7 +3995,7 @@
    <binding name="SmsBinding" type="sms:SmsPortType">
       <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
       <operation name="QueryStorageManager">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -3995,7 +4007,7 @@
          </fault>
       </operation>
       <operation name="QuerySessionManager">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4007,7 +4019,7 @@
          </fault>
       </operation>
       <operation name="QueryAboutInfo">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4019,7 +4031,7 @@
          </fault>
       </operation>
       <operation name="RegisterProvider_Task">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4037,7 +4049,7 @@
          </fault>
       </operation>
       <operation name="UnregisterProvider_Task">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4055,7 +4067,7 @@
          </fault>
       </operation>
       <operation name="QueryProvider">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4070,7 +4082,7 @@
          </fault>
       </operation>
       <operation name="QueryArray">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4088,7 +4100,7 @@
          </fault>
       </operation>
       <operation name="QueryProcessorAssociatedWithArray">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4106,7 +4118,7 @@
          </fault>
       </operation>
       <operation name="QueryPortAssociatedWithArray">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4124,7 +4136,7 @@
          </fault>
       </operation>
       <operation name="QueryPortAssociatedWithLun">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4142,7 +4154,7 @@
          </fault>
       </operation>
       <operation name="QueryLunAssociatedWithPort">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4160,7 +4172,7 @@
          </fault>
       </operation>
       <operation name="QueryArrayAssociatedWithLun">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4178,7 +4190,7 @@
          </fault>
       </operation>
       <operation name="QueryPortAssociatedWithProcessor">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4196,7 +4208,7 @@
          </fault>
       </operation>
       <operation name="QueryLunAssociatedWithArray">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4214,7 +4226,7 @@
          </fault>
       </operation>
       <operation name="QueryFileSystemAssociatedWithArray">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4232,7 +4244,7 @@
          </fault>
       </operation>
       <operation name="QueryDatastoreCapability">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4250,7 +4262,7 @@
          </fault>
       </operation>
       <operation name="QueryHostAssociatedWithLun">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4268,7 +4280,7 @@
          </fault>
       </operation>
       <operation name="QueryVmfsDatastoreAssociatedWithLun">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4286,7 +4298,7 @@
          </fault>
       </operation>
       <operation name="QueryNfsDatastoreAssociatedWithFileSystem">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4304,7 +4316,7 @@
          </fault>
       </operation>
       <operation name="QueryDrsMigrationCapabilityForPerformance">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4322,7 +4334,7 @@
          </fault>
       </operation>
       <operation name="QueryDrsMigrationCapabilityForPerformanceEx">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4340,7 +4352,7 @@
          </fault>
       </operation>
       <operation name="QueryStorageContainer">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4358,7 +4370,7 @@
          </fault>
       </operation>
       <operation name="QueryAssociatedBackingStoragePool">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4376,7 +4388,7 @@
          </fault>
       </operation>
       <operation name="QueryDatastoreBackingPoolMapping">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4394,7 +4406,7 @@
          </fault>
       </operation>
       <operation name="SmsRefreshCACertificatesAndCRLs_Task">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4412,7 +4424,7 @@
          </fault>
       </operation>
       <operation name="QueryFaultDomain">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4430,7 +4442,7 @@
          </fault>
       </operation>
       <operation name="QueryReplicationGroupInfo">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4445,7 +4457,7 @@
          </fault>
       </operation>
       <operation name="UpgradeVASAProvider_Task">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4460,7 +4472,7 @@
          </fault>
       </operation>
       <operation name="QuerySmsTaskResult">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4472,7 +4484,7 @@
          </fault>
       </operation>
       <operation name="QuerySmsTaskInfo">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4484,7 +4496,7 @@
          </fault>
       </operation>
       <operation name="QueryProviderInfo">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4496,7 +4508,7 @@
          </fault>
       </operation>
       <operation name="VasaProviderSync_Task">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4511,7 +4523,7 @@
          </fault>
       </operation>
       <operation name="VasaProviderRefreshCertificate_Task">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4526,7 +4538,7 @@
          </fault>
       </operation>
       <operation name="VasaProviderRevokeCertificate_Task">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4541,7 +4553,7 @@
          </fault>
       </operation>
       <operation name="VasaProviderReconnect_Task">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4559,7 +4571,7 @@
          </fault>
       </operation>
       <operation name="QueryReplicationPeer">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4583,7 +4595,7 @@
          </fault>
       </operation>
       <operation name="QueryReplicationGroup">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4607,7 +4619,7 @@
          </fault>
       </operation>
       <operation name="QueryPointInTimeReplica">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4631,7 +4643,7 @@
          </fault>
       </operation>
       <operation name="TestFailoverReplicationGroupStart_Task">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4661,7 +4673,7 @@
          </fault>
       </operation>
       <operation name="TestFailoverReplicationGroupStop_Task">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4694,7 +4706,7 @@
          </fault>
       </operation>
       <operation name="PromoteReplicationGroup_Task">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4724,7 +4736,7 @@
          </fault>
       </operation>
       <operation name="SyncReplicationGroup_Task">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4754,7 +4766,7 @@
          </fault>
       </operation>
       <operation name="PrepareFailoverReplicationGroup_Task">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4784,7 +4796,7 @@
          </fault>
       </operation>
       <operation name="FailoverReplicationGroup_Task">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4814,7 +4826,7 @@
          </fault>
       </operation>
       <operation name="ReverseReplicateGroup_Task">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -4844,7 +4856,7 @@
          </fault>
       </operation>
       <operation name="QueryActiveAlarm">
-         <soap:operation soapAction="urn:sms/9.0.0.0" style="document" />
+         <soap:operation soapAction="urn:sms/9.1.0.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>

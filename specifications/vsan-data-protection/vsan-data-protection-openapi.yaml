@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Snapshot Appliance API
-  version: 9.0.0.0
+  version: 9.1.0.0
 servers:
 - url: "https://{host}/api"
   variables:
@@ -13,6 +13,11 @@ tags:
     The Snapservice.ClusterPairs resource provides operations for managing cluster pairs.
 
     This resource was added in __vSphere API 9.0.0.0__.
+- name: Snapservice.ProtectionGroups
+  description: |-
+    The Snapservice.ProtectionGroups resource provides operations for managing protection groups.
+
+    This resource was added in __vSphere API 9.1.0.0__.
 - name: Snapservice.Sessions
   description: "The Snapservice.Sessions resource allows API clients to manage snapservice\
     \ session tokens including creating, deleting and obtaining information about\
@@ -52,6 +57,11 @@ tags:
     The Snapservice.Info.About resource provides operations that fetch details about Snapshot service.
 
     This resource was added in __vSphere API 8.0.3.0__.
+- name: Snapservice.ProtectionGroups.Capabilities
+  description: |-
+    The Snapservice.ProtectionGroups.Capabilities resource provides operations related to pgs' capabilities.
+
+    This resource was added in __vSphere API 9.1.0.0__.
 - name: Snapservice.Reports.Clusters.ProtectionGroups
   description: |-
     The Snapservice.Reports.Clusters.ProtectionGroups provides operations for protection groups report.
@@ -72,16 +82,46 @@ tags:
     The Snapservice.Reports.Clusters.VirtualMachines.Snapshots provides operations for virtual machine snapshot reports.
 
     This resource was added in __vSphere API 9.0.0.0__.
+- name: Snapservice.Sites.Capabilities
+  description: |-
+    The Snapservice.Sites.Capabilities resource provides operations related to sites' capabilities.
+
+    This resource was added in __vSphere API 9.1.0.0__.
 - name: Snapservice.Sites.Clusters
   description: |-
     The Snapservice.Sites.Clusters resource provides operations for managing clusters in a site
 
     This resource was added in __vSphere API 9.0.0.0__.
+- name: Snapservice.Sites.Datastores
+  description: |-
+    The Snapservice.Sites.Datastores resource provides operations related to datastores in a site.
+
+    This resource was added in __vSphere API 9.1.0.0__.
 - name: Snapservice.Sites.Licenses
   description: |-
     The Snapservice.Sites.Licenses resource provides operations for managing the licenses for a site.
 
     This resource was added in __vSphere API 9.0.0.0__.
+- name: Snapservice.Sites.Clusters.Capabilities
+  description: |-
+    The Snapservice.Sites.Clusters.Capabilities resource provides operations related to cluster's capabilities of a site.
+
+    This resource was added in __vSphere API 9.1.0.0__.
+- name: Snapservice.Sites.Datastores.Capabilities
+  description: |-
+    The Snapservice.Sites.Datastores.Capabilities resource provides operations related to datastore's capabilities of a site.
+
+    This resource was added in __vSphere API 9.1.0.0__.
+- name: Snapservice.VirtualMachines.ProtectionConfiguration
+  description: |-
+    The Snapservice.VirtualMachines.ProtectionConfiguration resource provides operations to manage virtual machine protection configuration.
+
+    This resource was added in __vSphere API 9.1.0.0__.
+- name: Snapservice.VirtualMachines.Snapshots
+  description: |-
+    The Snapservice.VirtualMachines.Snapshots provides operations for virtual machine snapshots for virtual machines.
+
+    This resource was added in __vSphere API 9.1.0.0__.
 paths:
   /snapservice/cluster-pairs:
     get:
@@ -483,6 +523,210 @@ paths:
                 $ref: "#/components/schemas/Vapi.Std.Errors.ServiceUnavailable"
         "202":
           description: Precheck result details with validation and status.
+          content:
+            application/json:
+              schema:
+                type: string
+      security:
+      - api_key_auth: []
+  /snapservice/protection-groups?action=compute-members:
+    post:
+      tags:
+      - Snapservice.ProtectionGroups
+      description: "Computes the member entities of a protection group based on the\
+        \ specification\n\nThis operation was added in __vSphere API 9.1.0.0__.\n\n\
+        Returns an authorization error if you do not have all of the privileges described\
+        \ as follows: \n   -  Operation execution requires `System.Read`. \n  -  The\
+        \ resource `ClusterComputeResource` referenced by the property *Snapservice.ProtectionGroups.ComputeMembersSpec.cluster_id*\
+        \ requires `System.Read`. \n"
+      operationId: Snapservice.ProtectionGroups_computeMembers
+      requestBody:
+        description: Specification used to preview the members of a create of update
+          protection group request.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Snapservice.ProtectionGroups.ComputeMembersSpec"
+        required: true
+      responses:
+        "400":
+          description: If validation of the spec fails. Eg. If spec.createSpec and
+            spec.updateSpec are provided together; spec.createSpec and spec.pgID are
+            provided together; spec.updateSpec is provided but no spec.gpID; spec.clusterId
+            or spec.pgId are not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.InvalidArgument"
+        "401":
+          description: If the caller is not authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Unauthenticated"
+        "403":
+          description: If the caller is not authorized to perform the operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Unauthorized"
+        "500":
+          description: If there is unknown internal error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Error"
+        "503":
+          description: If the service is not available.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.ServiceUnavailable"
+        "200":
+          description: List of virtual machines that would be included/excluded when
+            create/update a protection group.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Snapservice.MemberEntities"
+      security:
+      - api_key_auth: []
+  /snapservice/protection-groups/{pg}?action=start-ransomware-recovery&vmw-task=true:
+    post:
+      tags:
+      - Snapservice.ProtectionGroups
+      description: "Start Ransomware Recovery on the specified protection group. This\
+        \ operation is called in recovery site and when protection group is in DORMANT\
+        \ state. It sets a protection group into DORMANT_RANSOMWARE_RECOVERY state.\
+        \ When Ransomware Recovery is started, SnapService will do the following:\
+        \ Pause snapshot expiry.\n\nThis operation was added in __vSphere API 9.1.0.0__.\n\
+        \nReturns an authorization error if you do not have all of the privileges\
+        \ described as follows: \n   -  Operation execution requires `Host.Config.Storage`.\
+        \ \n"
+      operationId: Snapservice.ProtectionGroups_startRansomwareRecovery$Task
+      parameters:
+      - name: pg
+        in: path
+        description: |-
+          Identifier of the protection group.
+
+          The parameter must be an identifier for the resource type: `com.vmware.snapservice.protection_group`.
+        required: true
+        schema:
+          type: string
+      responses:
+        "400":
+          description: |-
+            ***Vapi.Std.Errors.AlreadyInDesiredState*** If the protection group is already in desired state.
+
+            ***Vapi.Std.Errors.NotAllowedInCurrentState*** If the specified protection group is not in a valid state for the transition.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Error"
+        "401":
+          description: If the caller is not authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Unauthenticated"
+        "403":
+          description: If the caller is not authorized to perform the operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Unauthorized"
+        "404":
+          description: If there is no protection group associated with pg in the system.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.NotFound"
+        "500":
+          description: If there is unknown internal error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Error"
+        "503":
+          description: If the service is not available.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.ServiceUnavailable"
+        "202":
+          description: Success!
+          content:
+            application/json:
+              schema:
+                type: string
+      security:
+      - api_key_auth: []
+  /snapservice/protection-groups/{pg}?action=end-ransomware-recovery&vmw-task=true:
+    post:
+      tags:
+      - Snapservice.ProtectionGroups
+      description: "End Ransomware Recovery on the specified protection group. This\
+        \ operation is called in recovery site and when protection group is in DORMANT_RANSOMWARE_RECOVERY\
+        \ state. It sets a protection group back into original state before this operation\
+        \ was called. When the Ransomware Recovery is ended, SnapService will to do\
+        \ the following: Unpause snapshot expiry.\n\nThis operation was added in __vSphere\
+        \ API 9.1.0.0__.\n\nReturns an authorization error if you do not have all\
+        \ of the privileges described as follows: \n   -  Operation execution requires\
+        \ `Host.Config.Storage`. \n"
+      operationId: Snapservice.ProtectionGroups_endRansomwareRecovery$Task
+      parameters:
+      - name: pg
+        in: path
+        description: |-
+          Identifier of the protection group.
+
+          The parameter must be an identifier for the resource type: `com.vmware.snapservice.protection_group`.
+        required: true
+        schema:
+          type: string
+      responses:
+        "400":
+          description: |-
+            ***Vapi.Std.Errors.AlreadyInDesiredState*** If the protection group is already in desired state.
+
+            ***Vapi.Std.Errors.NotAllowedInCurrentState*** If the specified protection group is not in a valid state.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Error"
+        "401":
+          description: If the caller is not authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Unauthenticated"
+        "403":
+          description: If the caller is not authorized to perform the operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Unauthorized"
+        "404":
+          description: If there is no protection group associated with pg in the system.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.NotFound"
+        "500":
+          description: If there is unknown internal error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Error"
+        "503":
+          description: If the service is not available.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.ServiceUnavailable"
+        "202":
+          description: Success!
           content:
             application/json:
               schema:
@@ -1348,7 +1592,38 @@ paths:
           \ state. \n\n Indicates the protection group is in a recovery state. In\
           \ this state site recovery operations can be initiated in case of planned\
           \ migration and unplanned failover. \n\nThis constant was added in __vSphere\
-          \ API 9.0.0.0__.\n\n\nFor more information see: *Snapservice.ProtectionGroupStatus*.\n\
+          \ API 9.0.0.0__.\n  - `DORMANT_RANSOMWARE_RECOVERY`: Dormant ransomware\
+          \ recovery state. \n\n Indicates the dormant protection group is undergoing\
+          \ ransomware recovery. In this state protection group state can be transitioned\
+          \ to DORMANT or DORMANT_PARTIAL_RECOVERY when end ransomware recovery operation\
+          \ is initiated. \n\nThis constant was added in __vSphere API 9.1.0.0__.\n\
+          \  - `DORMANT_PARTIAL_RECOVERY`: Dormant partial recovery state. \n\n Indicates\
+          \ some of the virtual machines from dormant protection group have been recovered\
+          \ on the recovery site. In this state protection group state can be transitioned\
+          \ to DORMANT_RANSOMWARE_RECOVERY when start ransomware recovery operation\
+          \ is initiated. \n\nThis constant was added in __vSphere API 9.1.0.0__.\n\
+          \  - `ACTIVE_RANSOMWARE_RECOVERY`: Active ransomware recovery state. \n\n\
+          \ Indicates that a ransomware recovery operation is being performed on the\
+          \ recovery site for one or more virtual machines in the active protection\
+          \ group. In this state protection group state can be transitioned to ACTIVE\
+          \ or ACTIVE_PARTIAL_RECOVERY when end ransomware recovery operation is initiated.\
+          \ \n\nThis constant was added in __vSphere API 9.1.0.0__.\n  - `ACTIVE_PARTIAL_RECOVERY`:\
+          \ Active partial recovery state. \n\n Indicates some of the virtual machines\
+          \ from active protection group have been recovered on the recovery site.\
+          \ In this state protection group state can be transitioned to ACTIVE_RANSOMWARE_RECOVERY\
+          \ when start ransomware recovery operation is initiated. \n\nThis constant\
+          \ was added in __vSphere API 9.1.0.0__.\n  - `PAUSED_RANSOMWARE_RECOVERY`:\
+          \ Paused ransomware recovery state. \n\n Indicates that a ransomware recovery\
+          \ operation is being performed on the recovery site for one or more virtual\
+          \ machines in the paused protection group In this state protection group\
+          \ state can be transitioned to PAUSED or PAUSED_PARTIAL_RECOVERY when end\
+          \ ransomware recovery operation is initiated. \n\nThis constant was added\
+          \ in __vSphere API 9.1.0.0__.\n  - `PAUSED_PARTIAL_RECOVERY`: Paused partial\
+          \ recovery state. \n\n Indicates some of the virtual machines from paused\
+          \ protection group have been recovered on the recovery site. In this state\
+          \ protection group state can be transitioned to PAUSED_RANSOMWARE_RECOVERY\
+          \ when start ransomware recovery operation is initiated. \n\nThis constant\
+          \ was added in __vSphere API 9.1.0.0__.\n\n\nFor more information see: *Snapservice.ProtectionGroupStatus*.\n\
           \nThis property was added in __vSphere API 8.0.3.0__.\n\nIf missing or `null`\
           \ or empty, protection groups with any state match the filter."
         required: false
@@ -2239,6 +2514,20 @@ paths:
           type: array
           items:
             type: string
+      requestBody:
+        description: |-
+          Tag rules for virtual machines that can match the filter.
+
+          This property was added in __vSphere API 9.1.0.0__.
+
+          If missing or `null` or empty, virtual machines with any tags can match the filter.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/Snapservice.TagRule"
+        required: false
       responses:
         "400":
           description: If validation of the filter fails.
@@ -3143,6 +3432,65 @@ paths:
                 $ref: "#/components/schemas/Snapservice.Info.About.Info"
       security:
       - api_key_auth: []
+  /snapservice/protection-groups/{pg}/capabilities:
+    get:
+      tags:
+      - Snapservice.ProtectionGroups.Capabilities
+      description: "List all capabilities for the protection_group in the specified\
+        \ site.\n\nThis operation was added in __vSphere API 9.1.0.0__.\n\nReturns\
+        \ an authorization error if you do not have all of the privileges described\
+        \ as follows: \n   -  Operation execution requires `System.Read`. \n"
+      operationId: Snapservice.ProtectionGroups.Capabilities_get
+      parameters:
+      - name: pg
+        in: path
+        description: |-
+          Identifier of the protection_group.
+
+          The parameter must be an identifier for the resource type: `com.vmware.snapservice.protection_group`.
+        required: true
+        schema:
+          type: string
+      responses:
+        "401":
+          description: If the caller is not authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Unauthenticated"
+        "403":
+          description: If the caller is not authorized to perform the operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Unauthorized"
+        "404":
+          description: If there is no protection_group associated with pg in the system.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.NotFound"
+        "500":
+          description: If there is unknown internal error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Error"
+        "503":
+          description: if the system is unable to communicate with a service to complete
+            the request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.ServiceUnavailable"
+        "200":
+          description: CapabilityInfo about the specified protection_group.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Snapservice.Capability.CapabilityInfo"
+      security:
+      - api_key_auth: []
   /snapservice/reports/clusters/{cluster}/protection-groups:
     get:
       tags:
@@ -3165,6 +3513,19 @@ paths:
         required: true
         schema:
           type: string
+      - name: filter
+        in: query
+        description: |-
+          Contains arguments to filter the list result.
+
+          This parameter was added in __vSphere API 9.1.0.0__.
+
+          If missing or `null`, the behavior is equivalent to a *Snapservice.Reports.Clusters.ProtectionGroups.FilterSpec* with all properties missing or `null`.
+        required: false
+        style: form
+        explode: true
+        schema:
+          $ref: "#/components/schemas/Snapservice.Reports.Clusters.ProtectionGroups.FilterSpec"
       responses:
         "400":
           description: If the API is not supported.
@@ -3232,6 +3593,19 @@ paths:
         required: true
         schema:
           type: string
+      - name: filter
+        in: query
+        description: |-
+          Contains arguments to filter the list result.
+
+          This parameter was added in __vSphere API 9.1.0.0__.
+
+          If missing or `null`, the behavior is equivalent to a *Snapservice.Reports.Clusters.VirtualMachines.FilterSpec* with all properties missing or `null`.
+        required: false
+        style: form
+        explode: true
+        schema:
+          $ref: "#/components/schemas/Snapservice.Reports.Clusters.VirtualMachines.FilterSpec"
       responses:
         "400":
           description: If the API is not supported.
@@ -3890,6 +4264,112 @@ paths:
                 $ref: "#/components/schemas/Snapservice.Reports.Clusters.VirtualMachines.Snapshots.StatusByVirtualMachineListResult"
       security:
       - api_key_auth: []
+  /snapservice/sites/{site}/capabilities:
+    get:
+      tags:
+      - Snapservice.Sites.Capabilities
+      description: "Get all capabilities for the site's services.\n\nThis operation\
+        \ was added in __vSphere API 9.1.0.0__.\n\nReturns an authorization error\
+        \ if you do not have all of the privileges described as follows: \n   -  Operation\
+        \ execution requires `VsanDP.Replication.com.vmware.vsan.snapshotservice.Site.View`.\
+        \ \n"
+      operationId: Snapservice.Sites.Capabilities_get
+      parameters:
+      - name: site
+        in: path
+        description: |-
+          Identifier of the site.
+
+          The parameter must be an identifier for the resource type: `com.vmware.snapservice.site`.
+        required: true
+        schema:
+          type: string
+      - name: service
+        in: query
+        description: |-
+          Filter by service name.
+
+          Possible values:
+            - `SS`: Snapshot Service.
+            - `SRM`: Site Recovery Manager.
+            - `HMS`: HBR Manager Service.
+
+
+          For more information see: *Snapservice.Sites.ServiceType*.
+
+          This property was added in __vSphere API 9.1.0.0__.
+
+          If missing or `null`, all services are returned.
+        required: false
+        style: form
+        explode: true
+        schema:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+      - name: capability
+        in: query
+        description: |-
+          Filter by capability name.
+
+          This property was added in __vSphere API 9.1.0.0__.
+
+          If missing or `null`, all relevant capabilities are returned.
+        required: false
+        style: form
+        explode: true
+        schema:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+      responses:
+        "400":
+          description: If validation of filter fails.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.InvalidArgument"
+        "401":
+          description: If the caller is not authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Unauthenticated"
+        "403":
+          description: If the caller is not authorized to perform the operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Unauthorized"
+        "404":
+          description: If there is no site associated with site in the system.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.NotFound"
+        "500":
+          description: If there is unknown internal error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Error"
+        "503":
+          description: if the system is unable to communicate with a service to complete
+            the request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.ServiceUnavailable"
+        "200":
+          description: Capabilities info about the specified site.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Snapservice.Sites.Capabilities.SiteCapabilities"
+      security:
+      - api_key_auth: []
   /snapservice/sites/{site}/clusters:
     get:
       tags:
@@ -3990,6 +4470,90 @@ paths:
                 $ref: "#/components/schemas/Snapservice.Sites.Clusters.ListResult"
       security:
       - api_key_auth: []
+  /snapservice/sites/{site}/datastores:
+    get:
+      tags:
+      - Snapservice.Sites.Datastores
+      description: "List all datastores in the specified site.\n\nThis operation was\
+        \ added in __vSphere API 9.1.0.0__.\n\nReturns an authorization error if you\
+        \ do not have all of the privileges described as follows: \n   -  Operation\
+        \ execution requires `VsanDP.Replication.com.vmware.vsan.snapshotservice.Site.View`.\
+        \ \n"
+      operationId: Snapservice.Sites.Datastores_list
+      parameters:
+      - name: site
+        in: path
+        description: |-
+          Identifier of the site.
+
+          The parameter must be an identifier for the resource type: `com.vmware.snapservice.site`.
+        required: true
+        schema:
+          type: string
+      - name: datastores
+        in: query
+        description: |-
+          Identifiers of datastores that can match the filter.
+
+          This property was added in __vSphere API 9.1.0.0__.
+
+          If missing or `null` or empty, datastores with any identifier match the filter.
+
+          When clients pass a value of this schema as a parameter, the property must contain identifiers for the resource type: `Datastore`. When operations return a value of this schema as a response, the property will contain identifiers for the resource type: `Datastore`.
+        required: false
+        style: form
+        explode: true
+        schema:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+      responses:
+        "400":
+          description: If validation of the filter fails.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.InvalidArgument"
+        "401":
+          description: If the caller is not authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Unauthenticated"
+        "403":
+          description: If the caller is not authorized to perform the operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Unauthorized"
+        "404":
+          description: If there is no site associated with site in the system.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.NotFound"
+        "500":
+          description: If there is unknown internal error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Error"
+        "503":
+          description: if the system is unable to communicate with a service to complete
+            the request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.ServiceUnavailable"
+        "200":
+          description: Information about the datastores matching the *Snapservice.Sites.Datastores.FilterSpec*.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Snapservice.Sites.Datastores.ListResult"
+      security:
+      - api_key_auth: []
   /snapservice/sites/{site}/licenses:
     get:
       tags:
@@ -4054,8 +4618,885 @@ paths:
                 $ref: "#/components/schemas/Snapservice.Sites.Licenses.ListResult"
       security:
       - api_key_auth: []
+  /snapservice/sites/{site}/clusters/{cluster}/capabilities:
+    get:
+      tags:
+      - Snapservice.Sites.Clusters.Capabilities
+      description: "List all capabilities for the cluster in the specified site.\n\
+        \nThis operation was added in __vSphere API 9.1.0.0__.\n\nReturns an authorization\
+        \ error if you do not have all of the privileges described as follows: \n\
+        \   -  Operation execution requires `VsanDP.Replication.com.vmware.vsan.snapshotservice.Site.View`.\
+        \ \n"
+      operationId: Snapservice.Sites.Clusters.Capabilities_get
+      parameters:
+      - name: site
+        in: path
+        description: |-
+          Identifier of the site.
+
+          The parameter must be an identifier for the resource type: `com.vmware.snapservice.site`.
+        required: true
+        schema:
+          type: string
+      - name: cluster
+        in: path
+        description: |-
+          Identifier of the cluster.
+
+          The parameter must be an identifier for the resource type: `ClusterComputeResource`.
+        required: true
+        schema:
+          type: string
+      - name: spec
+        in: query
+        description: |-
+          Set the view option for capabilities returned.
+
+          If missing or `null`, fallback to default parameters.
+        required: false
+        style: form
+        explode: true
+        schema:
+          $ref: "#/components/schemas/Snapservice.Sites.Clusters.Capabilities.ViewSpec"
+      responses:
+        "400":
+          description: If validation of any input parameters fails.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.InvalidArgument"
+        "401":
+          description: If the caller is not authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Unauthenticated"
+        "403":
+          description: If the caller is not authorized to perform the operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Unauthorized"
+        "404":
+          description: If there is no site associated with site and cluster in the
+            system.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.NotFound"
+        "500":
+          description: If there is unknown internal error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Error"
+        "503":
+          description: if the system is unable to communicate with a service to complete
+            the request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.ServiceUnavailable"
+        "200":
+          description: Capabilities info about the specified cluster.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Snapservice.Capability.CapabilityInfo"
+      security:
+      - api_key_auth: []
+  /snapservice/sites/{site}/datastores/capabilities:
+    get:
+      tags:
+      - Snapservice.Sites.Datastores.Capabilities
+      description: "List all datastores capabilities in the specified site.\n\nThis\
+        \ operation was added in __vSphere API 9.1.0.0__.\n\nReturns an authorization\
+        \ error if you do not have all of the privileges described as follows: \n\
+        \   -  Operation execution requires `VsanDP.Replication.com.vmware.vsan.snapshotservice.Site.View`.\
+        \ \n"
+      operationId: Snapservice.Sites.Datastores.Capabilities_list
+      parameters:
+      - name: site
+        in: path
+        description: |-
+          Identifier of the site.
+
+          The parameter must be an identifier for the resource type: `com.vmware.snapservice.site`.
+        required: true
+        schema:
+          type: string
+      - name: datastores
+        in: query
+        description: |-
+          Identifier of datastores that can match the filter. Capabilities for specified datastores will be returned.
+
+          This property was added in __vSphere API 9.1.0.0__.
+
+          If missing or `null` or empty, return capabilities for all datastores belonging to the site.
+
+          When clients pass a value of this schema as a parameter, the property must contain identifiers for the resource type: `Datastore`. When operations return a value of this schema as a response, the property will contain identifiers for the resource type: `Datastore`.
+        required: false
+        style: form
+        explode: true
+        schema:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+      responses:
+        "400":
+          description: If validation of the filter fails.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.InvalidArgument"
+        "401":
+          description: If the caller is not authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Unauthenticated"
+        "403":
+          description: If the caller is not authorized to perform the operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Unauthorized"
+        "404":
+          description: If there is no site associated with site in the system.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.NotFound"
+        "500":
+          description: If there is unknown internal error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Error"
+        "503":
+          description: if the system is unable to communicate with a service to complete
+            the request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.ServiceUnavailable"
+        "200":
+          description: Capabilities about the datastores matching the *Snapservice.Sites.Datastores.Capabilities.FilterSpec*.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Snapservice.Sites.Datastores.Capabilities.ListResult"
+      security:
+      - api_key_auth: []
+  /snapservice/sites/{site}/datastores/{datastore}/capabilities:
+    get:
+      tags:
+      - Snapservice.Sites.Datastores.Capabilities
+      description: "List all capabilities for the datastore in the specified site.\n\
+        \nThis operation was added in __vSphere API 9.1.0.0__.\n\nReturns an authorization\
+        \ error if you do not have all of the privileges described as follows: \n\
+        \   -  Operation execution requires `VsanDP.Replication.com.vmware.vsan.snapshotservice.Site.View`.\
+        \ \n"
+      operationId: Snapservice.Sites.Datastores.Capabilities_get
+      parameters:
+      - name: site
+        in: path
+        description: |-
+          Identifier of the site.
+
+          The parameter must be an identifier for the resource type: `com.vmware.snapservice.site`.
+        required: true
+        schema:
+          type: string
+      - name: datastore
+        in: path
+        description: |-
+          Identifier of the datastore.
+
+          The parameter must be an identifier for the resource type: `Datastore`.
+        required: true
+        schema:
+          type: string
+      responses:
+        "401":
+          description: If the caller is not authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Unauthenticated"
+        "403":
+          description: If the caller is not authorized to perform the operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Unauthorized"
+        "404":
+          description: If there is no site associated with site and datastore in the
+            system.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.NotFound"
+        "500":
+          description: If there is unknown internal error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Error"
+        "503":
+          description: if the system is unable to communicate with a service to complete
+            the request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.ServiceUnavailable"
+        "200":
+          description: Capabilities info about the specified datastore.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Snapservice.Capability.CapabilityInfo"
+      security:
+      - api_key_auth: []
+  /snapservice/virtual-machines/{vm}/protection-configuration:
+    get:
+      tags:
+      - Snapservice.VirtualMachines.ProtectionConfiguration
+      description: "Get protection configuration information regarding the specified\
+        \ virtual machine.\n\nThis operation was added in __vSphere API 9.1.0.0__.\n\
+        \nReturns an authorization error if you do not have all of the privileges\
+        \ described as follows: \n   -  Operation execution requires `System.Read`.\
+        \ \n"
+      operationId: Snapservice.VirtualMachines.ProtectionConfiguration_get
+      parameters:
+      - name: vm
+        in: path
+        description: |-
+          Identifier of the virtual machine.
+
+          The parameter must be an identifier for the resource type: `VirtualMachine`.
+        required: true
+        schema:
+          type: string
+      responses:
+        "401":
+          description: If the caller is not authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Unauthenticated"
+        "403":
+          description: If the caller is not authorized to perform the operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Unauthorized"
+        "404":
+          description: If no virtual machine associated with vm is found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.NotFound"
+        "500":
+          description: If there is unknown internal error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Error"
+        "503":
+          description: If the service is not available.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.ServiceUnavailable"
+        "200":
+          description: ConfigInfo Protection configuration information for the specified
+            virtual machine.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Snapservice.VirtualMachines.ProtectionConfiguration.Info"
+      security:
+      - api_key_auth: []
+  /snapservice/virtual-machines/{vm}/protection-configuration?vmw-task=true:
+    patch:
+      tags:
+      - Snapservice.VirtualMachines.ProtectionConfiguration
+      description: "Update the virtual machine protection configuration. Only configuration\
+        \ parameters specified in the updateSpec can be modified. There will be no\
+        \ change to other replication configuration settings as a result of this API\
+        \ call.\n\nThis operation was added in __vSphere API 9.1.0.0__.\n\nReturns\
+        \ an authorization error if you do not have all of the privileges described\
+        \ as follows: \n   -  Operation execution requires `System.Read`. \n"
+      operationId: Snapservice.VirtualMachines.ProtectionConfiguration_update$Task
+      parameters:
+      - name: vm
+        in: path
+        description: |-
+          Identifier of the virtual machine.
+
+          The parameter must be an identifier for the resource type: `VirtualMachine`.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Specification for the config update operation.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Snapservice.VirtualMachines.ProtectionConfiguration.UpdateSpec"
+        required: true
+      responses:
+        "400":
+          description: |-
+            ***Vapi.Std.Errors.InvalidArgument*** If validation of the spec fails.
+
+            ***Vapi.Std.Errors.NotAllowedInCurrentState*** If remote replication is not enabled or replication is already in-progress.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Error"
+        "401":
+          description: If the caller is not authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Unauthenticated"
+        "403":
+          description: If the caller is not authorized to perform the operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Unauthorized"
+        "404":
+          description: If no virtual machine associated with vm is found in the system.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.NotFound"
+        "500":
+          description: If there is unknown internal error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Error"
+        "503":
+          description: If the service is not available.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.ServiceUnavailable"
+        "202":
+          description: Success!
+          content:
+            application/json:
+              schema:
+                type: string
+      security:
+      - api_key_auth: []
+  /snapservice/virtual-machines/snapshots:
+    get:
+      tags:
+      - Snapservice.VirtualMachines.Snapshots
+      description: "Paginated list of virtual machine snapshots\n\nThis operation\
+        \ was added in __vSphere API 9.1.0.0__.\n\nReturns an authorization error\
+        \ if you do not have all of the privileges described as follows: \n   -  Operation\
+        \ execution requires `System.Read`. \n"
+      operationId: Snapservice.VirtualMachines.Snapshots_list
+      parameters:
+      - name: filter
+        in: query
+        description: |-
+          Contains arguments to filter the list result.
+
+          If missing or `null`, the behavior is equivalent to a *Snapservice.VirtualMachines.Snapshots.FilterSpec* with all properties missing or `null` which means all virtual machines snapshots match the filter.
+        required: false
+        style: form
+        explode: true
+        schema:
+          $ref: "#/components/schemas/Snapservice.VirtualMachines.Snapshots.FilterSpec"
+      - name: vm_bios_uuids
+        in: query
+        description: |-
+          BIOS identifiers of the virtual machines that can match the filter.
+
+          This property was added in __vSphere API 9.1.0.0__.
+
+          If missing or `null` or empty, virtual machines with any identifier matches the filter.
+
+          When clients pass a value of this schema as a parameter, the property must contain identifiers for the resource type: `VirtualMachine`. When operations return a value of this schema as a response, the property will contain identifiers for the resource type: `VirtualMachine`.
+        required: false
+        style: form
+        explode: true
+        schema:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+      - name: clusters
+        in: query
+        description: |-
+          Identifiers of clusters that can match the filter.
+
+          This property was added in __vSphere API 9.1.0.0__.
+
+          If missing or `null` or empty, clusters with any identifier matches the filter.
+
+          When clients pass a value of this schema as a parameter, the property must contain identifiers for the resource type: `ClusterComputeResource`. When operations return a value of this schema as a response, the property will contain identifiers for the resource type: `ClusterComputeResource`.
+        required: false
+        style: form
+        explode: true
+        schema:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+      - name: snapshots
+        in: query
+        description: |-
+          Identifiers of the snapshots that can match the filter.
+
+          This property was added in __vSphere API 9.1.0.0__.
+
+          If missing or `null` or empty, snapshots with any identifier match the filter.
+
+          When clients pass a value of this schema as a parameter, the property must contain identifiers for the resource type: `com.vmware.snapservice.vm.snapshot`. When operations return a value of this schema as a response, the property will contain identifiers for the resource type: `com.vmware.snapservice.vm.snapshot`.
+        required: false
+        style: form
+        explode: true
+        schema:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+      - name: iterate
+        in: query
+        description: |-
+          The specification of a page to be retrieved.
+
+          If missing or `null`, the first page will be retrieved.
+        required: false
+        style: form
+        explode: true
+        schema:
+          $ref: "#/components/schemas/Snapservice.VirtualMachines.Snapshots.IterationSpec"
+      responses:
+        "400":
+          description: If validation of the filter or iterate fails.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.InvalidArgument"
+        "401":
+          description: If the caller is not authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Unauthenticated"
+        "403":
+          description: If the caller is not authorized to perform the operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Unauthorized"
+        "500":
+          description: If there is unknown internal error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Error"
+        "503":
+          description: If the service is not available.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.ServiceUnavailable"
+        "200":
+          description: List of virtual machine snapshots for virtual machines matching
+            the *Snapservice.VirtualMachines.Snapshots.FilterSpec*.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Snapservice.VirtualMachines.Snapshots.ListResult"
+      security:
+      - api_key_auth: []
+  /snapservice/virtual-machines/snapshots/{snapshot}?vmw-task=true:
+    delete:
+      tags:
+      - Snapservice.VirtualMachines.Snapshots
+      description: "Delete the specified snapshot.\n\nThis operation was added in\
+        \ __vSphere API 9.1.0.0__.\n\nReturns an authorization error if you do not\
+        \ have all of the privileges described as follows: \n   -  Operation execution\
+        \ requires `System.Read`. \n"
+      operationId: Snapservice.VirtualMachines.Snapshots_delete$Task
+      parameters:
+      - name: snapshot
+        in: path
+        description: |-
+          Identifier of the virtual machine snapshot.
+
+          The parameter must be an identifier for the resource type: `com.vmware.snapservice.vm.snapshot`.
+        required: true
+        schema:
+          type: string
+      responses:
+        "400":
+          description: If the specified protection group is locked or the specified
+            snapshot cannot be deleted independently.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Unsupported"
+        "401":
+          description: If the caller is not authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Unauthenticated"
+        "403":
+          description: If the caller is not authorized to perform the operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Unauthorized"
+        "404":
+          description: If no snapshot associated with snapshot is found in the system.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.NotFound"
+        "500":
+          description: If there is unknown internal error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Error"
+        "503":
+          description: If the service is not available.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.ServiceUnavailable"
+        "202":
+          description: Success!
+          content:
+            application/json:
+              schema:
+                type: string
+      security:
+      - api_key_auth: []
+    patch:
+      tags:
+      - Snapservice.VirtualMachines.Snapshots
+      description: "Update virtual machine snapshot attributes.\n\nThis operation\
+        \ was added in __vSphere API 9.1.0.0__.\n\nReturns an authorization error\
+        \ if you do not have all of the privileges described as follows: \n   -  Operation\
+        \ execution requires `System.Read`. \n"
+      operationId: Snapservice.VirtualMachines.Snapshots_update$Task
+      parameters:
+      - name: snapshot
+        in: path
+        description: |-
+          Identifier of the virtual machine snapshot.
+
+          The parameter must be an identifier for the resource type: `com.vmware.snapservice.vm.snapshot`.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Specification for updating the snapshot attributes.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Snapservice.VirtualMachines.Snapshots.UpdateSpec"
+        required: true
+      responses:
+        "400":
+          description: |-
+            ***Vapi.Std.Errors.InvalidArgument*** If validation of the spec fails.
+
+            ***Vapi.Std.Errors.Unsupported*** If the snapshot attributes cannot be updated independently.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Error"
+        "401":
+          description: If the caller is not authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Unauthenticated"
+        "403":
+          description: If the caller is not authorized to perform the operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Unauthorized"
+        "404":
+          description: If no snapshot associated with snapshot is found in the system.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.NotFound"
+        "500":
+          description: If there is unknown internal error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Error"
+        "503":
+          description: If the service is not available.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.ServiceUnavailable"
+        "202":
+          description: Success!
+          content:
+            application/json:
+              schema:
+                type: string
+      security:
+      - api_key_auth: []
+  /snapservice/virtual-machines/snapshots/{snapshot}?action=add-label&vmw-task=true:
+    patch:
+      tags:
+      - Snapservice.VirtualMachines.Snapshots
+      description: |-
+        Add a label to an existing virtual machine snapshot.
+
+        This operation was added in __vSphere API 9.1.0.0__.
+      operationId: Snapservice.VirtualMachines.Snapshots_addLabel$Task
+      parameters:
+      - name: snapshot
+        in: path
+        description: |-
+          Identifier of the virtual machine snapshot.
+
+          The parameter must be an identifier for the resource type: `com.vmware.snapservice.vm.snapshot`.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Specification of the snapshot label
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Snapservice.VirtualMachines.Snapshots.AddLabelSpec"
+        required: true
+      responses:
+        "400":
+          description: |-
+            ***Vapi.Std.Errors.InvalidArgument*** If validation of the spec fails.
+
+            ***Vapi.Std.Errors.Unsupported*** If the operation is not supported.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Error"
+        "401":
+          description: If the caller is not authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Unauthenticated"
+        "403":
+          description: If the caller is not authorized to perform the operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Unauthorized"
+        "404":
+          description: If no snapshot associated with snapshot is found in the system.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.NotFound"
+        "500":
+          description: If there is unknown internal error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Error"
+        "503":
+          description: If the service is not available.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.ServiceUnavailable"
+        "202":
+          description: Success!
+          content:
+            application/json:
+              schema:
+                type: string
+      security:
+      - api_key_auth: []
+  /snapservice/virtual-machines/snapshots/{snapshot}?action=delete-label&vmw-task=true:
+    patch:
+      tags:
+      - Snapservice.VirtualMachines.Snapshots
+      description: |-
+        Delete a virtual machine snapshot's label.
+
+        This operation was added in __vSphere API 9.1.0.0__.
+      operationId: Snapservice.VirtualMachines.Snapshots_deleteLabel$Task
+      parameters:
+      - name: snapshot
+        in: path
+        description: |-
+          Identifier of the virtual machine snapshot.
+
+          The parameter must be an identifier for the resource type: `com.vmware.snapservice.vm.snapshot`.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Spec used to delete Label.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Snapservice.VirtualMachines.Snapshots.DeleteLabelSpec"
+        required: true
+      responses:
+        "400":
+          description: |-
+            ***Vapi.Std.Errors.InvalidArgument*** If validation of the spec fails.
+
+            ***Vapi.Std.Errors.Unsupported*** If the operation is not supported.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Error"
+        "401":
+          description: If the caller is not authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Unauthenticated"
+        "403":
+          description: If the caller is not authorized to perform the operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Unauthorized"
+        "404":
+          description: no snapshot associated with snapshot is found in the system.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.NotFound"
+        "500":
+          description: If there is unknown internal error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Error"
+        "503":
+          description: If the service is not available.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.ServiceUnavailable"
+        "202":
+          description: Success!
+          content:
+            application/json:
+              schema:
+                type: string
+      security:
+      - api_key_auth: []
+  /snapservice/virtual-machines/snapshots/{snapshot}?action=set-labels&vmw-task=true:
+    put:
+      tags:
+      - Snapservice.VirtualMachines.Snapshots
+      description: |-
+        Replace the entire set of labels for one category for a virtual machine snapshot.
+
+        This operation was added in __vSphere API 9.1.0.0__.
+      operationId: Snapservice.VirtualMachines.Snapshots_setLabels$Task
+      parameters:
+      - name: snapshot
+        in: path
+        description: |-
+          Identifier of the virtual machine snapshot.
+
+          The parameter must be an identifier for the resource type: `com.vmware.snapservice.vm.snapshot`.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Specification of the snapshot labels
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Snapservice.VirtualMachines.Snapshots.SetLabelsSpec"
+        required: true
+      responses:
+        "400":
+          description: |-
+            ***Vapi.Std.Errors.InvalidArgument*** If validation of the spec fails.
+
+            ***Vapi.Std.Errors.Unsupported*** If the operation is not supported.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Error"
+        "401":
+          description: If the caller is not authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Unauthenticated"
+        "403":
+          description: If the caller is not authorized to perform the operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Unauthorized"
+        "404":
+          description: If no snapshot associated with snapshot is found in the system.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.NotFound"
+        "500":
+          description: If there is unknown internal error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Error"
+        "503":
+          description: If the service is not available.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.ServiceUnavailable"
+        "202":
+          description: Success!
+          content:
+            application/json:
+              schema:
+                type: string
+      security:
+      - api_key_auth: []
 components:
   schemas:
+    Snapservice.LogicalOperator:
+      type: string
+      description: |-
+        The Snapservice.LogicalOperator enumerated type contains the strategies for for joining rule sets.
+
+        Possible values:
+          - `AND`: All rule sets should satisfy the criteria.
+          - `OR`: Any rule set can satisfy the criteria.
+
+
+        This enumeration was added in __vSphere API 9.1.0.0__.
+      enum:
+      - AND
+      - OR
     Snapservice.PrecheckStatus:
       type: string
       description: |-
@@ -4083,6 +5524,9 @@ components:
           - `DAY`: Day.
           - `WEEK`: Weeks.
           - `MONTH`: Months.
+          - `YEAR`: Years.
+
+        This constant was added in __vSphere API 9.1.0.0__.
 
 
         This enumeration was added in __vSphere API 8.0.3.0__.
@@ -4092,6 +5536,7 @@ components:
       - DAY
       - WEEK
       - MONTH
+      - YEAR
     Snapservice.TimeFrequency:
       type: string
       description: |-
@@ -4112,6 +5557,30 @@ components:
       - WEEKLY
       - MONTHLY
       - YEARLY
+    Snapservice.DayOfWeek:
+      type: string
+      description: |-
+        The Snapservice.DayOfWeek enumerated type contains the supported values for the day of week at which a replica snapshot is selected for long term retention.
+
+        Possible values:
+          - `SUNDAY`: Sunday
+          - `MONDAY`: Monday
+          - `TUESDAY`: Tuesday
+          - `WEDNESDAY`: Wednesday
+          - `THURSDAY`: Thursday
+          - `FRIDAY`: Friday
+          - `SATURDAY`: Saturday
+
+
+        This enumeration was added in __vSphere API 9.1.0.0__.
+      enum:
+      - SUNDAY
+      - MONDAY
+      - TUESDAY
+      - WEDNESDAY
+      - THURSDAY
+      - FRIDAY
+      - SATURDAY
     Snapservice.ProtectionGroupStatus:
       type: string
       description: "The Snapservice.ProtectionGroupStatus enumerated type contains\
@@ -4128,8 +5597,39 @@ components:
         \ added in __vSphere API 9.0.0.0__.\n  - `RECOVERY`: Recovery state. \n\n\
         \ Indicates the protection group is in a recovery state. In this state site\
         \ recovery operations can be initiated in case of planned migration and unplanned\
-        \ failover. \n\nThis constant was added in __vSphere API 9.0.0.0__.\n\n\n\
-        This enumeration was added in __vSphere API 8.0.3.0__."
+        \ failover. \n\nThis constant was added in __vSphere API 9.0.0.0__.\n  - `DORMANT_RANSOMWARE_RECOVERY`:\
+        \ Dormant ransomware recovery state. \n\n Indicates the dormant protection\
+        \ group is undergoing ransomware recovery. In this state protection group\
+        \ state can be transitioned to DORMANT or DORMANT_PARTIAL_RECOVERY when end\
+        \ ransomware recovery operation is initiated. \n\nThis constant was added\
+        \ in __vSphere API 9.1.0.0__.\n  - `DORMANT_PARTIAL_RECOVERY`: Dormant partial\
+        \ recovery state. \n\n Indicates some of the virtual machines from dormant\
+        \ protection group have been recovered on the recovery site. In this state\
+        \ protection group state can be transitioned to DORMANT_RANSOMWARE_RECOVERY\
+        \ when start ransomware recovery operation is initiated. \n\nThis constant\
+        \ was added in __vSphere API 9.1.0.0__.\n  - `ACTIVE_RANSOMWARE_RECOVERY`:\
+        \ Active ransomware recovery state. \n\n Indicates that a ransomware recovery\
+        \ operation is being performed on the recovery site for one or more virtual\
+        \ machines in the active protection group. In this state protection group\
+        \ state can be transitioned to ACTIVE or ACTIVE_PARTIAL_RECOVERY when end\
+        \ ransomware recovery operation is initiated. \n\nThis constant was added\
+        \ in __vSphere API 9.1.0.0__.\n  - `ACTIVE_PARTIAL_RECOVERY`: Active partial\
+        \ recovery state. \n\n Indicates some of the virtual machines from active\
+        \ protection group have been recovered on the recovery site. In this state\
+        \ protection group state can be transitioned to ACTIVE_RANSOMWARE_RECOVERY\
+        \ when start ransomware recovery operation is initiated. \n\nThis constant\
+        \ was added in __vSphere API 9.1.0.0__.\n  - `PAUSED_RANSOMWARE_RECOVERY`:\
+        \ Paused ransomware recovery state. \n\n Indicates that a ransomware recovery\
+        \ operation is being performed on the recovery site for one or more virtual\
+        \ machines in the paused protection group In this state protection group state\
+        \ can be transitioned to PAUSED or PAUSED_PARTIAL_RECOVERY when end ransomware\
+        \ recovery operation is initiated. \n\nThis constant was added in __vSphere\
+        \ API 9.1.0.0__.\n  - `PAUSED_PARTIAL_RECOVERY`: Paused partial recovery state.\
+        \ \n\n Indicates some of the virtual machines from paused protection group\
+        \ have been recovered on the recovery site. In this state protection group\
+        \ state can be transitioned to PAUSED_RANSOMWARE_RECOVERY when start ransomware\
+        \ recovery operation is initiated. \n\nThis constant was added in __vSphere\
+        \ API 9.1.0.0__.\n\n\nThis enumeration was added in __vSphere API 8.0.3.0__."
       enum:
       - ACTIVE
       - PAUSED
@@ -4137,6 +5637,30 @@ components:
       - DEMOTED
       - DORMANT
       - RECOVERY
+      - DORMANT_RANSOMWARE_RECOVERY
+      - DORMANT_PARTIAL_RECOVERY
+      - ACTIVE_RANSOMWARE_RECOVERY
+      - ACTIVE_PARTIAL_RECOVERY
+      - PAUSED_RANSOMWARE_RECOVERY
+      - PAUSED_PARTIAL_RECOVERY
+    Snapservice.MembershipChangeType:
+      type: string
+      description: |-
+        The change type of a virtual machine. Value ADD and EXISTING mean the virtual machine will be included in protection group; REMOVE and EXCLUDE mean they will not in the protection group.
+
+        Possible values:
+          - `ADD`: The virtual machine is added to protection group.
+          - `REMOVE`: The virtual machine is removed from protection group.
+          - `EXCLUDE`: The virtual machine is excluded from protection group by filter conditions.
+          - `EXISTING`: The virtual machine already exists in protection group, and keeps existing.
+
+
+        This enumeration was added in __vSphere API 9.1.0.0__.
+      enum:
+      - ADD
+      - REMOVE
+      - EXCLUDE
+      - EXISTING
     Snapservice.PrecheckResultItem:
       required:
       - desc
@@ -4227,6 +5751,16 @@ components:
             When clients pass a value of this schema as a parameter, the property must contain identifiers for the resource type: `VirtualMachine`. When operations return a value of this schema as a response, the property will contain identifiers for the resource type: `VirtualMachine`.
           items:
             type: string
+        tag_rules:
+          type: array
+          description: |-
+            Tag rules to select the virtual machines for protection. All virtual machines that match the specified tag selection criteria will be protected.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            If missing or `null`, *Snapservice.TargetEntities.vms* or *Snapservice.TargetEntities.vm_name_patterns* must be specified.
+          items:
+            $ref: "#/components/schemas/Snapservice.TagRule"
       description: |-
         The Snapservice.TargetEntities schema contains properties specifying the target entities to be protected. The initial release will only support virtual machines.
 
@@ -4248,6 +5782,9 @@ components:
               - `DAY`: Day.
               - `WEEK`: Weeks.
               - `MONTH`: Months.
+              - `YEAR`: Years.
+
+            This constant was added in __vSphere API 9.1.0.0__.
 
 
             For more information see: *Snapservice.TimeUnit*.
@@ -4281,6 +5818,9 @@ components:
               - `DAY`: Day.
               - `WEEK`: Weeks.
               - `MONTH`: Months.
+              - `YEAR`: Years.
+
+            This constant was added in __vSphere API 9.1.0.0__.
 
 
             For more information see: *Snapservice.TimeUnit*.
@@ -4345,6 +5885,9 @@ components:
               - `DAY`: Day.
               - `WEEK`: Weeks.
               - `MONTH`: Months.
+              - `YEAR`: Years.
+
+            This constant was added in __vSphere API 9.1.0.0__.
 
 
             For more information see: *Snapservice.TimeUnit*.
@@ -4361,6 +5904,164 @@ components:
         The Snapservice.TimePeriod schema contains properties that describes the time period and duration
 
         This schema was added in __vSphere API 9.0.0.0__.
+    Snapservice.LongTermRetention:
+      type: object
+      properties:
+        hourly:
+          description: |-
+            One snapshot for every hour is retained for the duration specified.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            if missing or `null` hourly long term retention is not specified.
+          allOf:
+          - $ref: "#/components/schemas/Snapservice.HourlyRetention"
+        daily:
+          description: |-
+            One snapshot for every day is retained for the duration specified.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            if missing or `null` daily long term retention is not specified.
+          allOf:
+          - $ref: "#/components/schemas/Snapservice.DailyRetention"
+        weekly:
+          description: |-
+            One snapshot for every week is retained for the duration specified.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            if missing or `null` weekly long term retention is not specified.
+          allOf:
+          - $ref: "#/components/schemas/Snapservice.WeeklyRetention"
+        monthly:
+          description: |-
+            One snapshot for every month is retained for the duration specified.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            if missing or `null` monthly long term retention is not specified.
+          allOf:
+          - $ref: "#/components/schemas/Snapservice.MonthlyRetention"
+      description: |-
+        The Snapservice.LongTermRetention schema contains different types of long term snapshot retention settings for a given protection group with Snapservice.ReplicationPolicy enabled. At least one of the values must be specified.
+
+        This schema was added in __vSphere API 9.1.0.0__.
+    Snapservice.HourlyRetention:
+      required:
+      - retention
+      type: object
+      properties:
+        retention:
+          description: |-
+            Total retention period for the snapshots.
+
+            This property was added in __vSphere API 9.1.0.0__.
+          allOf:
+          - $ref: "#/components/schemas/Snapservice.TimePeriod"
+      description: |-
+        The Snapservice.HourlyRetention schema contains properties that describe the hourly retention settings for a given protection group with Snapservice.ReplicationPolicy enabled.
+
+        This schema was added in __vSphere API 9.1.0.0__.
+    Snapservice.DailyRetention:
+      required:
+      - hour
+      - retention
+      type: object
+      properties:
+        hour:
+          type: integer
+          description: |-
+            Specifies the hour of the day, around which a replica snapshot is to be retained. The actual time when the snapshot is chosen might not be accurate since it depends on replica snapshots to be available as per the short term retention. Its value scope is [0, 1, 2, ..., 23]
+
+            This property was added in __vSphere API 9.1.0.0__.
+          format: int64
+        retention:
+          description: |-
+            Total retention period for the snapshots.
+
+            This property was added in __vSphere API 9.1.0.0__.
+          allOf:
+          - $ref: "#/components/schemas/Snapservice.TimePeriod"
+      description: |-
+        The Snapservice.DailyRetention schema contains properties that describe the daily retention settings for a given protection group with Snapservice.ReplicationPolicy enabled.
+
+        This schema was added in __vSphere API 9.1.0.0__.
+    Snapservice.WeeklyRetention:
+      required:
+      - day_of_week
+      - hour
+      - retention
+      type: object
+      properties:
+        hour:
+          type: integer
+          description: |-
+            Specifies the hour of the day, around which a replica snapshot is to be retained. The actual time when the snapshot is chosen might not be accurate since it depends on replica snapshots to be available as per the short term retention. Its value scope is [0, 1, 2, ..., 23]
+
+            This property was added in __vSphere API 9.1.0.0__.
+          format: int64
+        day_of_week:
+          type: string
+          description: |-
+            Specifies the day of week at which a replica snapshot is selected for long term retention.
+
+            Possible values:
+              - `SUNDAY`: Sunday
+              - `MONDAY`: Monday
+              - `TUESDAY`: Tuesday
+              - `WEDNESDAY`: Wednesday
+              - `THURSDAY`: Thursday
+              - `FRIDAY`: Friday
+              - `SATURDAY`: Saturday
+
+
+            For more information see: *Snapservice.DayOfWeek*.
+
+            This property was added in __vSphere API 9.1.0.0__.
+        retention:
+          description: |-
+            Total retention period for the snapshots.
+
+            This property was added in __vSphere API 9.1.0.0__.
+          allOf:
+          - $ref: "#/components/schemas/Snapservice.TimePeriod"
+      description: |-
+        The Snapservice.WeeklyRetention schema contains properties that describe the weekly retention settings for a given protection group with Snapservice.ReplicationPolicy enabled.
+
+        This schema was added in __vSphere API 9.1.0.0__.
+    Snapservice.MonthlyRetention:
+      required:
+      - day_of_month
+      - hour
+      - retention
+      type: object
+      properties:
+        hour:
+          type: integer
+          description: |-
+            Specifies the hour of the day, around which a replica snapshot is to be retained. The actual time when the snapshot is chosen might not be accurate since it depends on replica snapshots to be available as per the short term retention. Its value scope is [0, 1, 2, ..., 23]
+
+            This property was added in __vSphere API 9.1.0.0__.
+          format: int64
+        day_of_month:
+          type: integer
+          description: |-
+            Specifies the day of month at which a replica snapshot is selected for long term retention. Its value scope is [1, 2, ..., 30, 31]
+
+            This property was added in __vSphere API 9.1.0.0__.
+          format: int64
+        retention:
+          description: |-
+            Total retention period for the snapshots.
+
+            This property was added in __vSphere API 9.1.0.0__.
+          allOf:
+          - $ref: "#/components/schemas/Snapservice.TimePeriod"
+      description: |-
+        The Snapservice.MonthlyRetention schema contains properties that describe the monthly retention settings for a given protection group with Snapservice.ReplicationPolicy enabled.
+
+        This schema was added in __vSphere API 9.1.0.0__.
     Snapservice.RetentionConfig:
       required:
       - frequency
@@ -4422,10 +6123,135 @@ components:
             This property was added in __vSphere API 9.0.0.0__.
           allOf:
           - $ref: "#/components/schemas/Snapservice.ShortTermRetention"
+        long_term:
+          description: |-
+            Holds long term snapshot retention settings for the replication policy.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            if missing or `null` long term retention policies are not applicable.
+          allOf:
+          - $ref: "#/components/schemas/Snapservice.LongTermRetention"
       description: |-
         The Snapservice.RetentionPolicy schema contains properties that describe the policy for retention of the snapshots created for protection group members on the target replication site.
 
         This schema was added in __vSphere API 9.0.0.0__.
+    Snapservice.ReplicationTargetConfiguration:
+      type: object
+      properties:
+        use_replica_seed:
+          type: boolean
+          description: |-
+            Specify if replica seed should be used for virtual machine replication.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            if missing or `null` use the protection group level settings.
+        storage_spec:
+          description: |-
+            Specify the target storage spec for virtual machine replication.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            if missing or `null` protection group level config will be used.
+          allOf:
+          - $ref: "#/components/schemas/Snapservice.VmTargetStorageSpec"
+      description: |-
+        The Snapservice.ReplicationTargetConfiguration schema contains properties to configure the target for replication. At least one of the fields needs to be specified when updating the configuration.
+
+        This schema was added in __vSphere API 9.1.0.0__.
+    Snapservice.VmReplicationConfigParams:
+      type: object
+      properties:
+        target_config:
+          description: |-
+            Specify if replication target override should be configured for virtual machine replication.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            if missing or `null` use the protection group level settings.
+          allOf:
+          - $ref: "#/components/schemas/Snapservice.ReplicationTargetConfiguration"
+      description: |-
+        The Snapservice.VmReplicationConfigParams schema contains properties to configure virtual machine replication. At least one of the fields needs to be specified when updating the replication configuration.
+
+        This schema was added in __vSphere API 9.1.0.0__.
+    Snapservice.VmReplicationConfigSpec:
+      required:
+      - config_params
+      - vm
+      type: object
+      properties:
+        vm:
+          type: string
+          description: |-
+            Identifier of the virtual machine.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            When clients pass a value of this schema as a parameter, the property must be an identifier for the resource type: `VirtualMachine`. When operations return a value of this schema as a response, the property will be an identifier for the resource type: `VirtualMachine`.
+        config_params:
+          description: |-
+            Virtual machine replication configuration parameters.
+
+            This property was added in __vSphere API 9.1.0.0__.
+          allOf:
+          - $ref: "#/components/schemas/Snapservice.VmReplicationConfigParams"
+      description: |-
+        The Snapservice.VmReplicationConfigSpec schema contains properties that describe the settings to configure virtual machine replication.
+
+        This schema was added in __vSphere API 9.1.0.0__.
+    Snapservice.TargetEntityReplicationSpec:
+      type: object
+      properties:
+        vm_replication_specs:
+          type: array
+          description: |-
+            Optional list of virtual machine specific replication configuration. Only unique vms can be specified in the list of replication configurations. This is mandatory for the current release, but we are keeping it optional for future use-cases.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            if missing or `null` no virtual machine specific replication configuration overrides.
+          items:
+            $ref: "#/components/schemas/Snapservice.VmReplicationConfigSpec"
+      description: |-
+        The Snapservice.TargetEntityReplicationSpec schema contains properties that describe the settings to configure target entity replication. Currently, we only support virtual machines as a target entity.
+
+        This schema was added in __vSphere API 9.1.0.0__.
+    Snapservice.TargetStorageSpec:
+      type: object
+      properties:
+        target_datastore:
+          type: string
+          description: |-
+            Target datastore.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            This property is being kept optional for future use-cases, but mandatory in the current version.
+
+            When clients pass a value of this schema as a parameter, the property must be an identifier for the resource type: `Datastore`. When operations return a value of this schema as a response, the property will be an identifier for the resource type: `Datastore`.
+      description: |-
+        The Snapservice.TargetStorageSpec schema contains properties that describe the settings to configure target storage for the replication.
+
+        This schema was added in __vSphere API 9.1.0.0__.
+    Snapservice.VmTargetStorageSpec:
+      type: object
+      properties:
+        target_datastore:
+          type: string
+          description: |-
+            Target datastore.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            This property is being kept optional for future use-cases, but mandatory in the current version.
+
+            When clients pass a value of this schema as a parameter, the property must be an identifier for the resource type: `Datastore`. When operations return a value of this schema as a response, the property will be an identifier for the resource type: `Datastore`.
+      description: |-
+        The Snapservice.VmTargetStorageSpec schema contains properties that describe the settings to configure virtual machine level target storage for the replication.
+
+        This schema was added in __vSphere API 9.1.0.0__.
     Snapservice.ReplicationPolicy:
       required:
       - recovery_point_objective
@@ -4451,13 +6277,49 @@ components:
           - $ref: "#/components/schemas/Snapservice.TimePeriod"
         snapshot_retention:
           description: |-
-            Snapshot retention policy for remote site
+            Snapshot retention policy for remote site.
 
             This property was added in __vSphere API 9.0.0.0__.
           allOf:
           - $ref: "#/components/schemas/Snapservice.RetentionPolicy"
+        use_replica_seed:
+          type: boolean
+          description: "Specify if replica seed on destination should be used for\
+            \ initial sync. This flag applies to all protection group member entities,\
+            \ unless overridden for the individual target entity. \n\n During edit\
+            \ workflow, if the value of the flag is changed, the updated value would\
+            \ apply only to - existing member entities where no override is set and\
+            \ replication has not yet been configured, either due to a failure or\
+            \ any other delay. - new incoming member entities where no override is\
+            \ set.\n\nThis property was added in __vSphere API 9.1.0.0__.\n\nThis\
+            \ property is optional because it was added in a newer version than its\
+            \ parent node."
+        storage_spec:
+          description: "Target storage spec for all the VMs configured with this protection\
+            \ group. This spec applies to all protection group member entities, unless\
+            \ overridden for the individual target entity. \n\n During an edit workflow,\
+            \ if the spec is changed, the updated value would apply only to existing\
+            \ member entities where no override is set and replication has not yet\
+            \ been configured, either due to a failure or any other delay. In new\
+            \ incoming member entities where no override is set.\n\nThis property\
+            \ was added in __vSphere API 9.1.0.0__.\n\nif missing or `null` snap service\
+            \ will try to determine target datastore."
+          allOf:
+          - $ref: "#/components/schemas/Snapservice.TargetStorageSpec"
+        target_entity_replication_spec:
+          description: "Optional target entity policies to override protection group\
+            \ level replication policy settings. \n\n Target entity overrides can\
+            \ only be applied to incoming member entities, eg. new vms added to a\
+            \ protection group during edit protection group operation. In order to\
+            \ update the replication settings for an existing member entity, the target\
+            \ entity specific update API should be used. \n\n The member entity overrides\
+            \ are not displayed as a part of protection group List/Get operations.\n\
+            \nThis property was added in __vSphere API 9.1.0.0__.\n\nif missing or\
+            \ `null` the member entities will use the protection group level setting."
+          allOf:
+          - $ref: "#/components/schemas/Snapservice.TargetEntityReplicationSpec"
       description: |-
-        The Snapservice.ReplicationPolicy schema contains properties that describe the settings to configure replication for a given protection group
+        The Snapservice.ReplicationPolicy schema contains properties that describe the settings to configure replication for a given protection group.
 
         This schema was added in __vSphere API 9.0.0.0__.
     Snapservice.ProtectionGroupSpec:
@@ -4551,6 +6413,16 @@ components:
             Set if replication needs to be configured. Currently only one policy is supported
           items:
             $ref: "#/components/schemas/Snapservice.ReplicationPolicy"
+        locked:
+          type: boolean
+          description: "Indicates if the protection group is to be locked. A locked\
+            \ protection group cannot be modified or deleted by the user. All snapshots\
+            \ associated with the protection group will be secure and cannot be deleted.\
+            \ The system will automatically delete these snapshots upon expiry based\
+            \ on the retention period. \n\n Setting this field to false for an immutable\
+            \ protection group will not be supported.\n\nThis property was added in\
+            \ __vSphere API 9.1.0.0__.\n\nif missing or `null`, existing configuration\
+            \ will be retained."
       description: |-
         The Snapservice.ProtectionGroupUpdateSpec schema contains properties that describe the desired protection group and the snapshot policies associated with it. A protection group is a group of entities that vSAN Snapshot Service protects together.
 
@@ -4588,9 +6460,41 @@ components:
             \ API 9.0.0.0__.\n  - `RECOVERY`: Recovery state. \n\n Indicates the protection\
             \ group is in a recovery state. In this state site recovery operations\
             \ can be initiated in case of planned migration and unplanned failover.\
-            \ \n\nThis constant was added in __vSphere API 9.0.0.0__.\n\n\nFor more\
-            \ information see: *Snapservice.ProtectionGroupStatus*.\n\nThis property\
-            \ was added in __vSphere API 8.0.3.0__."
+            \ \n\nThis constant was added in __vSphere API 9.0.0.0__.\n  - `DORMANT_RANSOMWARE_RECOVERY`:\
+            \ Dormant ransomware recovery state. \n\n Indicates the dormant protection\
+            \ group is undergoing ransomware recovery. In this state protection group\
+            \ state can be transitioned to DORMANT or DORMANT_PARTIAL_RECOVERY when\
+            \ end ransomware recovery operation is initiated. \n\nThis constant was\
+            \ added in __vSphere API 9.1.0.0__.\n  - `DORMANT_PARTIAL_RECOVERY`: Dormant\
+            \ partial recovery state. \n\n Indicates some of the virtual machines\
+            \ from dormant protection group have been recovered on the recovery site.\
+            \ In this state protection group state can be transitioned to DORMANT_RANSOMWARE_RECOVERY\
+            \ when start ransomware recovery operation is initiated. \n\nThis constant\
+            \ was added in __vSphere API 9.1.0.0__.\n  - `ACTIVE_RANSOMWARE_RECOVERY`:\
+            \ Active ransomware recovery state. \n\n Indicates that a ransomware recovery\
+            \ operation is being performed on the recovery site for one or more virtual\
+            \ machines in the active protection group. In this state protection group\
+            \ state can be transitioned to ACTIVE or ACTIVE_PARTIAL_RECOVERY when\
+            \ end ransomware recovery operation is initiated. \n\nThis constant was\
+            \ added in __vSphere API 9.1.0.0__.\n  - `ACTIVE_PARTIAL_RECOVERY`: Active\
+            \ partial recovery state. \n\n Indicates some of the virtual machines\
+            \ from active protection group have been recovered on the recovery site.\
+            \ In this state protection group state can be transitioned to ACTIVE_RANSOMWARE_RECOVERY\
+            \ when start ransomware recovery operation is initiated. \n\nThis constant\
+            \ was added in __vSphere API 9.1.0.0__.\n  - `PAUSED_RANSOMWARE_RECOVERY`:\
+            \ Paused ransomware recovery state. \n\n Indicates that a ransomware recovery\
+            \ operation is being performed on the recovery site for one or more virtual\
+            \ machines in the paused protection group In this state protection group\
+            \ state can be transitioned to PAUSED or PAUSED_PARTIAL_RECOVERY when\
+            \ end ransomware recovery operation is initiated. \n\nThis constant was\
+            \ added in __vSphere API 9.1.0.0__.\n  - `PAUSED_PARTIAL_RECOVERY`: Paused\
+            \ partial recovery state. \n\n Indicates some of the virtual machines\
+            \ from paused protection group have been recovered on the recovery site.\
+            \ In this state protection group state can be transitioned to PAUSED_RANSOMWARE_RECOVERY\
+            \ when start ransomware recovery operation is initiated. \n\nThis constant\
+            \ was added in __vSphere API 9.1.0.0__.\n\n\nFor more information see:\
+            \ *Snapservice.ProtectionGroupStatus*.\n\nThis property was added in __vSphere\
+            \ API 8.0.3.0__."
         target_entities:
           description: |-
             User provided target entities that must belong to the protection group.
@@ -4674,6 +6578,126 @@ components:
         The Snapservice.ProtectionGroupInfo schema contains properties that provide detailed information regarding the protection group and the snapshot policies associated with it.
 
         This schema was added in __vSphere API 8.0.3.0__.
+    Snapservice.TagRule:
+      required:
+      - operator
+      - tags
+      type: object
+      properties:
+        tags:
+          type: array
+          description: |-
+            List of tag identifiers.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            When clients pass a value of this schema as a parameter, the property must contain identifiers for the resource type: `Tag`. When operations return a value of this schema as a response, the property will contain identifiers for the resource type: `Tag`.
+          items:
+            type: string
+        operator:
+          type: string
+          description: |-
+            Logical operator for the tags. This specifies how to join the tags within the tag IDs list above.
+
+            Possible values:
+              - `AND`: All rule sets should satisfy the criteria.
+              - `OR`: Any rule set can satisfy the criteria.
+
+
+            For more information see: *Snapservice.LogicalOperator*.
+
+            This property was added in __vSphere API 9.1.0.0__.
+      description: |-
+        The Snapservice.TagRule schema contains properties that provide the list of tags and joining strategy for the tags.
+
+        This schema was added in __vSphere API 9.1.0.0__.
+    Snapservice.VmMembershipInfo:
+      required:
+      - membership_change_reasons
+      - membership_change_type
+      - protection_groups
+      - vm
+      - vm_name
+      type: object
+      properties:
+        vm:
+          type: string
+          description: |-
+            Identifier of the virtual machine.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            When clients pass a value of this schema as a parameter, the property must be an identifier for the resource type: `VirtualMachine`. When operations return a value of this schema as a response, the property will be an identifier for the resource type: `VirtualMachine`.
+        vm_name:
+          type: string
+          description: |-
+            Name of the virtual machine.
+
+            This property was added in __vSphere API 9.1.0.0__.
+        protection_groups:
+          uniqueItems: true
+          type: array
+          description: |-
+            Identifiers of the protection groups that the virtual machine belongs to.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            When clients pass a value of this schema as a parameter, the property must contain identifiers for the resource type: `com.vmware.snapservice.protection_group`. When operations return a value of this schema as a response, the property will contain identifiers for the resource type: `com.vmware.snapservice.protection_group`.
+          items:
+            type: string
+        membership_change_type:
+          type: string
+          description: |-
+            The change type represents the change of relationship between the virtual machine and protection group.
+
+            Possible values:
+              - `ADD`: The virtual machine is added to protection group.
+              - `REMOVE`: The virtual machine is removed from protection group.
+              - `EXCLUDE`: The virtual machine is excluded from protection group by filter conditions.
+              - `EXISTING`: The virtual machine already exists in protection group, and keeps existing.
+
+
+            For more information see: *Snapservice.MembershipChangeType*.
+
+            This property was added in __vSphere API 9.1.0.0__.
+        membership_change_reasons:
+          type: array
+          description: |-
+            The reasons for membershipChangeType. There may be several reasons in one change.
+
+            This property was added in __vSphere API 9.1.0.0__.
+          items:
+            $ref: "#/components/schemas/Vapi.Std.LocalizableMessage"
+      description: |-
+        The Snapservice.VmMembershipInfo schema contains information about a virtual machine.
+
+        This schema was added in __vSphere API 9.1.0.0__.
+    Snapservice.MemberEntities:
+      required:
+      - excluded_vms
+      - included_vms
+      type: object
+      properties:
+        included_vms:
+          type: array
+          description: |-
+            The virtual machines with membershipChangeType ADD or EXISTING. The list is empty if the protection group will have no virtual machines based on the provided ComputeMembersSpec.
+
+            This property was added in __vSphere API 9.1.0.0__.
+          items:
+            $ref: "#/components/schemas/Snapservice.VmMembershipInfo"
+        excluded_vms:
+          type: array
+          description: |-
+            The virtual machines with membershipChangeType REMOVE or EXCLUDE. The list is empty if there is no virtual machines to be ineligible or removed from protection group based on the provided ComputeMembersSpec.
+
+            This property was added in __vSphere API 9.1.0.0__.
+          items:
+            $ref: "#/components/schemas/Snapservice.VmMembershipInfo"
+      description: |-
+        The Snapservice.MemberEntities schema contains kinds of membership information.
+
+        This schema was added in __vSphere API 9.1.0.0__.
     Snapservice.Reason:
       required:
       - messages
@@ -4690,6 +6714,23 @@ components:
         The Snapservice.Reason contains the details of the data protection reason for the respective error/warning.
 
         This schema was added in __vSphere API 9.0.0.0__.
+    Snapservice.Capability.CapabilityInfo:
+      required:
+      - capabilities
+      type: object
+      properties:
+        capabilities:
+          type: array
+          description: |-
+            Capabilities of a relevant entity.
+
+            This property was added in __vSphere API 9.1.0.0__.
+          items:
+            type: string
+      description: |-
+        The Snapservice.Capability.CapabilityInfo schema contains capabilities information of a relevant entity.
+
+        This schema was added in __vSphere API 9.1.0.0__.
     Snapservice.ClusterPairs.ConnectionStatus:
       type: string
       description: |-
@@ -4963,6 +7004,51 @@ components:
         The Snapservice.ClusterPairs.ListResult schema represents the result of *GET /snapservice/cluster-pairs* operation.
 
         This schema was added in __vSphere API 9.0.0.0__.
+    Snapservice.ProtectionGroups.ComputeMembersSpec:
+      type: object
+      properties:
+        create_spec:
+          description: |-
+            Field createSpec is the spec that would be used to create the protection group.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            If missing or `null`, this is not a preview request for creating protection group.
+          allOf:
+          - $ref: "#/components/schemas/Snapservice.ProtectionGroupSpec"
+        update_spec:
+          description: |-
+            Field updateSpec is the spec that would be used to update the protection group.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            If missing or `null`, this is not a preview request for updating protection group.
+          allOf:
+          - $ref: "#/components/schemas/Snapservice.ProtectionGroupUpdateSpec"
+        protection_group:
+          type: string
+          description: |-
+            Identifier of the protection group. Used in combination with updateSpec, indicating the protection group to be updated.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            If missing or `null` or empty, createSpec must be set.
+
+            When clients pass a value of this schema as a parameter, the property must be an identifier for the resource type: `com.vmware.snapservice.protection_group`. When operations return a value of this schema as a response, the property will be an identifier for the resource type: `com.vmware.snapservice.protection_group`.
+        cluster_id:
+          type: string
+          description: |-
+            The cluster on which the protection group is or is going to be created.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            This field might be removed in future.
+
+            When clients pass a value of this schema as a parameter, the property must be an identifier for the resource type: `ClusterComputeResource`. When operations return a value of this schema as a response, the property will be an identifier for the resource type: `ClusterComputeResource`.
+      description: |-
+        The Snapservice.ProtectionGroups.ComputeMembersSpec schema is used to provide the create or update configuration spec for a protection group when checking which virtual machines will become protected as part of it. See *POST /snapservice/protection-groups?action=compute-members* operation
+
+        This schema was added in __vSphere API 9.1.0.0__.
     Snapservice.Sessions.Info:
       required:
       - created_time
@@ -5848,10 +7934,42 @@ components:
             \ API 9.0.0.0__.\n  - `RECOVERY`: Recovery state. \n\n Indicates the protection\
             \ group is in a recovery state. In this state site recovery operations\
             \ can be initiated in case of planned migration and unplanned failover.\
-            \ \n\nThis constant was added in __vSphere API 9.0.0.0__.\n\n\nFor more\
-            \ information see: *Snapservice.ProtectionGroupStatus*.\n\nThis property\
-            \ was added in __vSphere API 8.0.3.0__.\n\nIf missing or `null` or empty,\
-            \ protection groups with any state match the filter."
+            \ \n\nThis constant was added in __vSphere API 9.0.0.0__.\n  - `DORMANT_RANSOMWARE_RECOVERY`:\
+            \ Dormant ransomware recovery state. \n\n Indicates the dormant protection\
+            \ group is undergoing ransomware recovery. In this state protection group\
+            \ state can be transitioned to DORMANT or DORMANT_PARTIAL_RECOVERY when\
+            \ end ransomware recovery operation is initiated. \n\nThis constant was\
+            \ added in __vSphere API 9.1.0.0__.\n  - `DORMANT_PARTIAL_RECOVERY`: Dormant\
+            \ partial recovery state. \n\n Indicates some of the virtual machines\
+            \ from dormant protection group have been recovered on the recovery site.\
+            \ In this state protection group state can be transitioned to DORMANT_RANSOMWARE_RECOVERY\
+            \ when start ransomware recovery operation is initiated. \n\nThis constant\
+            \ was added in __vSphere API 9.1.0.0__.\n  - `ACTIVE_RANSOMWARE_RECOVERY`:\
+            \ Active ransomware recovery state. \n\n Indicates that a ransomware recovery\
+            \ operation is being performed on the recovery site for one or more virtual\
+            \ machines in the active protection group. In this state protection group\
+            \ state can be transitioned to ACTIVE or ACTIVE_PARTIAL_RECOVERY when\
+            \ end ransomware recovery operation is initiated. \n\nThis constant was\
+            \ added in __vSphere API 9.1.0.0__.\n  - `ACTIVE_PARTIAL_RECOVERY`: Active\
+            \ partial recovery state. \n\n Indicates some of the virtual machines\
+            \ from active protection group have been recovered on the recovery site.\
+            \ In this state protection group state can be transitioned to ACTIVE_RANSOMWARE_RECOVERY\
+            \ when start ransomware recovery operation is initiated. \n\nThis constant\
+            \ was added in __vSphere API 9.1.0.0__.\n  - `PAUSED_RANSOMWARE_RECOVERY`:\
+            \ Paused ransomware recovery state. \n\n Indicates that a ransomware recovery\
+            \ operation is being performed on the recovery site for one or more virtual\
+            \ machines in the paused protection group In this state protection group\
+            \ state can be transitioned to PAUSED or PAUSED_PARTIAL_RECOVERY when\
+            \ end ransomware recovery operation is initiated. \n\nThis constant was\
+            \ added in __vSphere API 9.1.0.0__.\n  - `PAUSED_PARTIAL_RECOVERY`: Paused\
+            \ partial recovery state. \n\n Indicates some of the virtual machines\
+            \ from paused protection group have been recovered on the recovery site.\
+            \ In this state protection group state can be transitioned to PAUSED_RANSOMWARE_RECOVERY\
+            \ when start ransomware recovery operation is initiated. \n\nThis constant\
+            \ was added in __vSphere API 9.1.0.0__.\n\n\nFor more information see:\
+            \ *Snapservice.ProtectionGroupStatus*.\n\nThis property was added in __vSphere\
+            \ API 8.0.3.0__.\n\nIf missing or `null` or empty, protection groups with\
+            \ any state match the filter."
           items:
             type: string
         vms:
@@ -5947,19 +8065,22 @@ components:
         The Snapservice.Clusters.VirtualMachines.ReplicationStatus enumerated type contains the supported values for the replication status of a virtual machine.
 
         Possible values:
-          - `ERROR`: The group has replication or configuration errors
-          - `MOVING`: The group is in the process of being moved to a different HBR server
-          - `CONFIGURING`: The group is in the process of being configured or re-configured
-          - `PAUSED`: The replication for this group is being paused
-          - `FULL_SYNC`: Full sync is performed on this group
+          - `ERROR`: The virtual machine has replication errors. See also CONFIGURATION_ERROR.
+          - `MOVING`: The virtual machine is in the process of being moved to a different HBR server.
+          - `CONFIGURING`: Replication is in the process of being configured or re-configured.
+          - `PAUSED`: The replication is being paused.
+          - `FULL_SYNC`: Full sync is performed on this virtual machine.
           - `INITIAL_FULL_SYNC`: Initial full sync is performed, this state happens only once in a group's lifetime
-          - `SYNC`: There is live replication traffic for this group
-          - `NOT_ACTIVE`: There is no replication trafic for this group and there are no opened connecitons for it.
-          - `OK`: The group is configured properly, no configuration or replication errors are present. But no actual replication traffic is taking place at the moment.
-          - `UNKNOWN`: The group's status cannot be determined.
-          - `RECOVERING`: A recovery is being performed on this group.
-          - `RECOVERED`: The replication group has been successfully recovered.
-          - `DISK_RESIZING`: Some of the target disks are currently resizing
+          - `SYNC`: There is live replication traffic.
+          - `NOT_ACTIVE`: There is no replication traffic and there are no opened connections for it.
+          - `OK`: The virtual machine replication is configured properly, no configuration or replication errors are present. But no actual replication traffic is taking place at the moment.
+          - `UNKNOWN`: The replication status cannot be determined.
+          - `RECOVERING`: A recovery is being performed.
+          - `RECOVERED`: The virtual machine has been successfully recovered.
+          - `DISK_RESIZING`: Some of the target disks are currently resizing.
+          - `CONFIGURATION_ERROR`: The virtual machine has replication configuration errors.
+
+        This constant was added in __vSphere API 9.1.0.0__.
 
 
         This enumeration was added in __vSphere API 9.0.0.0__.
@@ -5977,6 +8098,25 @@ components:
       - RECOVERING
       - RECOVERED
       - DISK_RESIZING
+      - CONFIGURATION_ERROR
+    Snapservice.Clusters.VirtualMachines.ReplicationErrorType:
+      type: string
+      description: |-
+        The Snapservice.Clusters.VirtualMachines.ReplicationErrorType enumerated type contains the supported values for the replication error types of a virtual machine. NOTE: This list of errors is not exhaustive. It includes only known cases that the user can take action for.
+
+        Possible values:
+          - `INSUFFICIENT_LICENSE`: Virtual machine replication configuration failed due to invalid license.
+          - `INVALID_SEED`: Virtual machine replication configuration failed due to seeding configuration error.
+          - `INVALID_TARGET_DATASTORE`: Virtual machine replication configuration failed due to datastore configuration error.
+          - `UNKNOWN`: Virtual machine replication failed due to unknown error.
+
+
+        This enumeration was added in __vSphere API 9.1.0.0__.
+      enum:
+      - INSUFFICIENT_LICENSE
+      - INVALID_SEED
+      - INVALID_TARGET_DATASTORE
+      - UNKNOWN
     Snapservice.Clusters.VirtualMachines.FilterSpec:
       type: object
       properties:
@@ -6004,19 +8144,22 @@ components:
             Replication state for the virtual machine.
 
             Possible values:
-              - `ERROR`: The group has replication or configuration errors
-              - `MOVING`: The group is in the process of being moved to a different HBR server
-              - `CONFIGURING`: The group is in the process of being configured or re-configured
-              - `PAUSED`: The replication for this group is being paused
-              - `FULL_SYNC`: Full sync is performed on this group
+              - `ERROR`: The virtual machine has replication errors. See also CONFIGURATION_ERROR.
+              - `MOVING`: The virtual machine is in the process of being moved to a different HBR server.
+              - `CONFIGURING`: Replication is in the process of being configured or re-configured.
+              - `PAUSED`: The replication is being paused.
+              - `FULL_SYNC`: Full sync is performed on this virtual machine.
               - `INITIAL_FULL_SYNC`: Initial full sync is performed, this state happens only once in a group's lifetime
-              - `SYNC`: There is live replication traffic for this group
-              - `NOT_ACTIVE`: There is no replication trafic for this group and there are no opened connecitons for it.
-              - `OK`: The group is configured properly, no configuration or replication errors are present. But no actual replication traffic is taking place at the moment.
-              - `UNKNOWN`: The group's status cannot be determined.
-              - `RECOVERING`: A recovery is being performed on this group.
-              - `RECOVERED`: The replication group has been successfully recovered.
-              - `DISK_RESIZING`: Some of the target disks are currently resizing
+              - `SYNC`: There is live replication traffic.
+              - `NOT_ACTIVE`: There is no replication traffic and there are no opened connections for it.
+              - `OK`: The virtual machine replication is configured properly, no configuration or replication errors are present. But no actual replication traffic is taking place at the moment.
+              - `UNKNOWN`: The replication status cannot be determined.
+              - `RECOVERING`: A recovery is being performed.
+              - `RECOVERED`: The virtual machine has been successfully recovered.
+              - `DISK_RESIZING`: Some of the target disks are currently resizing.
+              - `CONFIGURATION_ERROR`: The virtual machine has replication configuration errors.
+
+            This constant was added in __vSphere API 9.1.0.0__.
 
 
             For more information see: *Snapservice.Clusters.VirtualMachines.ReplicationStatus*.
@@ -6029,17 +8172,37 @@ components:
 
             This property was added in __vSphere API 9.0.0.0__.
 
-            This property is optional and it is only relevant when the value of status is *Snapservice.Clusters.VirtualMachines.ReplicationStatus.ERROR*.
+            This property is optional and it is only relevant when the value of status is one of *Snapservice.Clusters.VirtualMachines.ReplicationStatus.ERROR* or *Snapservice.Clusters.VirtualMachines.ReplicationStatus.CONFIGURATION_ERROR*.
           items:
             $ref: "#/components/schemas/Snapservice.Reason"
         license_failure:
           type: boolean
           description: |-
+            This property is deprecated.
+
             Virtual machine replication configuration failed due to invalid license.
 
             This property was added in __vSphere API 9.0.0.0__.
 
-            This property is optional and it is only relevant when the value of status is *Snapservice.Clusters.VirtualMachines.ReplicationStatus.ERROR*.
+            This property is optional and it is only relevant when the value of status is one of *Snapservice.Clusters.VirtualMachines.ReplicationStatus.ERROR* or *Snapservice.Clusters.VirtualMachines.ReplicationStatus.CONFIGURATION_ERROR*.
+          deprecated: true
+        error_type:
+          type: string
+          description: |-
+            Virtual machine replication error type.
+
+            Possible values:
+              - `INSUFFICIENT_LICENSE`: Virtual machine replication configuration failed due to invalid license.
+              - `INVALID_SEED`: Virtual machine replication configuration failed due to seeding configuration error.
+              - `INVALID_TARGET_DATASTORE`: Virtual machine replication configuration failed due to datastore configuration error.
+              - `UNKNOWN`: Virtual machine replication failed due to unknown error.
+
+
+            For more information see: *Snapservice.Clusters.VirtualMachines.ReplicationErrorType*.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            This property is optional and it is only relevant when the value of status is one of *Snapservice.Clusters.VirtualMachines.ReplicationStatus.ERROR* or *Snapservice.Clusters.VirtualMachines.ReplicationStatus.CONFIGURATION_ERROR*.
         cluster_pair:
           type: string
           description: |-
@@ -6048,6 +8211,27 @@ components:
             This property was added in __vSphere API 9.0.0.0__.
 
             When clients pass a value of this schema as a parameter, the property must be an identifier for the resource type: `com.vmware.snapservice.cluster_pair`. When operations return a value of this schema as a response, the property will be an identifier for the resource type: `com.vmware.snapservice.cluster_pair`.
+        replica_datastores:
+          type: array
+          description: |-
+            Replica datastores for which the virtual machine replication is configured.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            This property is optional because it was added in a newer version than its parent node.
+
+            When clients pass a value of this schema as a parameter, the property must contain identifiers for the resource type: `Datastore`. When operations return a value of this schema as a response, the property will contain identifiers for the resource type: `Datastore`.
+          items:
+            type: string
+        rpo_violation:
+          description: |-
+            The RecoveryPointObjective(RPO) violation for the virtual machine replication.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            missing or `null` if there is no rpo violation for the virtual machine.
+          allOf:
+          - $ref: "#/components/schemas/Snapservice.TimePeriod"
       description: |-
         The Snapservice.Clusters.VirtualMachines.ReplicationInfo schema contains properties that provide information regarding the replication configuration for a virtual machine.
 
@@ -6057,7 +8241,7 @@ components:
       properties:
         incoming_replication:
           description: |-
-            Provides the information rergarding the incoming replication for the virtual machine.
+            Provides the information regarding the incoming replication for the virtual machine.
 
             This property was added in __vSphere API 9.0.0.0__.
 
@@ -6067,7 +8251,7 @@ components:
         outgoing_replications:
           type: array
           description: |-
-            Provides the information rergarding the outgoing replications for the virtual machine.
+            Provides the information regarding the outgoing replications for the virtual machine.
 
             This property was added in __vSphere API 9.0.0.0__.
 
@@ -6093,6 +8277,14 @@ components:
             Name of the virtual machine.
 
             This property was added in __vSphere API 8.0.3.0__.
+        bios_uuid:
+          type: string
+          description: |-
+            128-bit SMBIOS UUID of a virtual machine represented as a hexadecimal string in "12345678-abcd-1234-cdef-123456789abc" format.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            This property is optional because it was added in a newer version than its parent node.
         local_protection_enabled:
           type: boolean
           description: |-
@@ -6542,6 +8734,16 @@ components:
             This property was added in __vSphere API 8.0.3.0__.
           items:
             $ref: "#/components/schemas/Snapservice.Clusters.ProtectionGroups.Snapshots.VmSnapshotSummary"
+        labels:
+          type: array
+          description: |-
+            All the labels associated with this Snapshot.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            missing or `null` if the snapshot does not have any labels this will be empty
+          items:
+            $ref: "#/components/schemas/Snapservice.Snapshots.Label"
       description: |-
         Information regarding a protection group snapshot.
 
@@ -6685,6 +8887,9 @@ components:
           - `SCHEDULED`: Indicates that a snapshot was taken as part of a periodic schedule.
           - `ONE_TIME`: Indicates that the snapshot was taken as a one time operation triggered by the user.
           - `SYSTEM_CREATED`: Indicates that the snapshot was taken by the system
+          - `STAGED`: Indicates that the vm snapshot was taken as part of a ransomware recovery staging operation.
+
+        This constant was added in __vSphere API 9.1.0.0__.
 
 
         This enumeration was added in __vSphere API 8.0.3.0__.
@@ -6692,6 +8897,7 @@ components:
       - SCHEDULED
       - ONE_TIME
       - SYSTEM_CREATED
+      - STAGED
     Snapservice.Clusters.VirtualMachines.Snapshots.FilterSpec:
       type: object
       properties:
@@ -6740,6 +8946,9 @@ components:
               - `SCHEDULED`: Indicates that a snapshot was taken as part of a periodic schedule.
               - `ONE_TIME`: Indicates that the snapshot was taken as a one time operation triggered by the user.
               - `SYSTEM_CREATED`: Indicates that the snapshot was taken by the system
+              - `STAGED`: Indicates that the vm snapshot was taken as part of a ransomware recovery staging operation.
+
+            This constant was added in __vSphere API 9.1.0.0__.
 
 
             For more information see: *Snapservice.Clusters.VirtualMachines.Snapshots.Type*.
@@ -6775,6 +8984,9 @@ components:
               - `SCHEDULED`: Indicates that a snapshot was taken as part of a periodic schedule.
               - `ONE_TIME`: Indicates that the snapshot was taken as a one time operation triggered by the user.
               - `SYSTEM_CREATED`: Indicates that the snapshot was taken by the system
+              - `STAGED`: Indicates that the vm snapshot was taken as part of a ransomware recovery staging operation.
+
+            This constant was added in __vSphere API 9.1.0.0__.
 
 
             For more information see: *Snapservice.Clusters.VirtualMachines.Snapshots.Type*.
@@ -6824,6 +9036,16 @@ components:
             This property was added in __vSphere API 8.0.3.0__.
           items:
             $ref: "#/components/schemas/Snapservice.Clusters.VirtualMachines.Disks.Snapshots.Info"
+        labels:
+          type: array
+          description: |-
+            All the labels associated with this Snapshot. if the snapshot does not have any labels this will be empty
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            This property is optional because it was added in a newer version than its parent node.
+          items:
+            $ref: "#/components/schemas/Snapservice.Snapshots.Label"
       description: |-
         Information regarding a virtual machine snapshot.
 
@@ -6923,6 +9145,21 @@ components:
         The Snapservice.Info.About.Info schema contains information about the snapshot service.
 
         This schema was added in __vSphere API 8.0.3.0__.
+    Snapservice.Reports.Clusters.ProtectionGroups.FilterSpec:
+      required:
+      - replication
+      type: object
+      properties:
+        replication:
+          type: boolean
+          description: |-
+            Indicates whether this protection group list is for replication reports.
+
+            This property was added in __vSphere API 9.1.0.0__.
+      description: |-
+        The Snapservice.Reports.Clusters.ProtectionGroups.FilterSpec schema contains properties used to filter the results when listing protection groups for the reports.
+
+        This schema was added in __vSphere API 9.1.0.0__.
     Snapservice.Reports.Clusters.ProtectionGroups.ProtectionGroupInfo:
       required:
       - deleted
@@ -6941,6 +9178,58 @@ components:
             Whether the protection group is deleted.
 
             This property was added in __vSphere API 9.0.0.0__.
+        status:
+          type: string
+          description: "Current status of the protection group.\n\nPossible values:\n\
+            \  - `ACTIVE`: Active\n  - `PAUSED`: Paused\n  - `MARKED_FOR_DELETE`:\
+            \ Marked for delete, \n\n Indicates that the PG is soft deleted but has\
+            \ some PG snapshots and VM snapshots which are not yet expired. \n  -\
+            \ `DEMOTED`: Indicates that the protection group is in a demoted state.\
+            \ While in this state, there are no outgoing or incoming replications\
+            \ and local snapshots (if any) are also stopped.\n  - `DORMANT`: \n\n\
+            \ Indicates that the PG is in dormant state.  \n\n In this state, all\
+            \ local protection and outgoing replications for the members are disabled.\
+            \ Members belonging to this protection group will be replica members for\
+            \ active incoming replications. \n\nThis constant was added in __vSphere\
+            \ API 9.0.0.0__.\n  - `RECOVERY`: Recovery state. \n\n Indicates the protection\
+            \ group is in a recovery state. In this state site recovery operations\
+            \ can be initiated in case of planned migration and unplanned failover.\
+            \ \n\nThis constant was added in __vSphere API 9.0.0.0__.\n  - `DORMANT_RANSOMWARE_RECOVERY`:\
+            \ Dormant ransomware recovery state. \n\n Indicates the dormant protection\
+            \ group is undergoing ransomware recovery. In this state protection group\
+            \ state can be transitioned to DORMANT or DORMANT_PARTIAL_RECOVERY when\
+            \ end ransomware recovery operation is initiated. \n\nThis constant was\
+            \ added in __vSphere API 9.1.0.0__.\n  - `DORMANT_PARTIAL_RECOVERY`: Dormant\
+            \ partial recovery state. \n\n Indicates some of the virtual machines\
+            \ from dormant protection group have been recovered on the recovery site.\
+            \ In this state protection group state can be transitioned to DORMANT_RANSOMWARE_RECOVERY\
+            \ when start ransomware recovery operation is initiated. \n\nThis constant\
+            \ was added in __vSphere API 9.1.0.0__.\n  - `ACTIVE_RANSOMWARE_RECOVERY`:\
+            \ Active ransomware recovery state. \n\n Indicates that a ransomware recovery\
+            \ operation is being performed on the recovery site for one or more virtual\
+            \ machines in the active protection group. In this state protection group\
+            \ state can be transitioned to ACTIVE or ACTIVE_PARTIAL_RECOVERY when\
+            \ end ransomware recovery operation is initiated. \n\nThis constant was\
+            \ added in __vSphere API 9.1.0.0__.\n  - `ACTIVE_PARTIAL_RECOVERY`: Active\
+            \ partial recovery state. \n\n Indicates some of the virtual machines\
+            \ from active protection group have been recovered on the recovery site.\
+            \ In this state protection group state can be transitioned to ACTIVE_RANSOMWARE_RECOVERY\
+            \ when start ransomware recovery operation is initiated. \n\nThis constant\
+            \ was added in __vSphere API 9.1.0.0__.\n  - `PAUSED_RANSOMWARE_RECOVERY`:\
+            \ Paused ransomware recovery state. \n\n Indicates that a ransomware recovery\
+            \ operation is being performed on the recovery site for one or more virtual\
+            \ machines in the paused protection group In this state protection group\
+            \ state can be transitioned to PAUSED or PAUSED_PARTIAL_RECOVERY when\
+            \ end ransomware recovery operation is initiated. \n\nThis constant was\
+            \ added in __vSphere API 9.1.0.0__.\n  - `PAUSED_PARTIAL_RECOVERY`: Paused\
+            \ partial recovery state. \n\n Indicates some of the virtual machines\
+            \ from paused protection group have been recovered on the recovery site.\
+            \ In this state protection group state can be transitioned to PAUSED_RANSOMWARE_RECOVERY\
+            \ when start ransomware recovery operation is initiated. \n\nThis constant\
+            \ was added in __vSphere API 9.1.0.0__.\n\n\nFor more information see:\
+            \ *Snapservice.ProtectionGroupStatus*.\n\nThis property was added in __vSphere\
+            \ API 9.1.0.0__.\n\nIf missing or `null` no status is available. e.g.\
+            \ A deleted protection group will not have a status."
       description: |-
         The Snapservice.Reports.Clusters.ProtectionGroups.ProtectionGroupInfo schema contains properties that provide information regarding the protection group.
 
@@ -6987,6 +9276,21 @@ components:
         The Snapservice.Reports.Clusters.ProtectionGroups.ListResult schema represents the result of *GET /snapservice/reports/clusters/{cluster}/protection-groups* operation.
 
         This schema was added in __vSphere API 9.0.0.0__.
+    Snapservice.Reports.Clusters.VirtualMachines.FilterSpec:
+      required:
+      - replication
+      type: object
+      properties:
+        replication:
+          type: boolean
+          description: |-
+            Indicates whether this virtual machine list is for replication reports.
+
+            This property was added in __vSphere API 9.1.0.0__.
+      description: |-
+        The Snapservice.Reports.Clusters.VirtualMachines.FilterSpec schema contains properties used to filter the results when listing virtual machines for the reports.
+
+        This schema was added in __vSphere API 9.1.0.0__.
     Snapservice.Reports.Clusters.VirtualMachines.Info:
       required:
       - deleted
@@ -7002,9 +9306,20 @@ components:
         deleted:
           type: boolean
           description: |-
+            This property is deprecated.
+
             Whether the virtual machine is deleted.
 
             This property was added in __vSphere API 9.0.0.0__.
+          deprecated: true
+        exists:
+          type: boolean
+          description: |-
+            Whether the virtual machine exists in the VC inventory. If the virtual machine no longer exists, but has had snapshots in the cluster for the last 90 days, then this will be False. If the virtual machine is a replication placeholder, then this will be set to False.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            This property is optional because it was added in a newer version than its parent node.
       description: |-
         The Snapservice.Reports.Clusters.VirtualMachines.Info schema contains properties that provide information regarding the virtual machine.
 
@@ -7073,7 +9388,7 @@ components:
         start_time:
           type: string
           description: |-
-            Start time for the time range for which the snapshot report has to be generated.
+            Start time for the time range for which the snapshot report has to be generated. Time is in UTC format.
 
             This property was added in __vSphere API 9.0.0.0__.
 
@@ -7082,7 +9397,7 @@ components:
         end_time:
           type: string
           description: |-
-            End time for the time range for which the snapshot report has to be generated.
+            End time for the time range for which the snapshot report has to be generated. Time is in UTC format.
 
             This property was added in __vSphere API 9.0.0.0__.
 
@@ -7212,14 +9527,14 @@ components:
         creation_time:
           type: string
           description: |-
-            Creation time of protection group snapshot. If the snapshot operation fails, start time of the operation is returned.
+            Creation time of protection group snapshot. Time is in UTC format. If the snapshot operation fails, start time of the operation is returned.
 
             This property was added in __vSphere API 9.0.0.0__.
           format: date-time
         expiration_time:
           type: string
           description: |-
-            Expiration time of protection group snapshot.
+            Expiration time of protection group snapshot. Time is in UTC format.
 
             This property was added in __vSphere API 9.0.0.0__.
 
@@ -7261,14 +9576,14 @@ components:
         start_time:
           type: string
           description: |-
-            Start time of the time slice for which the snapshot status count is aggregated.
+            Start time of the time slice for which the snapshot status count is aggregated. Time is in UTC format.
 
             This property was added in __vSphere API 9.0.0.0__.
           format: date-time
         end_time:
           type: string
           description: |-
-            End time of the time slice for which the snapshots status count is aggregated.
+            End time of the time slice for which the snapshots status count is aggregated. Time is in UTC format.
 
             This property was added in __vSphere API 9.0.0.0__.
           format: date-time
@@ -7394,7 +9709,7 @@ components:
         start_time:
           type: string
           description: |-
-            Start time for the time range for which the snapshot report has to be generated.
+            Start time for the time range for which the snapshot report has to be generated. Time is in UTC format.
 
             This property was added in __vSphere API 9.0.0.0__.
 
@@ -7403,7 +9718,7 @@ components:
         end_time:
           type: string
           description: |-
-            End time for the time range for which the snapshot report has to be generated.
+            End time for the time range for which the snapshot report has to be generated. Time is in UTC format.
 
             This property was added in __vSphere API 9.0.0.0__.
 
@@ -7539,14 +9854,14 @@ components:
         creation_time:
           type: string
           description: |-
-            Creation time of virtual machine snapshot. If the snapshot operation fails, start time of the operation is returned.
+            Creation time of virtual machine snapshot. Time is in UTC format. If the snapshot operation fails, start time of the operation is returned.
 
             This property was added in __vSphere API 9.0.0.0__.
           format: date-time
         expiration_time:
           type: string
           description: |-
-            Expiration time of virtual machine snapshot.
+            Expiration time of virtual machine snapshot. Time is in UTC format.
 
             This property was added in __vSphere API 9.0.0.0__.
 
@@ -7561,6 +9876,9 @@ components:
               - `SCHEDULED`: Indicates that a snapshot was taken as part of a periodic schedule.
               - `ONE_TIME`: Indicates that the snapshot was taken as a one time operation triggered by the user.
               - `SYSTEM_CREATED`: Indicates that the snapshot was taken by the system
+              - `STAGED`: Indicates that the vm snapshot was taken as part of a ransomware recovery staging operation.
+
+            This constant was added in __vSphere API 9.1.0.0__.
 
 
             For more information see: *Snapservice.Clusters.VirtualMachines.Snapshots.Type*.
@@ -7588,14 +9906,14 @@ components:
         start_time:
           type: string
           description: |-
-            Start time of the time slice for which the snapshot status count is aggregated.
+            Start time of the time slice for which the snapshot status count is aggregated. Time is in UTC format.
 
             This property was added in __vSphere API 9.0.0.0__.
           format: date-time
         end_time:
           type: string
           description: |-
-            End time of the time slice for which the snapshos status count is aggregated.
+            End time of the time slice for which the snapshos status count is aggregated. Time is in UTC format.
 
             This property was added in __vSphere API 9.0.0.0__.
           format: date-time
@@ -7693,6 +10011,92 @@ components:
         The Snapservice.Reports.Clusters.VirtualMachines.Snapshots.StatusByVirtualMachineListResult schema represents the result of *GET /snapservice/reports/clusters/{cluster}/virtual-machines/snapshot-status-counts?aggregateBy=virtual-machine* operation.
 
         This schema was added in __vSphere API 9.0.0.0__.
+    Snapservice.Sites.Capabilities.ServiceCapabilityInfo:
+      required:
+      - service
+      type: object
+      properties:
+        service:
+          type: string
+          description: |-
+            Name of a relevant resource. Example: "snapservice", "hms", "srm", ...
+
+            Possible values:
+              - `SS`: Snapshot Service.
+              - `SRM`: Site Recovery Manager.
+              - `HMS`: HBR Manager Service.
+
+
+            For more information see: *Snapservice.Sites.ServiceType*.
+
+            This property was added in __vSphere API 9.1.0.0__.
+        info:
+          description: |-
+            Capabilities of a relevant resource.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            If missing or `null`, it means that the service did not respond to internal request for capabilities.
+          allOf:
+          - $ref: "#/components/schemas/Snapservice.Capability.CapabilityInfo"
+      description: |-
+        The Snapservice.Sites.Capabilities.ServiceCapabilityInfo schema contains properties that provide capabilities information of a relevant resource for a site.
+
+        This schema was added in __vSphere API 9.1.0.0__.
+    Snapservice.Sites.Capabilities.SiteCapabilities:
+      required:
+      - service_capability_info
+      type: object
+      properties:
+        service_capability_info:
+          type: array
+          description: |-
+            List of site's capabilities by service.
+
+            This property was added in __vSphere API 9.1.0.0__.
+          items:
+            $ref: "#/components/schemas/Snapservice.Sites.Capabilities.ServiceCapabilityInfo"
+      description: |-
+        The Snapservice.Sites.Capabilities.SiteCapabilities schema contains properties that provide the list of capabilities for a site.
+
+        This schema was added in __vSphere API 9.1.0.0__.
+    Snapservice.Sites.Capabilities.FilterSpec:
+      type: object
+      properties:
+        service:
+          uniqueItems: true
+          type: array
+          description: |-
+            Filter by service name.
+
+            Possible values:
+              - `SS`: Snapshot Service.
+              - `SRM`: Site Recovery Manager.
+              - `HMS`: HBR Manager Service.
+
+
+            For more information see: *Snapservice.Sites.ServiceType*.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            If missing or `null`, all services are returned.
+          items:
+            type: string
+        capability:
+          uniqueItems: true
+          type: array
+          description: |-
+            Filter by capability name.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            If missing or `null`, all relevant capabilities are returned.
+          items:
+            type: string
+      description: |-
+        The Snapservice.Sites.Capabilities.FilterSpec schema contains properties used to filter the results when retrieving site's capabilities. If multiple properties are specified, only entries matching all of the properties will be returned.
+
+        This schema was added in __vSphere API 9.1.0.0__.
     Snapservice.Sites.Clusters.FilterSpec:
       type: object
       properties:
@@ -7735,6 +10139,18 @@ components:
             Name of the cluster.
 
             This property was added in __vSphere API 9.0.0.0__.
+        datastores:
+          type: array
+          description: |-
+            Identifiers of datastores that are available for the cluster.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            This property is optional because it was added in a newer version than its parent node.
+
+            When clients pass a value of this schema as a parameter, the property must contain identifiers for the resource type: `Datastore`. When operations return a value of this schema as a response, the property will contain identifiers for the resource type: `Datastore`.
+          items:
+            type: string
       description: |-
         The Snapservice.Sites.Clusters.Info schema contains details regarding the cluster.
 
@@ -7781,6 +10197,156 @@ components:
         The Snapservice.Sites.Clusters.ListResult schema represents the result of *GET /snapservice/sites/{site}/clusters* operation.
 
         This schema was added in __vSphere API 9.0.0.0__.
+    Snapservice.Sites.Datastores.Type:
+      type: string
+      description: |-
+        The Snapservice.Sites.Datastores.Type enumerated type defines the types of vCenter datastores.
+
+        Possible values:
+          - `VMFS`: VMware File System (ESX Server only).
+          - `NFS`: Network file system v3 (linux & esx servers only).
+          - `NFS41`: Network file system v4.1 (linux & esx servers only).
+          - `CIFS`: Common Internet File System.
+          - `VSAN`: Virtual SAN (ESX Server only).
+          - `VFFS`: Flash Read Cache (ESX Server only).
+          - `VVOL`: Vsphere Virtual Volume (ESX Server only).
+          - `PMEM`: Persistent Memory File System (ESX Server only).
+
+
+        This enumeration was added in __vSphere API 9.1.0.0__.
+      enum:
+      - VMFS
+      - NFS
+      - NFS41
+      - CIFS
+      - VSAN
+      - VFFS
+      - VVOL
+      - PMEM
+    Snapservice.Sites.Datastores.FilterSpec:
+      type: object
+      properties:
+        datastores:
+          uniqueItems: true
+          type: array
+          description: |-
+            Identifiers of datastores that can match the filter.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            If missing or `null` or empty, datastores with any identifier match the filter.
+
+            When clients pass a value of this schema as a parameter, the property must contain identifiers for the resource type: `Datastore`. When operations return a value of this schema as a response, the property will contain identifiers for the resource type: `Datastore`.
+          items:
+            type: string
+      description: |-
+        The Snapservice.Sites.Datastores.FilterSpec schema contains properties used to filter the results when listing datastores for the specified site.
+
+        This schema was added in __vSphere API 9.1.0.0__.
+    Snapservice.Sites.Datastores.Info:
+      required:
+      - hierarchy
+      - name
+      - type
+      type: object
+      properties:
+        name:
+          type: string
+          description: |-
+            Name of the datastore.
+
+            This property was added in __vSphere API 9.1.0.0__.
+        type:
+          type: string
+          description: |-
+            Type of the datastore.
+
+            Possible values:
+              - `VMFS`: VMware File System (ESX Server only).
+              - `NFS`: Network file system v3 (linux & esx servers only).
+              - `NFS41`: Network file system v4.1 (linux & esx servers only).
+              - `CIFS`: Common Internet File System.
+              - `VSAN`: Virtual SAN (ESX Server only).
+              - `VFFS`: Flash Read Cache (ESX Server only).
+              - `VVOL`: Vsphere Virtual Volume (ESX Server only).
+              - `PMEM`: Persistent Memory File System (ESX Server only).
+
+
+            For more information see: *Snapservice.Sites.Datastores.Type*.
+
+            This property was added in __vSphere API 9.1.0.0__.
+        free_space:
+          type: integer
+          description: |-
+            Free space available for the datastore (in bytes).
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            missing or `null` if free space information is not available.
+          format: int64
+        capacity:
+          type: integer
+          description: |-
+            Storage capacity for the datastore (in bytes).
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            missing or `null` if capacity information is not available.
+          format: int64
+        hierarchy:
+          type: array
+          description: |-
+            Hierarchy structure of the datastore represented as a list with the highest element in the hierarchy tree at the top of the list. For each entity in the list, type and name will be separated by a colon ":". A datastore heirarchy list for instance, - Folder:[Datacenter Folder Name] - Datacenter:[Datacenter Name] - Folder:[Datastore Folder Name]
+
+            This property was added in __vSphere API 9.1.0.0__.
+          items:
+            type: string
+      description: |-
+        The Snapservice.Sites.Datastores.Info schema contains details regarding the datastore.
+
+        This schema was added in __vSphere API 9.1.0.0__.
+    Snapservice.Sites.Datastores.ListItem:
+      required:
+      - datastore
+      - info
+      type: object
+      properties:
+        datastore:
+          type: string
+          description: |-
+            Identifier of the datastore.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            When clients pass a value of this schema as a parameter, the property must be an identifier for the resource type: `Datastore`. When operations return a value of this schema as a response, the property will be an identifier for the resource type: `Datastore`.
+        info:
+          description: |-
+            Information regarding the datastore.
+
+            This property was added in __vSphere API 9.1.0.0__.
+          allOf:
+          - $ref: "#/components/schemas/Snapservice.Sites.Datastores.Info"
+      description: |-
+        The Snapservice.Sites.Datastores.ListItem schema contains information about a datastore returned by *GET /snapservice/sites/{site}/datastores* operation
+
+        This schema was added in __vSphere API 9.1.0.0__.
+    Snapservice.Sites.Datastores.ListResult:
+      required:
+      - items
+      type: object
+      properties:
+        items:
+          type: array
+          description: |-
+            List of datastores.
+
+            This property was added in __vSphere API 9.1.0.0__.
+          items:
+            $ref: "#/components/schemas/Snapservice.Sites.Datastores.ListItem"
+      description: |-
+        The Snapservice.Sites.Datastores.ListResult schema represents the result of *GET /snapservice/sites/{site}/datastores* operation.
+
+        This schema was added in __vSphere API 9.1.0.0__.
     Snapservice.Sites.Licenses.LicenseType:
       type: string
       description: |-
@@ -7948,6 +10514,105 @@ components:
         The Snapservice.Sites.Licenses.ListResult schema represents the result of *GET /snapservice/sites/{site}/licenses* operation.
 
         This schema was added in __vSphere API 9.0.0.0__.
+    Snapservice.Sites.Clusters.Capabilities.ViewSpec:
+      type: object
+      properties:
+        aggregated:
+          type: boolean
+          description: |-
+            Indicates whether to aggregate capabilities of the cluster's child entities (datastores) in the cluster.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            If missing or `null` or empty, return capabilities for cluster without considering child entities.
+      description: |-
+        The Snapservice.Sites.Clusters.Capabilities.ViewSpec schema contains properties used to change the view level of the cluster's capabilities.
+
+        This schema was added in __vSphere API 9.1.0.0__.
+    Snapservice.Sites.Datastores.Capabilities.FilterSpec:
+      type: object
+      properties:
+        datastores:
+          uniqueItems: true
+          type: array
+          description: |-
+            Identifier of datastores that can match the filter. Capabilities for specified datastores will be returned.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            If missing or `null` or empty, return capabilities for all datastores belonging to the site.
+
+            When clients pass a value of this schema as a parameter, the property must contain identifiers for the resource type: `Datastore`. When operations return a value of this schema as a response, the property will contain identifiers for the resource type: `Datastore`.
+          items:
+            type: string
+      description: |-
+        The Snapservice.Sites.Datastores.Capabilities.FilterSpec schema contains properties used to filter the results when listing datastores' capabilities for the specified site.
+
+        This schema was added in __vSphere API 9.1.0.0__.
+    Snapservice.Sites.Datastores.Capabilities.ListItem:
+      required:
+      - datastore
+      - info
+      type: object
+      properties:
+        datastore:
+          type: string
+          description: |-
+            Identifier of the datastore.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            When clients pass a value of this schema as a parameter, the property must be an identifier for the resource type: `Datastore`. When operations return a value of this schema as a response, the property will be an identifier for the resource type: `Datastore`.
+        info:
+          description: |-
+            Capability information regarding the datastore.
+
+            This property was added in __vSphere API 9.1.0.0__.
+          allOf:
+          - $ref: "#/components/schemas/Snapservice.Capability.CapabilityInfo"
+      description: |-
+        The Snapservice.Sites.Datastores.Capabilities.ListItem schema contains information about a datastore's capability returned by *GET /snapservice/sites/{site}/datastores/capabilities* operation
+
+        This schema was added in __vSphere API 9.1.0.0__.
+    Snapservice.Sites.Datastores.Capabilities.ListResult:
+      required:
+      - items
+      type: object
+      properties:
+        items:
+          type: array
+          description: |-
+            List of datastores capabilities.
+
+            This property was added in __vSphere API 9.1.0.0__.
+          items:
+            $ref: "#/components/schemas/Snapservice.Sites.Datastores.Capabilities.ListItem"
+      description: |-
+        The Snapservice.Sites.Datastores.Capabilities.ListResult schema represents the result of *GET /snapservice/sites/{site}/datastores/capabilities* operation.
+
+        This schema was added in __vSphere API 9.1.0.0__.
+    Snapservice.Snapshots.Label:
+      required:
+      - category
+      - name
+      type: object
+      properties:
+        category:
+          type: string
+          description: |-
+            Category for the snapshot label
+
+            This property was added in __vSphere API 9.1.0.0__.
+        name:
+          type: string
+          description: |-
+            Name for the snapshot label
+
+            This property was added in __vSphere API 9.1.0.0__.
+      description: |-
+        The Snapservice.Snapshots.Label schema contains properties that describe the desired snapshot Label
+
+        This schema was added in __vSphere API 9.1.0.0__.
     Snapservice.Tasks.Status:
       type: string
       description: "The Snapservice.Tasks.Status enumerated type defines the status\
@@ -8227,6 +10892,366 @@ components:
         The Snapservice.Tasks.Info schema contains information about a task.
 
         This schema was added in __vSphere API 8.0.3.0__.
+    Snapservice.VirtualMachines.ProtectionConfiguration.TargetStorageSpec:
+      type: object
+      properties:
+        datastore:
+          type: string
+          description: |-
+            Target datastore.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            This property is being kept optional for future use-cases, but mandatory in the current version.
+
+            When clients pass a value of this schema as a parameter, the property must be an identifier for the resource type: `Datastore`. When operations return a value of this schema as a response, the property will be an identifier for the resource type: `Datastore`.
+      description: |-
+        The Snapservice.VirtualMachines.ProtectionConfiguration.TargetStorageSpec schema contains properties that describe the settings to configure virtual machine level target storage for the replication.
+
+        This schema was added in __vSphere API 9.1.0.0__.
+    Snapservice.VirtualMachines.ProtectionConfiguration.ReplicationTarget:
+      type: object
+      properties:
+        use_replica_seed:
+          type: boolean
+          description: |-
+            Specify if replica seed file is used for replication.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            if missing or `null` no virtual machine override is set and the default protection group configuration is used.
+        replication_path:
+          type: string
+          description: |-
+            Path within the datastore where the virtual machine should be replicated or seed files are located. If not specified, the default path will be used. By default, the virtual machine name is used as the replication path. An example of replication path is "VMParent/VM1".
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            if missing or `null` no virtual machine override is set and the default path is used.
+        target_storage_spec:
+          description: |-
+            Specify the virtual machine level target storage spec for virtual machine replication.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            if missing or `null` the default protection group configuration is used.
+          allOf:
+          - $ref: "#/components/schemas/Snapservice.VirtualMachines.ProtectionConfiguration.TargetStorageSpec"
+      description: |-
+        The Snapservice.VirtualMachines.ProtectionConfiguration.ReplicationTarget schema contains properties to specify target configuration overrides for a virtual machine. This structure is used by both get and update APIs.
+
+        This schema was added in __vSphere API 9.1.0.0__.
+    Snapservice.VirtualMachines.ProtectionConfiguration.ReplicationConfigurationInfo:
+      required:
+      - replication_target
+      type: object
+      properties:
+        replication_target:
+          description: |-
+            Replication target configuration used for replication.
+
+            This property was added in __vSphere API 9.1.0.0__.
+          allOf:
+          - $ref: "#/components/schemas/Snapservice.VirtualMachines.ProtectionConfiguration.ReplicationTarget"
+      description: |-
+        The Snapservice.VirtualMachines.ProtectionConfiguration.ReplicationConfigurationInfo schema contains properties that provide information regarding the virtual machine level replication configuration overrides for a virtual machine.
+
+        This schema was added in __vSphere API 9.1.0.0__.
+    Snapservice.VirtualMachines.ProtectionConfiguration.Info:
+      required:
+      - replication_config_info
+      type: object
+      properties:
+        replication_config_info:
+          type: array
+          description: "List of virtual machine replication configuration that overrides\
+            \ the global PG level settings. If replication is not enabled or no overrides\
+            \ are defined, an empty list is returned. \n\n Currently, we only support\
+            \ one replication configuration per vm, so this list can have a max of\
+            \ only one entry.\n\nThis property was added in __vSphere API 9.1.0.0__."
+          items:
+            $ref: "#/components/schemas/Snapservice.VirtualMachines.ProtectionConfiguration.ReplicationConfigurationInfo"
+      description: |-
+        The Snapservice.VirtualMachines.ProtectionConfiguration.Info schema contains properties that provide information regarding the virtual machine level protection configuration overrides for virtual machine.
+
+        This schema was added in __vSphere API 9.1.0.0__.
+    Snapservice.VirtualMachines.ProtectionConfiguration.ReplicationConfigurationUpdateSpec:
+      type: object
+      properties:
+        replication_target:
+          description: |-
+            Specify replication target configuration to be used for virtual machine replication. The replication target configuration can only be updated if the virtual machine replication has not yet started.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            if missing or `null` clear virtual machine overrides for target configuration and use the default pg configuration.
+          allOf:
+          - $ref: "#/components/schemas/Snapservice.VirtualMachines.ProtectionConfiguration.ReplicationTarget"
+      description: "The Snapservice.VirtualMachines.ProtectionConfiguration.ReplicationConfigurationUpdateSpec\
+        \ schema contains properties to configure virtual machine replication. \n\n\
+        \ At least one parameter needs to be specified when updating the replication\
+        \ configuration.\n\nThis schema was added in __vSphere API 9.1.0.0__."
+    Snapservice.VirtualMachines.ProtectionConfiguration.UpdateSpec:
+      type: object
+      properties:
+        replication_config_update_spec:
+          type: array
+          description: |-
+            Optional list of virtual machine replication configuration that overrides the global PG level settings. Currently, we only support one replication configuration per VM, so this parameter is mandatory, with a single entry.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            if missing or `null`, do not modify the existing virtual machine replication configurations. This parameter is currently mandatory, but kept optional for the future.
+          items:
+            $ref: "#/components/schemas/Snapservice.VirtualMachines.ProtectionConfiguration.ReplicationConfigurationUpdateSpec"
+      description: |-
+        The Snapservice.VirtualMachines.ProtectionConfiguration.UpdateSpec schema contains properties to configure virtual machine protection, that overrides the global PG level settings. Currently we only support replication configuration, but it can be extended in the future to support other virtual machine configurations.
+
+        This schema was added in __vSphere API 9.1.0.0__.
+    Snapservice.VirtualMachines.Snapshots.FilterSpec:
+      type: object
+      properties:
+        created_after:
+          type: string
+          description: |-
+            Minimum creation date for the snapshots that must match the filter.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            If missing or `null` snapshots with any creation time match the filter.
+          format: date-time
+        created_before:
+          type: string
+          description: |-
+            Maximum creation date for the snapshots that must match the filter.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            If missing or `null` snapshots with any creation time match the filter.
+          format: date-time
+        snapshots_per_vm:
+          type: integer
+          description: |-
+            Specifies the number of snapshots to be retrieved per virtual machine.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            If missing or `null` defaults to a size defined by the service.
+          format: int64
+      description: |-
+        The Snapservice.VirtualMachines.Snapshots.FilterSpec schema contains properties used to filter the results when listing virtual machine snapshots for virtual machines. See *GET /snapservice/virtual-machines/snapshots*. When multiple filters are specified, it operates as an AND operation. The snapshots returned will match all the specified filters.
+
+        This schema was added in __vSphere API 9.1.0.0__.
+    Snapservice.VirtualMachines.Snapshots.IterationSpec:
+      type: object
+      properties:
+        page_size:
+          type: integer
+          description: |-
+            Specifies the maximum number of results to return.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            If missing or `null` defaults to a size defined by the service.
+          format: int64
+        offset:
+          type: integer
+          description: |-
+            Used to retrieve paged data for larger result sets. The offset indicates how many starting elements to be skipped in a sorted list of items. If the offset is greater than or equal to the number of items in the list, empty response is returned by the server.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            missing or `null` the offset will be 0
+          format: int64
+      description: |-
+        The Snapservice.VirtualMachines.Snapshots.IterationSpec schema contains properties used to break results into pages when listing virtual machine snapshots for virtual machines. see *GET /snapservice/virtual-machines/snapshots*.
+
+        This schema was added in __vSphere API 9.1.0.0__.
+    Snapservice.VirtualMachines.Snapshots.ListItem:
+      required:
+      - creation_time
+      - name
+      - snapshot
+      - snapshot_type
+      - vm
+      type: object
+      properties:
+        name:
+          type: string
+          description: |-
+            Name of the virtual machine snapshot.
+
+            This property was added in __vSphere API 9.1.0.0__.
+        snapshot:
+          type: string
+          description: |-
+            Identifier of the virtual machine snapshot.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            When clients pass a value of this schema as a parameter, the property must be an identifier for the resource type: `com.vmware.snapservice.vm.snapshot`. When operations return a value of this schema as a response, the property will be an identifier for the resource type: `com.vmware.snapservice.vm.snapshot`.
+        vm:
+          type: string
+          description: |-
+            Identifier of the virtual machine.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            When clients pass a value of this schema as a parameter, the property must be an identifier for the resource type: `VirtualMachine`. When operations return a value of this schema as a response, the property will be an identifier for the resource type: `VirtualMachine`.
+        vm_bios_uuid:
+          type: string
+          description: |-
+            BIOS identifier of the virtual machine.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            If missing or `null` or empty, virtual machines with any BIOS identifier match the filter.
+
+            When clients pass a value of this schema as a parameter, the property must be an identifier for the resource type: `VirtualMachine`. When operations return a value of this schema as a response, the property will be an identifier for the resource type: `VirtualMachine`.
+        creation_time:
+          type: string
+          description: |-
+            Creation time of virtual machine snapshot. Time is in UTC format. If the snapshot operation fails, start time of the operation is returned.
+
+            This property was added in __vSphere API 9.1.0.0__.
+          format: date-time
+        expiration_time:
+          type: string
+          description: |-
+            Expiration time of virtual machine snapshot. Time is in UTC format.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            If missing or `null` no expiry time is set for the virtual machine snapshot.
+          format: date-time
+        snapshot_type:
+          type: string
+          description: |-
+            Type of virtual machine snapshot.
+
+            Possible values:
+              - `SCHEDULED`: Indicates that a snapshot was taken as part of a periodic schedule.
+              - `ONE_TIME`: Indicates that the snapshot was taken as a one time operation triggered by the user.
+              - `SYSTEM_CREATED`: Indicates that the snapshot was taken by the system
+              - `STAGED`: Indicates that the vm snapshot was taken as part of a ransomware recovery staging operation.
+
+            This constant was added in __vSphere API 9.1.0.0__.
+
+
+            For more information see: *Snapservice.Clusters.VirtualMachines.Snapshots.Type*.
+
+            This property was added in __vSphere API 9.1.0.0__.
+        labels:
+          type: array
+          description: |-
+            All the labels associated with this Snapshot. if the snapshot does not have any labels this will be empty
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            This property is optional because it was added in a newer version than its parent node.
+          items:
+            $ref: "#/components/schemas/Snapservice.Snapshots.Label"
+      description: |-
+        The Snapservice.VirtualMachines.Snapshots.ListItem schema contains information about a virtual machine snapshot returned by *GET /snapservice/virtual-machines/snapshots* operation
+
+        This schema was added in __vSphere API 9.1.0.0__.
+    Snapservice.VirtualMachines.Snapshots.ListResult:
+      required:
+      - snapshots
+      - total_count
+      type: object
+      properties:
+        snapshots:
+          type: array
+          description: |-
+            List of virtual machine snapshot items.
+
+            This property was added in __vSphere API 9.1.0.0__.
+          items:
+            $ref: "#/components/schemas/Snapservice.VirtualMachines.Snapshots.ListItem"
+        total_count:
+          type: integer
+          description: |-
+            The paginated list may contain partial result, this field provides total number of items with the given filters applied.
+
+            This property was added in __vSphere API 9.1.0.0__.
+          format: int64
+      description: |-
+        The Snapservice.VirtualMachines.Snapshots.ListResult schema represents the result of *GET /snapservice/virtual-machines/snapshots* operation. The result list is pre sorted by *Snapservice.VirtualMachines.Snapshots.ListItem.creation_time* of the virtual machine snapshot.
+
+        This schema was added in __vSphere API 9.1.0.0__.
+    Snapservice.VirtualMachines.Snapshots.UpdateSpec:
+      type: object
+      properties:
+        delete_after:
+          description: |-
+            Time period after which the snapshot can be deleted, starting from the current time. This field is currently mandatory, but kept optional for the future.
+
+            This property was added in __vSphere API 9.1.0.0__.
+
+            if missing or `null` existing snapshot retention will be retained.
+          allOf:
+          - $ref: "#/components/schemas/Snapservice.TimePeriod"
+      description: |-
+        The Snapservice.VirtualMachines.Snapshots.UpdateSpec schema contains properties that describe the desired virtual machine snapshot attributes.
+
+        This schema was added in __vSphere API 9.1.0.0__.
+    Snapservice.VirtualMachines.Snapshots.AddLabelSpec:
+      required:
+      - label
+      type: object
+      properties:
+        label:
+          description: |-
+            Information regarding the label to be added to the snapshot.
+
+            This property was added in __vSphere API 9.1.0.0__.
+          allOf:
+          - $ref: "#/components/schemas/Snapservice.Snapshots.Label"
+      description: |-
+        The Snapservice.VirtualMachines.Snapshots.AddLabelSpec schema contains information regarding the label to be added to the snapshot.
+
+        This schema was added in __vSphere API 9.1.0.0__.
+    Snapservice.VirtualMachines.Snapshots.DeleteLabelSpec:
+      required:
+      - label
+      type: object
+      properties:
+        label:
+          description: |-
+            One snapshot label info.
+
+            This property was added in __vSphere API 9.1.0.0__.
+          allOf:
+          - $ref: "#/components/schemas/Snapservice.Snapshots.Label"
+      description: |-
+        The Snapservice.VirtualMachines.Snapshots.DeleteLabelSpec schema contains information regarding the label to be deleted from the snapshot.
+
+        This schema was added in __vSphere API 9.1.0.0__.
+    Snapservice.VirtualMachines.Snapshots.SetLabelsSpec:
+      required:
+      - category
+      - names
+      type: object
+      properties:
+        category:
+          type: string
+          description: |-
+            Information regarding the label category to be set to the snapshot.
+
+            This property was added in __vSphere API 9.1.0.0__.
+        names:
+          type: array
+          description: |-
+            Information regarding the label names to be set to the snapshot.
+
+            This property was added in __vSphere API 9.1.0.0__.
+          items:
+            type: string
+      description: |-
+        The Snapservice.VirtualMachines.Snapshots.SetLabelsSpec schema contains information regarding the labels to be set to the snapshot.
+
+        This schema was added in __vSphere API 9.1.0.0__.
     Vapi.Std.DynamicID:
       required:
       - id
@@ -8978,6 +12003,19 @@ components:
       - $ref: "#/components/schemas/Vapi.Std.Errors.Error"
     Vapi.Std.Errors.Unauthorized:
       type: object
+      properties:
+        challenge:
+          type: string
+          description: "Indicates the authentication challenges applicable to the\
+            \ target API provider. It can be used by a client to discover the correct\
+            \ authentication scheme to use. The exact syntax of the value is defined\
+            \ by the specific provider, the protocol and authentication schemes used.\
+            \ \n\n For example, a provider using REST may adhere to the WWW-Authenticate\
+            \ HTTP header specification, RFC7235, section 4.1. In this case an example\
+            \ challenge value may be: SIGN realm=\"27da158-2ba4-11e9-b\",sts=\"http://vcenter/sso?vsphere.local\"\
+            , Basic realm=\"vCenter\"\n\nThis property was added in __vSphere API\
+            \ 9.1.0.0__.\n\nThis property is optional because it was added in a newer\
+            \ version than its parent node."
       description: "The Vapi.Std.Errors.Unauthorized error indicates that the user\
         \ is not authorized to perform the operation. \n\n API requests may include\
         \ a security context containing user credentials. For example, the user credentials\

@@ -7,7 +7,7 @@
         "license": {
             "name": "VMware Cloud Foundation"
         },
-        "version": "9.0.0.0"
+        "version": "9.1.0.0"
     },
     "servers": [
         {
@@ -163,7 +163,7 @@
                         "schema": {
                             "type": "string"
                         },
-                        "example": "Empty to delete any configured, or one of: VCF_DEPOT, VXRAIL_DEPOT"
+                        "example": "Empty to delete any configured, or one of: VCF_DEPOT"
                     }
                 ],
                 "responses": {
@@ -212,6 +212,16 @@
                     "required": true
                 },
                 "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TokenPair"
+                                }
+                            }
+                        }
+                    },
                     "400": {
                         "description": "Bad Request",
                         "content": {
@@ -231,16 +241,6 @@
                                 }
                             }
                         }
-                    },
-                    "201": {
-                        "description": "Created",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/TokenPair"
-                                }
-                            }
-                        }
                     }
                 }
             }
@@ -253,22 +253,22 @@
                 "summary": "Retrieve all VCF (or VVF) installation tasks",
                 "operationId": "getSddcTasks",
                 "responses": {
-                    "500": {
-                        "description": "Internal Server Error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
-                    },
                     "200": {
                         "description": "Success",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/PageOfSddcTask"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
                                 }
                             }
                         }
@@ -305,12 +305,12 @@
                     "required": true
                 },
                 "responses": {
-                    "400": {
-                        "description": "Installation already exists",
+                    "202": {
+                        "description": "Accepted",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Error"
+                                    "$ref": "#/components/schemas/SddcTask"
                                 }
                             }
                         }
@@ -325,12 +325,12 @@
                             }
                         }
                     },
-                    "202": {
-                        "description": "Accepted",
+                    "400": {
+                        "description": "Installation already exists",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/SddcTask"
+                                    "$ref": "#/components/schemas/Error"
                                 }
                             }
                         }
@@ -357,6 +357,16 @@
                     "required": true
                 },
                 "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VcfOperationsDiscoveryResult"
+                                }
+                            }
+                        }
+                    },
                     "400": {
                         "description": "Bad Request",
                         "content": {
@@ -373,16 +383,6 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
-                    },
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/VcfOperationsDiscoveryResult"
                                 }
                             }
                         }
@@ -409,6 +409,16 @@
                     "required": true
                 },
                 "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VcenterDiscoveryResult"
+                                }
+                            }
+                        }
+                    },
                     "400": {
                         "description": "Bad Request",
                         "content": {
@@ -419,12 +429,54 @@
                             }
                         }
                     },
+                    "500": {
+                        "description": "InternalServerError",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/sddcs/vcenter-discovery/networks": {
+            "post": {
+                "tags": [
+                    "VCF Installer"
+                ],
+                "summary": "Discover vCenter networks",
+                "description": "Discover the networks of the given vCenter instance.",
+                "operationId": "discoverVcenterNetworks",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/VcenterNetworkDiscoverySpec"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
                     "200": {
                         "description": "OK",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/VcenterDiscoveryResult"
+                                    "$ref": "#/components/schemas/PageOfVcenterNetworkInfo"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
                                 }
                             }
                         }
@@ -470,22 +522,22 @@
                             }
                         }
                     },
-                    "200": {
-                        "description": "Success",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/PageOfValidation"
-                                }
-                            }
-                        }
-                    },
                     "500": {
                         "description": "Internal Server Error",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PageOfValidation"
                                 }
                             }
                         }
@@ -510,32 +562,12 @@
                     "required": true
                 },
                 "responses": {
-                    "403": {
-                        "description": "Forbidden",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
-                    },
                     "202": {
                         "description": "Accepted",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/Validation"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
                                 }
                             }
                         }
@@ -550,6 +582,26 @@
                             }
                         }
                     },
+                    "400": {
+                        "description": "Bad user input",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "content": {
@@ -560,8 +612,122 @@
                             }
                         }
                     },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/sddcs/sddcm-discovery": {
+            "post": {
+                "tags": [
+                    "VCF Installer"
+                ],
+                "summary": "Discover SDDC Manager topology",
+                "description": "Discover SDDC Manager topology and its adjacent topology such as its management vCenter, VCF Operations collector, etc.",
+                "operationId": "discoverSddcManager",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SddcManagerDiscoverySpec"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "InternalServerError",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SddcManagerDiscoveryResult"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/sddcs/resources-calculation": {
+            "post": {
+                "tags": [
+                    "VCF Installer"
+                ],
+                "summary": "Perform calculation of the infrastructure resources for a VCF Installer specification",
+                "description": "VCF Installer specification incorporates all the client inputs regarding VCF (or VVF) components constituting the installation. Validates the required and available resources to deploy the VCF instance by the supplied specification",
+                "operationId": "resourcesCalculation",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SddcSpec"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
                     "400": {
                         "description": "Bad user input",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "202": {
+                        "description": "Accepted",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CapacityValidation"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -634,22 +800,22 @@
                     "required": true
                 },
                 "responses": {
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/InstallerSpec"
-                                }
-                            }
-                        }
-                    },
                     "500": {
                         "description": "InternalServerError",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/InstallerSpec"
                                 }
                             }
                         }
@@ -706,16 +872,6 @@
                     "required": true
                 },
                 "responses": {
-                    "400": {
-                        "description": "Bad request",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
-                    },
                     "200": {
                         "description": "OK",
                         "content": {
@@ -726,8 +882,8 @@
                             }
                         }
                     },
-                    "500": {
-                        "description": "Internal server error",
+                    "400": {
+                        "description": "Bad request",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -738,6 +894,16 @@
                     },
                     "409": {
                         "description": "Trusted certificate already exists",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -893,8 +1059,8 @@
                     "required": true
                 },
                 "responses": {
-                    "404": {
-                        "description": "Not Found",
+                    "400": {
+                        "description": "Bad Request",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -903,18 +1069,8 @@
                             }
                         }
                     },
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
+                    "404": {
+                        "description": "Not Found",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -929,6 +1085,16 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
                                 }
                             }
                         }
@@ -956,22 +1122,22 @@
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "A task object.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Task"
-                                }
-                            }
-                        }
-                    },
                     "500": {
                         "description": "Unexpected error",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "A task object.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Task"
                                 }
                             }
                         }
@@ -1007,8 +1173,8 @@
                     }
                 ],
                 "responses": {
-                    "500": {
-                        "description": "Unexpected error",
+                    "409": {
+                        "description": "Task can not be cancelled. Only a IN_PROGRESS task can be cancelled.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1017,8 +1183,8 @@
                             }
                         }
                     },
-                    "404": {
-                        "description": "Task not found",
+                    "500": {
+                        "description": "Unexpected error",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1030,8 +1196,8 @@
                     "200": {
                         "description": "Task was cancelled successfully."
                     },
-                    "409": {
-                        "description": "Task can not be cancelled. Only a IN_PROGRESS task can be cancelled.",
+                    "404": {
+                        "description": "Task not found",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1061,16 +1227,6 @@
                     }
                 ],
                 "responses": {
-                    "409": {
-                        "description": "Task can not be retried. Only a failed Task can be retried.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
-                    },
                     "500": {
                         "description": "Unexpected error",
                         "content": {
@@ -1083,6 +1239,16 @@
                     },
                     "200": {
                         "description": "Task was retried successfully."
+                    },
+                    "409": {
+                        "description": "Task can not be retried. Only a failed Task can be retried.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
                     },
                     "404": {
                         "description": "Task not found",
@@ -1191,22 +1357,22 @@
                 "description": "Get the depot sync information.",
                 "operationId": "getDepotSyncInfo",
                 "responses": {
-                    "500": {
-                        "description": "Internal Server Error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
-                    },
                     "200": {
                         "description": "OK",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/DepotSyncInfo"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
                                 }
                             }
                         }
@@ -1273,10 +1439,6 @@
                             }
                         }
                     },
-                    "500": {
-                        "description": "Internal server error",
-                        "x-vmw-compiler-skip": true
-                    },
                     "400": {
                         "description": "Bad request",
                         "content": {
@@ -1286,6 +1448,10 @@
                                 }
                             }
                         }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "x-vmw-compiler-skip": true
                     }
                 }
             },
@@ -1307,9 +1473,15 @@
                     "required": true
                 },
                 "responses": {
-                    "500": {
-                        "description": "Internal server error",
-                        "x-vmw-compiler-skip": true
+                    "400": {
+                        "description": "Bad request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
                     },
                     "202": {
                         "description": "Accepted",
@@ -1321,15 +1493,9 @@
                             }
                         }
                     },
-                    "400": {
-                        "description": "Bad request",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
+                    "500": {
+                        "description": "Internal server error",
+                        "x-vmw-compiler-skip": true
                     }
                 }
             }
@@ -1376,16 +1542,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "string",
-                                "description": "Required action for CEIP.",
-                                "enum": [
-                                    "ENABLED",
-                                    "DISABLED",
-                                    "DISABLING",
-                                    "ENABLING",
-                                    "ENABLING_FAILED",
-                                    "DISABLING_FAILED"
-                                ]
+                                "$ref": "#/components/schemas/CeipUpdateSpec"
                             }
                         }
                     },
@@ -1457,12 +1614,12 @@
                     }
                 ],
                 "responses": {
-                    "404": {
-                        "description": "Not Found",
+                    "200": {
+                        "description": "OK",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Error"
+                                    "$ref": "#/components/schemas/SddcTask"
                                 }
                             }
                         }
@@ -1477,8 +1634,8 @@
                             }
                         }
                     },
-                    "500": {
-                        "description": "Internal Server Error",
+                    "404": {
+                        "description": "Not Found",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1487,12 +1644,12 @@
                             }
                         }
                     },
-                    "200": {
-                        "description": "OK",
+                    "500": {
+                        "description": "Internal Server Error",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/SddcTask"
+                                    "$ref": "#/components/schemas/Error"
                                 }
                             }
                         }
@@ -1539,8 +1696,18 @@
                     }
                 },
                 "responses": {
-                    "404": {
-                        "description": "Not Found",
+                    "202": {
+                        "description": "Accepted",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SddcTask"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Not allowed",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1559,32 +1726,22 @@
                             }
                         }
                     },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
-                    },
-                    "405": {
-                        "description": "Not allowed",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
-                    },
-                    "202": {
-                        "description": "Accepted",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/SddcTask"
                                 }
                             }
                         }
@@ -1613,6 +1770,16 @@
                     }
                 ],
                 "responses": {
+                    "404": {
+                        "description": "Bundle Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "content": {
@@ -1629,16 +1796,6 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/Bundle"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Bundle Not Found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
                                 }
                             }
                         }
@@ -1674,16 +1831,6 @@
                     }
                 ],
                 "responses": {
-                    "409": {
-                        "description": "Conflict",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
-                    },
                     "204": {
                         "description": "No Content"
                     },
@@ -1699,6 +1846,16 @@
                     },
                     "500": {
                         "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1739,16 +1896,6 @@
                     "required": true
                 },
                 "responses": {
-                    "409": {
-                        "description": "Conflict",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
-                    },
                     "202": {
                         "description": "Accepted",
                         "content": {
@@ -1778,6 +1925,16 @@
                                 }
                             }
                         }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -1790,22 +1947,22 @@
                 "summary": "Retrieve a list of SDDC Manager services",
                 "operationId": "getVcfServices",
                 "responses": {
-                    "400": {
-                        "description": "Bad Request",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
-                    },
                     "200": {
                         "description": "Ok",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/PageOfVcfService"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
                                 }
                             }
                         }
@@ -1842,22 +1999,22 @@
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "Ok",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/VcfService"
-                                }
-                            }
-                        }
-                    },
                     "404": {
                         "description": "VcfService not found",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VcfService"
                                 }
                             }
                         }
@@ -2024,12 +2181,12 @@
                 "description": "Get the details of VCF Management Components containing each component's FQDN, deployment type, and deployment status",
                 "operationId": "getSystemVcfManagementComponents",
                 "responses": {
-                    "403": {
-                        "description": "Forbidden",
+                    "200": {
+                        "description": "OK",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Error"
+                                    "$ref": "#/components/schemas/VcfManagementComponents"
                                 }
                             }
                         }
@@ -2044,12 +2201,44 @@
                             }
                         }
                     },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/system/settings/depot/machine-details": {
+            "get": {
+                "tags": [
+                    "DepotSettings"
+                ],
+                "summary": "Retrieve machine details",
+                "description": "Get machine details",
+                "operationId": "getMachineDetails",
+                "responses": {
                     "200": {
                         "description": "OK",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/VcfManagementComponents"
+                                    "$ref": "#/components/schemas/MachineDetails"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
                                 }
                             }
                         }
@@ -2111,16 +2300,6 @@
                     }
                 ],
                 "responses": {
-                    "404": {
-                        "description": "Not Found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
-                    },
                     "200": {
                         "description": "OK",
                         "content": {
@@ -2133,6 +2312,16 @@
                     },
                     "400": {
                         "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -2176,12 +2365,12 @@
                     }
                 ],
                 "responses": {
-                    "501": {
-                        "description": "Not Implemented",
+                    "200": {
+                        "description": "Success",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Error"
+                                    "$ref": "#/components/schemas/Validation"
                                 }
                             }
                         }
@@ -2192,16 +2381,6 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
-                    },
-                    "200": {
-                        "description": "Success",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Validation"
                                 }
                             }
                         }
@@ -2227,8 +2406,63 @@
                 "summary": "Retrieve the results of latest VCF (or VVF) installation validation",
                 "operationId": "getLatestSddcSpecValidation",
                 "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Validation"
+                                }
+                            }
+                        }
+                    },
                     "404": {
                         "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/sddcs/resources-calculation/{id}": {
+            "get": {
+                "tags": [
+                    "VCF Installer"
+                ],
+                "summary": "Retrieve the results of VCF (or VVF) installation resource calculation by its ID",
+                "operationId": "getResourcesCalculation",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "VCF (or VVF) resources calculation ID",
+                        "required": true,
+                        "schema": {
+                            "maximum": 36,
+                            "minimum": 36,
+                            "type": "string"
+                        },
+                        "example": "123e4567-e89b-42d3-a456-556642440000"
+                    }
+                ],
+                "responses": {
+                    "501": {
+                        "description": "Not Implemented",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -2242,7 +2476,17 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Validation"
+                                    "$ref": "#/components/schemas/CapacityValidation"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
                                 }
                             }
                         }
@@ -2268,22 +2512,22 @@
                 "summary": "Retrieve latest VCF (or VVF) installation task",
                 "operationId": "getLatestSddcTask",
                 "responses": {
-                    "500": {
-                        "description": "Internal Server Error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
-                    },
                     "200": {
                         "description": "OK",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/SddcTask"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
                                 }
                             }
                         }
@@ -2296,8 +2540,8 @@
                 "tags": [
                     "Releases"
                 ],
-                "summary": "Retrieve a list of releases including current and target versions",
-                "description": "Get all Releases, with option to get current release for a domain, get release by version or get future releases for a versionor get all the applicable target release.",
+                "summary": "Retrieve a list of release including current and target versions",
+                "description": "Get all Releases, with option to get current release for a domain, get release by version or get future releases for a versionor get all the applicable target release. Domain VCF release calculations consider SDDC-M, BOM stack components(life cycle managed by LCM eg: Vcenter, Esx, Nsx) to compute Management domain VCF version, BOM stack components(life cycle managed by LCM) to compute VI domain VCF version respectively. Eg: Management domain component stack versions: [SDDC-M: 5.2.1.0, VC: 8.0U3, NSX:4.2.1.3, ESX: 8.0U3]. VCF version computed will be 5.2.1.0. VI domain component stack versions: [VC: 9.0.0.0, NSX: 9.0.0.0, ESX: 9.0.0.0]. VCF version computed is 9.0.0.0 for VI domain.",
                 "operationId": "getReleases",
                 "parameters": [
                     {
@@ -2382,8 +2626,18 @@
                     }
                 ],
                 "responses": {
-                    "403": {
-                        "description": "Forbidden",
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PageOfRelease"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Release Not Found",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -2402,18 +2656,8 @@
                             }
                         }
                     },
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/PageOfRelease"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Release Not Found",
+                    "403": {
+                        "description": "Forbidden",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -2509,26 +2753,6 @@
                     }
                 ],
                 "responses": {
-                    "404": {
-                        "description": "Not Found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
-                    },
-                    "200": {
-                        "description": "Ok",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/PageOfReleaseComponentDetail"
-                                }
-                            }
-                        }
-                    },
                     "400": {
                         "description": "Bad Request",
                         "content": {
@@ -2548,6 +2772,26 @@
                                 }
                             }
                         }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PageOfReleaseComponentDetail"
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -2558,7 +2802,7 @@
                     "Releases"
                 ],
                 "summary": "Retrieve the lowest deployed release of VMware Cloud Foundation",
-                "description": "Returns release for the lowest deployed VCF version for a domain on the environment. If Management domain is ahead of WLD domain, VCF BOM version for the WLD domain will be returned. NOTE: This operation is not applicable if appliance is in VCF Installer mode.",
+                "description": "Returns release for the lowest deployed VCF version for a domain on the environment.If Management domain is ahead of WLD domain, VCF BOM version for the WLDdomain will be returned. Domain VCF release calculations consider SDDC-M, BOM stack components(life cycle managed by LCM eg: Vcenter, Esx, Nsx) to compute Management domain VCF version, BOM stack components(life cycle managed by LCM) to compute VI domain VCF version respectively. Eg: Management domain component stack versions: [SDDC-M: 5.2.1.0, VC: 8.0U3, NSX:4.2.1.3, ESX: 8.0U3]. VCF version computed will be 5.2.1.0. VI domain component stack versions: [VC: 9.0.0.0, NSX: 9.0.0.0, ESX: 9.0.0.0]. VCF version computed is 9.0.0.0 for VI domain.",
                 "operationId": "getSystemRelease",
                 "responses": {
                     "200": {
@@ -2571,8 +2815,8 @@
                             }
                         }
                     },
-                    "500": {
-                        "description": "Internal Server Error",
+                    "404": {
+                        "description": "Release Not Found",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -2581,8 +2825,8 @@
                             }
                         }
                     },
-                    "404": {
-                        "description": "Release Not Found",
+                    "500": {
+                        "description": "Internal Server Error",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -2625,8 +2869,8 @@
                             }
                         }
                     },
-                    "500": {
-                        "description": "Internal Server Error",
+                    "404": {
+                        "description": "Domain Not Found.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -2635,8 +2879,8 @@
                             }
                         }
                     },
-                    "404": {
-                        "description": "Domain Not Found.",
+                    "500": {
+                        "description": "Internal Server Error",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -2688,8 +2932,18 @@
                     }
                 ],
                 "responses": {
-                    "404": {
-                        "description": "Not Found",
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/FlexibleProductPatches"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -2708,16 +2962,6 @@
                             }
                         }
                     },
-                    "200": {
-                        "description": "Ok",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/FlexibleProductPatches"
-                                }
-                            }
-                        }
-                    },
                     "500": {
                         "description": "InternalServerError",
                         "content": {
@@ -2728,8 +2972,8 @@
                             }
                         }
                     },
-                    "422": {
-                        "description": "Unprocessable Entity",
+                    "404": {
+                        "description": "Not Found",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -2782,8 +3026,8 @@
                     }
                 ],
                 "responses": {
-                    "404": {
-                        "description": "Not Found",
+                    "422": {
+                        "description": "Unprocessable Entity",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -2802,16 +3046,6 @@
                             }
                         }
                     },
-                    "200": {
-                        "description": "Ok",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/CustomPatches"
-                                }
-                            }
-                        }
-                    },
                     "500": {
                         "description": "InternalServerError",
                         "content": {
@@ -2822,12 +3056,22 @@
                             }
                         }
                     },
-                    "422": {
-                        "description": "Unprocessable Entity",
+                    "404": {
+                        "description": "Not Found",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CustomPatches"
                                 }
                             }
                         }
@@ -2876,6 +3120,16 @@
                     }
                 ],
                 "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PageOfBundleDownloadStatusInfo"
+                                }
+                            }
+                        }
+                    },
                     "400": {
                         "description": "Bad Request",
                         "content": {
@@ -2892,16 +3146,6 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
-                    },
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/PageOfBundleDownloadStatusInfo"
                                 }
                             }
                         }
@@ -3017,13 +3261,6 @@
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "No Content"
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "x-vmw-compiler-skip": true
-                    },
                     "500": {
                         "description": "Internal server error",
                         "content": {
@@ -3033,6 +3270,13 @@
                                 }
                             }
                         }
+                    },
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "x-vmw-compiler-skip": true
                     }
                 }
             }
@@ -3064,15 +3308,17 @@
                         "maxLength": 32,
                         "type": "string",
                         "description": "This field is mandatory when downloadToken is used for online depot authentication and authorization. downloadToken should be generated from the broadcom support portal https://support.broadcom.com"
+                    },
+                    "downloadActivationCode": {
+                        "type": "string",
+                        "description": "This field is mandatory when downloadActivationCode is used for online depot authentication and authorization. downloadActivationCode should be generated from the broadcom support portal https://support.broadcom.com"
                     }
                 },
                 "description": "VMware Depot Account Information"
             },
             "DepotConfiguration": {
                 "required": [
-                    "hostname",
-                    "isOfflineDepot",
-                    "port"
+                    "isOfflineDepot"
                 ],
                 "type": "object",
                 "properties": {
@@ -3088,6 +3334,13 @@
                         "type": "integer",
                         "description": "Port of the depot",
                         "format": "int32"
+                    },
+                    "url": {
+                        "maxLength": 2048,
+                        "minLength": 0,
+                        "pattern": "^(https?://[^\\s]+)$",
+                        "type": "string",
+                        "description": "Depot URL (Currently used only for VCF offline depot). Supports HTTP no-auth for unauthenticated offline depot access."
                     }
                 },
                 "description": "Depot Configuration"
@@ -3098,9 +3351,6 @@
                     "vmwareAccount": {
                         "$ref": "#/components/schemas/DepotAccount"
                     },
-                    "dellEmcSupportAccount": {
-                        "$ref": "#/components/schemas/DepotAccount"
-                    },
                     "offlineAccount": {
                         "$ref": "#/components/schemas/DepotAccount"
                     },
@@ -3108,7 +3358,7 @@
                         "$ref": "#/components/schemas/DepotConfiguration"
                     }
                 },
-                "description": "VMware Depot Settings. At least one of vmwareAccount, dellEmcSupportAccount or offlineAccount value must be provided"
+                "description": "VMware Depot Settings. At least one of vmwareAccount or offlineAccount value must be provided"
             },
             "Error": {
                 "type": "object",
@@ -3142,6 +3392,14 @@
                         },
                         "description": "The error context (e.g. the component where it occurred).",
                         "readOnly": true
+                    },
+                    "notifications": {
+                        "type": "array",
+                        "description": "Detailed results of the precheck validation.",
+                        "readOnly": true,
+                        "items": {
+                            "$ref": "#/components/schemas/ValidationNotification"
+                        }
                     },
                     "message": {
                         "type": "string",
@@ -3200,6 +3458,60 @@
                 },
                 "description": "Describes a single error cause"
             },
+            "Remediation": {
+                "required": [
+                    "message"
+                ],
+                "type": "object",
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "description": "Steps needed to perform remediation.",
+                        "readOnly": true
+                    },
+                    "link": {
+                        "type": "string",
+                        "description": "Link associated with the remediation.",
+                        "readOnly": true
+                    }
+                },
+                "description": "Remediation conveys the remediation message and the associated link.",
+                "readOnly": true
+            },
+            "ValidationNotification": {
+                "required": [
+                    "message",
+                    "severity"
+                ],
+                "type": "object",
+                "properties": {
+                    "severity": {
+                        "type": "string",
+                        "description": "Severity level of the notification. Supported values: INFO/ERROR/WARNING",
+                        "readOnly": true
+                    },
+                    "message": {
+                        "type": "string",
+                        "description": "Precheck result message",
+                        "readOnly": true
+                    },
+                    "remediations": {
+                        "type": "array",
+                        "description": "List of steps and associated info to remediate the issue.",
+                        "readOnly": true,
+                        "items": {
+                            "$ref": "#/components/schemas/Remediation"
+                        }
+                    },
+                    "impactMessage": {
+                        "type": "string",
+                        "description": "Impact of precheck failure or warning.",
+                        "readOnly": true
+                    }
+                },
+                "description": "Represents the detailed result of the precheck validation.",
+                "readOnly": true
+            },
             "TokenCreationSpec": {
                 "type": "object",
                 "properties": {
@@ -3245,6 +3557,24 @@
                 },
                 "description": "This contains the access token and the refresh token for the user API access."
             },
+            "DataInTransitConfig": {
+                "required": [
+                    "enable"
+                ],
+                "type": "object",
+                "properties": {
+                    "enable": {
+                        "type": "boolean",
+                        "description": "Enable vSAN DIT encryption"
+                    },
+                    "rekeyInterval": {
+                        "type": "integer",
+                        "description": "Periodical rekeying interval in minutes for vSAN DIT encryption",
+                        "format": "int32"
+                    }
+                },
+                "description": "This specification contains data-in-transit encryption configuration for vSAN enabled clusters"
+            },
             "DnsSpec": {
                 "required": [
                     "subdomain"
@@ -3270,6 +3600,37 @@
                 },
                 "description": "Spec contains parameters of Domain Name System"
             },
+            "DtgwSpec": {
+                "required": [
+                    "externalIpBlockCidr",
+                    "gatewayCidr",
+                    "vlan"
+                ],
+                "type": "object",
+                "properties": {
+                    "vlan": {
+                        "type": "integer",
+                        "description": "VLAN for Distributed Transit Gateway",
+                        "format": "int64"
+                    },
+                    "gatewayCidr": {
+                        "pattern": "^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\/(([0-9])|([12][0-9])|(3[0-2]))$",
+                        "type": "string",
+                        "description": "Gateway CIDR for Distributed Transit Gateway"
+                    },
+                    "externalIpBlockCidr": {
+                        "pattern": "^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\/(([0-9])|([12][0-9])|(3[0-2]))$",
+                        "type": "string",
+                        "description": "External IP Block CIDR for VPCs, required for external connectivity via DTGW"
+                    },
+                    "privateTgwIpBlockCidr": {
+                        "pattern": "^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\/(([0-9])|([12][0-9])|(3[0-2]))$",
+                        "type": "string",
+                        "description": "Private TGW IP Block CIDR for VPCs"
+                    }
+                },
+                "description": "Specification for Distributed Transit Gateway aka DTGW"
+            },
             "DvsSpec": {
                 "required": [
                     "vmnicsToUplinks"
@@ -3283,11 +3644,11 @@
                     },
                     "networks": {
                         "type": "array",
-                        "description": "Types of networks in this Distributed vSphere Switch. One among: VSAN, VMOTION, MANAGEMENT, VM_MANAGEMENT, NFS or any custom network types defined in networkSpecs",
+                        "description": "Types of networks in this Distributed vSphere Switch. One among: VSAN, VMOTION, MANAGEMENT, VM_MANAGEMENT, NFS, FLEET_MANAGEMENT or any custom network types defined in networkSpecs",
                         "example": "MANAGEMENT",
                         "items": {
                             "type": "string",
-                            "description": "Types of networks in this Distributed vSphere Switch. One among: VSAN, VMOTION, MANAGEMENT, VM_MANAGEMENT, NFS or any custom network types defined in networkSpecs",
+                            "description": "Types of networks in this Distributed vSphere Switch. One among: VSAN, VMOTION, MANAGEMENT, VM_MANAGEMENT, NFS, FLEET_MANAGEMENT or any custom network types defined in networkSpecs",
                             "example": "MANAGEMENT"
                         }
                     },
@@ -3295,7 +3656,7 @@
                         "maximum": 9190,
                         "minimum": 1280,
                         "type": "integer",
-                        "description": "Distributed vSphere Switch MTU (default value is 9000)",
+                        "description": "Distributed vSphere Switch MTU (default value is 9000). If not specified during cluster creation or domain creation (with NSX sharing), this value will be automatically populated with the NSX Global Config Physical Uplink MTU from the associated NSX cluster.",
                         "format": "int32",
                         "example": 9000
                     },
@@ -3328,20 +3689,126 @@
                 },
                 "description": "Spec contains parameters for DVS"
             },
+            "EncryptionConfig": {
+                "type": "object",
+                "properties": {
+                    "dataInTransitConfig": {
+                        "$ref": "#/components/schemas/DataInTransitConfig"
+                    }
+                },
+                "description": "This specification contains encryption configuration for vSAN enabled clusters"
+            },
             "FcSpec": {
-                "required": [
-                    "datastoreName"
-                ],
                 "type": "object",
                 "properties": {
                     "datastoreName": {
                         "maxLength": 80,
                         "minLength": 0,
                         "type": "string",
-                        "description": "Datastore name used for cluster creation"
+                        "description": "Datastore name used for cluster creation. This field is optional in case of management domain deployment (datastore name will be auto-generated) but it is required for all Day-N operations"
                     }
                 },
                 "description": "Cluster storage configuration for VMFS on FC"
+            },
+            "FleetDepotServiceSpec": {
+                "type": "object",
+                "properties": {
+                    "version": {
+                        "type": "string",
+                        "description": "Version",
+                        "example": "9.0.0.0.24597083"
+                    },
+                    "size": {
+                        "type": "string",
+                        "description": "size",
+                        "example": "small"
+                    }
+                },
+                "description": "Specification for deploy/configure of Software Depot"
+            },
+            "FleetLcmServiceSpec": {
+                "type": "object",
+                "properties": {
+                    "version": {
+                        "type": "string",
+                        "description": "Version",
+                        "example": "9.0.0.0.24597083"
+                    },
+                    "size": {
+                        "type": "string",
+                        "description": "size",
+                        "example": "small"
+                    }
+                },
+                "description": "Specification for deploy/configure of Fleet LCM service"
+            },
+            "IPv4Pool": {
+                "type": "object",
+                "properties": {
+                    "cidr": {
+                        "type": "string",
+                        "description": "Network CIDR.",
+                        "example": "10.0.0.0/24"
+                    },
+                    "ipRange": {
+                        "$ref": "#/components/schemas/IpRange"
+                    },
+                    "addresses": {
+                        "type": "array",
+                        "description": "List of IPv4 addresses.",
+                        "example": "[\"10.0.0.80\", \"10.0.0.81\", \"10.0.0.82\", ...]",
+                        "items": {
+                            "type": "string",
+                            "description": "List of IPv4 addresses.",
+                            "example": "[\"10.0.0.80\", \"10.0.0.81\", \"10.0.0.82\", ...]"
+                        }
+                    },
+                    "excludedAddresses": {
+                        "type": "array",
+                        "description": "List of IPv4 addresses to exclude. Applies to range and CIDR",
+                        "example": "[\"10.0.0.81\", ...]",
+                        "items": {
+                            "type": "string",
+                            "description": "List of IPv4 addresses to exclude. Applies to range and CIDR",
+                            "example": "[\"10.0.0.81\", ...]"
+                        }
+                    }
+                },
+                "description": "Spec contains parameters for IPv4Pool. One of addresses, ipRange or cidr is required"
+            },
+            "IPv6Pool": {
+                "type": "object",
+                "properties": {
+                    "cidr": {
+                        "type": "string",
+                        "description": "Network CIDR.",
+                        "example": "2001:db8::00/112"
+                    },
+                    "ipRange": {
+                        "$ref": "#/components/schemas/IpRangeV6"
+                    },
+                    "addresses": {
+                        "type": "array",
+                        "description": "List of IPv6 addresses.",
+                        "example": "[\"2001:db8::80\", \"2001:db8::81\", \"2001:db8::82\", ...]",
+                        "items": {
+                            "type": "string",
+                            "description": "List of IPv6 addresses.",
+                            "example": "[\"2001:db8::80\", \"2001:db8::81\", \"2001:db8::82\", ...]"
+                        }
+                    },
+                    "excludedAddresses": {
+                        "type": "array",
+                        "description": "List of IPv6 addresses to exclude. Applies to range and CIDR",
+                        "example": "[\"2001:db8::81\", ...]",
+                        "items": {
+                            "type": "string",
+                            "description": "List of IPv6 addresses to exclude. Applies to range and CIDR",
+                            "example": "[\"2001:db8::81\", ...]"
+                        }
+                    }
+                },
+                "description": "Spec contains parameters for IPv6Pool"
             },
             "IpAddressPoolRangeSpec": {
                 "required": [
@@ -3441,7 +3908,33 @@
                         "example": "192.168.0.128"
                     }
                 },
-                "description": "Spec contains parameters for range of IP addresses"
+                "description": "Spec contains parameters for range of IP addresses",
+                "example": "10.0.0.80-10.0.0.89"
+            },
+            "IpRangeV6": {
+                "required": [
+                    "endIpAddress",
+                    "startIpAddress"
+                ],
+                "type": "object",
+                "properties": {
+                    "startIpAddress": {
+                        "maxLength": 39,
+                        "minLength": 2,
+                        "type": "string",
+                        "description": "Start IP Address",
+                        "example": "::"
+                    },
+                    "endIpAddress": {
+                        "maxLength": 39,
+                        "minLength": 2,
+                        "type": "string",
+                        "description": "End IP Address",
+                        "example": "2001:0db8:0000:0000:0000:ff00:0042:8329"
+                    }
+                },
+                "description": "Spec contains parameters for range of IP addresses",
+                "example": "2001:db8::80-2001:db8::89"
             },
             "LagSpec": {
                 "required": [
@@ -3454,7 +3947,7 @@
                 "type": "object",
                 "properties": {
                     "name": {
-                        "maxLength": 80,
+                        "maxLength": 16,
                         "minLength": 0,
                         "type": "string",
                         "description": "LAG name"
@@ -3484,6 +3977,36 @@
                     }
                 },
                 "description": "This specification contains VDS (vSphere distributed switch) LAG configurations"
+            },
+            "LicenseServerSpec": {
+                "required": [
+                    "hostname"
+                ],
+                "type": "object",
+                "properties": {
+                    "hostname": {
+                        "type": "string",
+                        "description": "Host name",
+                        "example": "license-server.rainpole.io"
+                    },
+                    "version": {
+                        "type": "string",
+                        "description": "Version",
+                        "example": "9.0.0.0.24597083"
+                    },
+                    "useExistingDeployment": {
+                        "type": "boolean",
+                        "description": "Import existing deployment or deploy one.",
+                        "example": true,
+                        "default": false
+                    },
+                    "sslThumbprint": {
+                        "type": "string",
+                        "description": "SSL thumbprint (SHA256) of the product's certificate. Need to be populated when using existing deployment in order to establish trust with the existing product.",
+                        "example": "3D:D0:EE:B5:A0:CC:45:08:5C:4F:84:51:CD:00:B6:41:BB:4A:A2:9A:77:1C:A6:4C:6D:84:5A:D0:4F:68:7A:B8"
+                    }
+                },
+                "description": "Specification for License Server"
             },
             "NasVolumeSpec": {
                 "required": [
@@ -3522,7 +4045,6 @@
             },
             "NfsDatastoreSpec": {
                 "required": [
-                    "datastoreName",
                     "nasVolume"
                 ],
                 "type": "object",
@@ -3531,7 +4053,7 @@
                         "maxLength": 80,
                         "minLength": 0,
                         "type": "string",
-                        "description": "Datastore name used for cluster creation"
+                        "description": "Datastore name used for cluster creation. This field is optional in case of management domain deployment (datastore name will be auto-generated) but it is required for all Day-N operations"
                     },
                     "nasVolume": {
                         "$ref": "#/components/schemas/NasVolumeSpec"
@@ -3550,9 +4072,6 @@
                 "description": "Spec contains parameters for NSX manager"
             },
             "NsxtSwitchConfig": {
-                "required": [
-                    "transportZones"
-                ],
                 "type": "object",
                 "properties": {
                     "transportZones": {
@@ -3678,6 +4197,22 @@
                 },
                 "description": "Spec contains Root Certificate Authority parameters"
             },
+            "SaltSpec": {
+                "type": "object",
+                "properties": {
+                    "version": {
+                        "type": "string",
+                        "description": "Version",
+                        "example": "9.0.0.0.24597083"
+                    },
+                    "size": {
+                        "type": "string",
+                        "description": "size",
+                        "example": "small"
+                    }
+                },
+                "description": "Specification for Salt services"
+            },
             "SddcClusterSpec": {
                 "type": "object",
                 "properties": {
@@ -3773,6 +4308,22 @@
                 },
                 "description": "Spec contains parameters for Host"
             },
+            "SddcLcmServiceSpec": {
+                "type": "object",
+                "properties": {
+                    "version": {
+                        "type": "string",
+                        "description": "Version",
+                        "example": "9.0.0.0.24597083"
+                    },
+                    "size": {
+                        "type": "string",
+                        "description": "size",
+                        "example": "small"
+                    }
+                },
+                "description": "Specification for deploy/configure of a SDDC LCM service"
+            },
             "SddcManagerSpec": {
                 "required": [
                     "hostname"
@@ -3781,9 +4332,9 @@
                 "properties": {
                     "rootPassword": {
                         "maxLength": 2147483647,
-                        "minLength": 8,
+                        "minLength": 15,
                         "type": "string",
-                        "description": "Password for the 'root' user on SDDC Manager appliance. It needs to be a strong password with at least one alphabet and one special character and at least 8 characters in length. If blank, the SDDC Local Admin Password will be used (if provided) or password will be auto-generated."
+                        "description": "Password for the 'root' user on SDDC Manager appliance. The password of this account must be at least 15 characters long. It also must contain at-least 1 uppercase, 1 lowercase, 1 special character  specified in braces [!%@$^#?*] and 1 digit. If blank, the SDDC Local Admin Password will be used (if provided) or password will be auto-generated."
                     },
                     "hostname": {
                         "maxLength": 63,
@@ -3793,26 +4344,26 @@
                     },
                     "sshPassword": {
                         "maxLength": 2147483647,
-                        "minLength": 8,
+                        "minLength": 15,
                         "type": "string",
-                        "description": "Password for the 'vcf' user on SDDC Manager appliance. It needs to be a strong password with at least one alphabet and one special character and at least 8 characters in length. If blank, the SDDC Local Admin Password will be used (if provided) or password will be auto-generated."
+                        "description": "Password for the 'vcf' user on SDDC Manager appliance. The password of this account must be at least 15 characters long. It also must contain at-least 1 uppercase, 1 lowercase, 1 special character  specified in braces [!%@$^#?*] and 1 digit. If blank, the SDDC Local Admin Password will be used (if provided) or password will be auto-generated."
                     },
                     "localUserPassword": {
                         "maxLength": 2147483647,
                         "minLength": 12,
                         "type": "string",
-                        "description": "The local account is a built-in admin account in VCF that can be used in emergency scenarios. The password of this account must be at least 12 characters long. It also must contain at-least 1 uppercase, 1 lowercase, 1 special character specified in braces [!%@$^#?] and 1 digit. In addition, a character cannot be repeated more than 3 times consecutively. If blank, the password will be auto-generated."
+                        "description": "The local account is a built-in admin account in VCF that can be used in emergency scenarios. The password of this account must be at least 12 characters long. It also must contain at-least 1 uppercase, 1 lowercase, 1 special character specified in braces [!%@$^#?*] and 1 digit. If blank, the password will be auto-generated."
+                    },
+                    "version": {
+                        "type": "string",
+                        "description": "Version",
+                        "example": "9.0.0.0.24597083"
                     },
                     "useExistingDeployment": {
                         "type": "boolean",
                         "description": "Import existing deployment or deploy one.",
                         "example": true,
                         "default": false
-                    },
-                    "version": {
-                        "type": "string",
-                        "description": "Version",
-                        "example": "9.0.0.0.24597083"
                     },
                     "sslThumbprint": {
                         "type": "string",
@@ -3831,7 +4382,7 @@
                 "properties": {
                     "networkType": {
                         "type": "string",
-                        "description": "Network Type. One among: VSAN, VMOTION, MANAGEMENT, VM_MANAGEMENT, NFS or any custom network type",
+                        "description": "Network Type. One among: VSAN, VMOTION, MANAGEMENT, VM_MANAGEMENT, NFS, FLEET_MANAGEMENT or any custom network type",
                         "example": "MANAGEMENT"
                     },
                     "subnet": {
@@ -3911,6 +4462,20 @@
                     "portGroupKey": {
                         "type": "string",
                         "description": "Name of the Distributed Portgroup to be created. It will be autogenerated if null"
+                    },
+                    "ipAddressVersion": {
+                        "pattern": "(IPv4|IPv6)",
+                        "type": "string",
+                        "description": "IP Address version. One among: IPv4, IPv6",
+                        "example": "IPv6",
+                        "default": "IPv4"
+                    },
+                    "ipAddressAssignmentMode": {
+                        "pattern": "(STATIC|DHCP|SLAAC)",
+                        "type": "string",
+                        "description": "IP Address assignment mode. One among: STATIC, DHCP, SLAAC",
+                        "example": "SLAAC",
+                        "default": "STATIC"
                     }
                 },
                 "description": "Defines a network spec"
@@ -3966,6 +4531,9 @@
                     "ipAddressPoolSpec": {
                         "$ref": "#/components/schemas/IpAddressPoolSpec"
                     },
+                    "vpcSpec": {
+                        "$ref": "#/components/schemas/VpcSpec"
+                    },
                     "skipNsxOverlayOverManagementNetwork": {
                         "type": "boolean",
                         "description": "Flag that indicates if the Overlay over Management Network configuration will be skipped. Applicable only when vCenter is existing and being converted."
@@ -3976,16 +4544,16 @@
                         "example": true,
                         "default": false
                     },
+                    "version": {
+                        "type": "string",
+                        "description": "Version",
+                        "example": "9.0.0.0.24597083"
+                    },
                     "useExistingDeployment": {
                         "type": "boolean",
                         "description": "Import existing deployment or deploy one.",
                         "example": true,
                         "default": false
-                    },
-                    "version": {
-                        "type": "string",
-                        "description": "Version",
-                        "example": "9.0.0.0.24597083"
                     },
                     "sslThumbprint": {
                         "type": "string",
@@ -4013,9 +4581,9 @@
                         "example": "sfo01-m01"
                     },
                     "workflowType": {
-                        "pattern": "(VCF|VCF_EXTEND|VVF)",
+                        "pattern": "(VCF|VCF_COMPLETE|VCF_EXTEND|VVF|VCF_BOOTSTRAP)",
                         "type": "string",
-                        "description": "Type of workflow to initiate creation and/or validation of SDDC",
+                        "description": "Type of workflow to initiate creation and/or validation of SDDC. If building a secondary VCF instance to connect it to the fleet, specify workflowType as VCF_EXTEND.",
                         "example": "One among: VCF, VCF_EXTEND, VVF"
                     },
                     "hostSpecs": {
@@ -4094,8 +4662,29 @@
                     "datastoreSpec": {
                         "$ref": "#/components/schemas/SddcDatastoreSpec"
                     },
-                    "vcfOperationsFleetManagementSpec": {
-                        "$ref": "#/components/schemas/VcfOperationsFleetManagementSpec"
+                    "vspClusterSpec": {
+                        "$ref": "#/components/schemas/SddcVspClusterSpec"
+                    },
+                    "fleetLcmSpec": {
+                        "$ref": "#/components/schemas/FleetLcmServiceSpec"
+                    },
+                    "sddcLcmSpec": {
+                        "$ref": "#/components/schemas/SddcLcmServiceSpec"
+                    },
+                    "fleetDepotSpec": {
+                        "$ref": "#/components/schemas/FleetDepotServiceSpec"
+                    },
+                    "telemetryAcceptorSpec": {
+                        "$ref": "#/components/schemas/TelemetryAcceptorSpec"
+                    },
+                    "vidbSpec": {
+                        "$ref": "#/components/schemas/VidbSpec"
+                    },
+                    "saltSpec": {
+                        "$ref": "#/components/schemas/SaltSpec"
+                    },
+                    "saltRaasSpec": {
+                        "$ref": "#/components/schemas/SaltSpec"
                     },
                     "vcfOperationsSpec": {
                         "$ref": "#/components/schemas/VcfOperationsSpec"
@@ -4106,11 +4695,17 @@
                     "vcfAutomationSpec": {
                         "$ref": "#/components/schemas/VcfAutomationSpec"
                     },
+                    "vcfManagementComponentsInfrastructureSpec": {
+                        "$ref": "#/components/schemas/VcfManagementComponentsInfrastructureSpec"
+                    },
+                    "licenseServerSpec": {
+                        "$ref": "#/components/schemas/LicenseServerSpec"
+                    },
                     "vcfInstanceName": {
                         "maxLength": 300,
-                        "minLength": 3,
+                        "minLength": 1,
                         "type": "string",
-                        "description": "VCF Instance name. Minumum length 3, maximum length 300"
+                        "description": "VCF Instance name. Minimum length 1, maximum length 300"
                     }
                 },
                 "description": "VCF Installer specification"
@@ -4130,10 +4725,10 @@
                         "example": "vcenter.rainpole.io"
                     },
                     "rootVcenterPassword": {
-                        "maxLength": 2147483647,
-                        "minLength": 15,
+                        "maxLength": 20,
+                        "minLength": 8,
                         "type": "string",
-                        "description": "vCenter root password. The password must be between 15 characters and 20 characters long. It must also contain at least one uppercase and lowercase letter, one number, and one character from '! \" # $ % & ' ( ) * + , - . / : ; < = > ? @ [ \\ ] ^ _ ` { &Iota; } ~' and all characters must be ASCII. Space is not allowed in password. For VCF only: if blank, the SDDC Local Admin Password will be used (if provided) or password will be auto-generated.",
+                        "description": "vCenter root password. For new deployments, the password must be between 15 and 20 characters long. For existing vCenter (brownfield convert), the password must be between 8 and 20 characters long. It must also contain at least one uppercase and lowercase letter, one number, and one character from '! \" # $ % & ' ( ) * + , - . / : ; < = > ? @ [ \\ ] ^ _ ` { &Iota; } ~' and all characters must be ASCII. Space is not allowed in password. For VCF only: if blank, the SDDC Local Admin Password will be used (if provided) or password will be auto-generated.",
                         "example": "Sample_Password123"
                     },
                     "vmSize": {
@@ -4161,16 +4756,16 @@
                         "type": "string",
                         "description": "Admin user sso password. Password needs to be a strong password with at least one Uppercase character, one lowercase character, one digit and one special character specified in braces [!$%^] and 8-20 characters in length,and 3 maximum identical adjacent characters!. If blank, the SDDC Local Admin Password will be used (if provided) or password will be auto-generated."
                     },
+                    "version": {
+                        "type": "string",
+                        "description": "Version",
+                        "example": "9.0.0.0.24597083"
+                    },
                     "useExistingDeployment": {
                         "type": "boolean",
                         "description": "Import existing deployment or deploy one.",
                         "example": true,
                         "default": false
-                    },
-                    "version": {
-                        "type": "string",
-                        "description": "Version",
-                        "example": "9.0.0.0.24597083"
                     },
                     "sslThumbprint": {
                         "type": "string",
@@ -4179,6 +4774,78 @@
                     }
                 },
                 "description": "Spec contains parameters for vCenter"
+            },
+            "SddcVspClusterSpec": {
+                "required": [
+                    "instanceFqdn",
+                    "ipv4Pool",
+                    "platformFqdn"
+                ],
+                "type": "object",
+                "properties": {
+                    "platformFqdn": {
+                        "type": "string",
+                        "description": "VSP cluster primary FQDN.",
+                        "example": "vsp-cluster.rainpole.io"
+                    },
+                    "systemUserPassword": {
+                        "maxLength": 2147483647,
+                        "minLength": 15,
+                        "type": "string",
+                        "description": "SSH password for vmware-system-user and admin@vsp.local on VMSP cluster nodes. Password must be at least 15 characters long. If blank the password will be auto-generated.",
+                        "example": "Broadcom1@!#$%?^*"
+                    },
+                    "ipv4Pool": {
+                        "$ref": "#/components/schemas/IPv4Pool"
+                    },
+                    "ipv6Pool": {
+                        "$ref": "#/components/schemas/IPv6Pool"
+                    },
+                    "size": {
+                        "type": "string",
+                        "description": "Size of VSP cluster. One among: small, medium, large",
+                        "example": "Small"
+                    },
+                    "internalClusterCidrIpv4": {
+                        "type": "string",
+                        "description": "Internal Cluster CIDR for IPv4. The set of addresses must be completely unique and not in use anywhere in your entire environment.",
+                        "example": "198.18.0.0/15",
+                        "default": "198.18.0.0/15"
+                    },
+                    "internalClusterCidrIpv6": {
+                        "type": "string",
+                        "description": "Internal Cluster CIDR for IPv6. The set of addresses must be completely unique and not in use anywhere in your entire environment.",
+                        "example": "fd00::/111",
+                        "default": "fd00::/111"
+                    },
+                    "instanceFqdn": {
+                        "type": "string",
+                        "description": "VSP cluster instance FQDN.",
+                        "example": "instance.rainpole.io"
+                    },
+                    "fleetFqdn": {
+                        "type": "string",
+                        "description": "VSP cluster fleet FQDN. This should be provided in VVF and primary VCF instance. If building a secondary VCF instance, do not provide this field.",
+                        "example": "instance.rainpole.io"
+                    },
+                    "version": {
+                        "type": "string",
+                        "description": "Version",
+                        "example": "9.0.0.0.24597083"
+                    },
+                    "useExistingDeployment": {
+                        "type": "boolean",
+                        "description": "Import existing deployment or deploy one.",
+                        "example": true,
+                        "default": false
+                    },
+                    "sslThumbprint": {
+                        "type": "string",
+                        "description": "SSL thumbprint (SHA256) of the product's certificate. Need to be populated when using existing deployment in order to establish trust with the existing product.",
+                        "example": "3D:D0:EE:B5:A0:CC:45:08:5C:4F:84:51:CD:00:B6:41:BB:4A:A2:9A:77:1C:A6:4C:6D:84:5A:D0:4F:68:7A:B8"
+                    }
+                },
+                "description": "Specification VSP cluster deployment"
             },
             "SecuritySpec": {
                 "type": "object",
@@ -4230,6 +4897,22 @@
                 },
                 "description": "This specification contains the teaming policies associated with the uplink profile."
             },
+            "TelemetryAcceptorSpec": {
+                "type": "object",
+                "properties": {
+                    "version": {
+                        "type": "string",
+                        "description": "Version",
+                        "example": "9.0.0.0.24597083"
+                    },
+                    "size": {
+                        "type": "string",
+                        "description": "size",
+                        "example": "small"
+                    }
+                },
+                "description": "Specification for deploy/configure of Telemetry acceptor service"
+            },
             "TransportZone": {
                 "required": [
                     "transportType"
@@ -4253,7 +4936,8 @@
             },
             "VcfAutomationSpec": {
                 "required": [
-                    "hostname"
+                    "hostname",
+                    "internalClusterCidr"
                 ],
                 "type": "object",
                 "properties": {
@@ -4262,26 +4946,30 @@
                         "description": "Host name",
                         "example": "vcfautomation.rainpole.io"
                     },
-                    "adminUserPassword": {
+                    "platformFqdn": {
                         "type": "string",
-                        "description": "Admin user password. If blank the password will be auto-generated."
+                        "description": "FQDN of the VSP platform (required when useExistingDeployment is not 'true')",
+                        "example": "vsp-platform.rainpole.io"
+                    },
+                    "adminUserPassword": {
+                        "maxLength": 2147483647,
+                        "minLength": 15,
+                        "type": "string",
+                        "description": "Admin user password. Password must be at least 15 characters long. If blank the password will be auto-generated."
                     },
                     "ipPool": {
-                        "maxItems": 4,
-                        "minItems": 2,
                         "type": "array",
-                        "description": "List of IP addresses.  For Standard deployment model two IP addresses need to be specified and for High Availability four IP addresses need to be specified",
-                        "example": "['10.0.0.80', '10.0.0.81']",
+                        "description": "List of IP addresses for the IP pool",
+                        "example": "['10.0.0.80', '10.0.0.81', '10.0.0.82', '10.0.0.83', '10.0.0.84', '10.0.0.85']",
                         "items": {
                             "type": "string",
-                            "description": "List of IP addresses.  For Standard deployment model two IP addresses need to be specified and for High Availability four IP addresses need to be specified",
-                            "example": "['10.0.0.80', '10.0.0.81']"
+                            "description": "List of IP addresses for the IP pool",
+                            "example": "['10.0.0.80', '10.0.0.81', '10.0.0.82', '10.0.0.83', '10.0.0.84', '10.0.0.85']"
                         }
                     },
                     "internalClusterCidr": {
                         "type": "string",
-                        "description": "Internal Cluster CIDR. One among: 198.18.0.0/15, 240.0.0.0/15, 250.0.0.0/15",
-                        "example": "198.18.0.0/15"
+                        "description": "Internal Cluster CIDR. The set of addresses must be completely unique and not in use anywhere in your entire environment."
                     },
                     "nodePrefix": {
                         "maxLength": 57,
@@ -4291,16 +4979,21 @@
                         "description": "Node Prefix. It cannot be blank and must begin and end with an alphanumeric character, and can only contain lowercase alphanumeric characters or hyphens.",
                         "example": "node-123"
                     },
-                    "useExistingDeployment": {
-                        "type": "boolean",
-                        "description": "Import existing deployment or deploy one.",
-                        "example": true,
-                        "default": false
+                    "size": {
+                        "type": "string",
+                        "description": "size",
+                        "example": "small"
                     },
                     "version": {
                         "type": "string",
                         "description": "Version",
                         "example": "9.0.0.0.24597083"
+                    },
+                    "useExistingDeployment": {
+                        "type": "boolean",
+                        "description": "Import existing deployment or deploy one.",
+                        "example": true,
+                        "default": false
                     },
                     "sslThumbprint": {
                         "type": "string",
@@ -4309,6 +5002,56 @@
                     }
                 },
                 "description": "Specification for VCF Automation"
+            },
+            "VcfManagementComponentsInfrastructureSpec": {
+                "type": "object",
+                "properties": {
+                    "localRegionNetwork": {
+                        "$ref": "#/components/schemas/VcfManagementComponentsNetworkSpec"
+                    },
+                    "xRegionNetwork": {
+                        "$ref": "#/components/schemas/VcfManagementComponentsNetworkSpec"
+                    }
+                },
+                "description": "Specification for infrastructure to be used for VCF Management Components deployment"
+            },
+            "VcfManagementComponentsNetworkSpec": {
+                "required": [
+                    "gateway",
+                    "networkName",
+                    "subnetMask"
+                ],
+                "type": "object",
+                "properties": {
+                    "networkName": {
+                        "type": "string",
+                        "description": "Name of the network to be used for deployment"
+                    },
+                    "subnetMask": {
+                        "maxLength": 15,
+                        "minLength": 7,
+                        "type": "string",
+                        "description": "Subnet Mask",
+                        "example": "255.255.255.0"
+                    },
+                    "gateway": {
+                        "maxLength": 15,
+                        "minLength": 7,
+                        "type": "string",
+                        "description": "Gateway",
+                        "example": "10.0.0.250"
+                    },
+                    "ipv6Gateway": {
+                        "type": "string",
+                        "description": "Gateway for IPv6 network"
+                    },
+                    "ipv6Prefix": {
+                        "type": "integer",
+                        "description": "Prefix for IPv6 network",
+                        "format": "int32"
+                    }
+                },
+                "description": "Specification for network to be used for VCF Management Components deployment"
             },
             "VcfOperationsCollectorSpec": {
                 "required": [
@@ -4332,16 +5075,16 @@
                         "description": "VCF Operations collector appliance size. One among: small, standard. Default value if not provided is small",
                         "example": "small"
                     },
+                    "version": {
+                        "type": "string",
+                        "description": "Version",
+                        "example": "9.0.0.0.24597083"
+                    },
                     "useExistingDeployment": {
                         "type": "boolean",
                         "description": "Import existing deployment or deploy one.",
                         "example": true,
                         "default": false
-                    },
-                    "version": {
-                        "type": "string",
-                        "description": "Version",
-                        "example": "9.0.0.0.24597083"
                     },
                     "sslThumbprint": {
                         "type": "string",
@@ -4350,46 +5093,6 @@
                     }
                 },
                 "description": "Specification for VCF Operations collector"
-            },
-            "VcfOperationsFleetManagementSpec": {
-                "required": [
-                    "hostname"
-                ],
-                "type": "object",
-                "properties": {
-                    "hostname": {
-                        "type": "string",
-                        "description": "Host name",
-                        "example": "vcf-operations-fleet-management.rainpole.io"
-                    },
-                    "rootUserPassword": {
-                        "maxLength": 256,
-                        "minLength": 15,
-                        "type": "string",
-                        "description": "Root user password. Password should be at least 15 characters in length. If blank the password will be auto-generated."
-                    },
-                    "adminUserPassword": {
-                        "type": "string",
-                        "description": "Admin user password. If blank the password will be auto-generated."
-                    },
-                    "useExistingDeployment": {
-                        "type": "boolean",
-                        "description": "Import existing deployment or deploy one.",
-                        "example": true,
-                        "default": false
-                    },
-                    "version": {
-                        "type": "string",
-                        "description": "Version",
-                        "example": "9.0.0.0.24597083"
-                    },
-                    "sslThumbprint": {
-                        "type": "string",
-                        "description": "SSL thumbprint (SHA256) of the product's certificate. Need to be populated when using existing deployment in order to establish trust with the existing product.",
-                        "example": "3D:D0:EE:B5:A0:CC:45:08:5C:4F:84:51:CD:00:B6:41:BB:4A:A2:9A:77:1C:A6:4C:6D:84:5A:D0:4F:68:7A:B8"
-                    }
-                },
-                "description": "Specification for VCF Operations fleet management"
             },
             "VcfOperationsNode": {
                 "required": [
@@ -4410,12 +5113,12 @@
                     },
                     "type": {
                         "type": "string",
-                        "description": "Node type. One among: master, replica, data",
+                        "description": "Node type. One among: master, replica, data. If building a secondary VCF instance, specify the master node details.",
                         "example": "master"
                     },
                     "sslThumbprint": {
                         "type": "string",
-                        "description": "SSL thumbprint (SHA256) of the node certificate. Need to be populated when using existing VCF Ops deployment.",
+                        "description": "SSL thumbprint (SHA256) of the node certificate. Need to be populated when using existing VCF Ops deployment or when connecting a secondary VCF instance to the primary VCF instance (fleet).",
                         "example": "3D:D0:EE:B5:A0:CC:45:08:5C:4F:84:51:CD:00:B6:41:BB:4A:A2:9A:77:1C:A6:4C:6D:84:5A:D0:4F:68:7A:B8"
                     }
                 },
@@ -4431,7 +5134,7 @@
                         "maxItems": 3,
                         "minItems": 1,
                         "type": "array",
-                        "description": "List of nodes",
+                        "description": "List of VCF Ops nodes. If building a secondary VCF instance, specify the details of the existing VCF Ops master node.",
                         "items": {
                             "$ref": "#/components/schemas/VcfOperationsNode"
                         }
@@ -4440,7 +5143,7 @@
                         "maxLength": 2147483647,
                         "minLength": 8,
                         "type": "string",
-                        "description": "Admin user password. If blank the password will be auto-generated."
+                        "description": "Admin user password. If blank the password will be auto-generated. If building a secondary VCF instance, this field should be set to the existing admin password of VCF Ops."
                     },
                     "applianceSize": {
                         "pattern": "(xsmall|small|medium|large|xlarge)",
@@ -4454,7 +5157,7 @@
                     },
                     "useExistingDeployment": {
                         "type": "boolean",
-                        "description": "Import existing deployment or deploy one.",
+                        "description": "Import existing deployment or deploy one. If building a secondary VCF instance, this field should be set to true",
                         "example": true,
                         "default": false
                     },
@@ -4465,6 +5168,30 @@
                     }
                 },
                 "description": "Specification for VCF Operations"
+            },
+            "VidbSpec": {
+                "required": [
+                    "hostname"
+                ],
+                "type": "object",
+                "properties": {
+                    "hostname": {
+                        "type": "string",
+                        "description": "VIDB hostname.",
+                        "example": "vidb.vcf.local"
+                    },
+                    "version": {
+                        "type": "string",
+                        "description": "Version",
+                        "example": "9.0.0.0.24597083"
+                    },
+                    "size": {
+                        "type": "string",
+                        "description": "size",
+                        "example": "small"
+                    }
+                },
+                "description": "Specification for VIDB"
             },
             "VmfsDatastoreSpec": {
                 "type": "object",
@@ -4499,6 +5226,18 @@
                 },
                 "description": "This specification contains vmnic to uplink configurations for vSphere host."
             },
+            "VpcSpec": {
+                "required": [
+                    "dtgwSpec"
+                ],
+                "type": "object",
+                "properties": {
+                    "dtgwSpec": {
+                        "$ref": "#/components/schemas/DtgwSpec"
+                    }
+                },
+                "description": "Specification for VPC related configurations"
+            },
             "VsanEsaConfig": {
                 "type": "object",
                 "properties": {
@@ -4522,6 +5261,9 @@
                     },
                     "esaConfig": {
                         "$ref": "#/components/schemas/VsanEsaConfig"
+                    },
+                    "encryptionConfig": {
+                        "$ref": "#/components/schemas/EncryptionConfig"
                     },
                     "failuresToTolerate": {
                         "maximum": 3,
@@ -4591,6 +5333,16 @@
                     "updateTimestamp": {
                         "type": "string",
                         "description": "Last Update Time of SDDC Milestone"
+                    },
+                    "completedTasks": {
+                        "type": "integer",
+                        "description": "Number of completed tasks which are assigned to the current milestone. Null if milestone is not started",
+                        "format": "int32"
+                    },
+                    "totalTasks": {
+                        "type": "integer",
+                        "description": "Number of total tasks which are assigned to the current milestone. Null if milestone is not started",
+                        "format": "int32"
                     }
                 },
                 "description": "Represents a SDDC Milestone"
@@ -4645,6 +5397,11 @@
                         "items": {
                             "$ref": "#/components/schemas/Error"
                         }
+                    },
+                    "milestoneTask": {
+                        "type": "string",
+                        "description": "The milestone to which this task is assigned. The milestone must be started in order to be populated.",
+                        "readOnly": true
                     }
                 },
                 "description": "Represents a SDDC sub-task"
@@ -4665,7 +5422,17 @@
                     },
                     "name": {
                         "type": "string",
-                        "description": "Task name",
+                        "description": "Deployment name",
+                        "readOnly": true
+                    },
+                    "deploymentType": {
+                        "type": "string",
+                        "description": "Deployment type",
+                        "readOnly": true
+                    },
+                    "vcfInstanceName": {
+                        "type": "string",
+                        "description": "VCF instance name",
                         "readOnly": true
                     },
                     "status": {
@@ -4726,6 +5493,29 @@
                     }
                 },
                 "description": "VCF Operations specification holding endpoint information which to query for topology/discovery data."
+            },
+            "ManagedUnit": {
+                "required": [
+                    "host",
+                    "name",
+                    "type"
+                ],
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "description": "Managed Unit type"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Managed Unit name"
+                    },
+                    "host": {
+                        "type": "string",
+                        "description": "Managed Unit host"
+                    }
+                },
+                "description": "Managed unit information registered in Vcf Operations instance."
             },
             "NodeAddress": {
                 "type": "object",
@@ -4852,6 +5642,16 @@
                             "$ref": "#/components/schemas/VcfAutomationNodeInfo"
                         }
                     },
+                    "vcfVidbs": {
+                        "type": "array",
+                        "description": "Registered VIDB instances",
+                        "items": {
+                            "$ref": "#/components/schemas/VcfOperationsProductInfo"
+                        }
+                    },
+                    "vcfLcm": {
+                        "$ref": "#/components/schemas/VcfOperationsProductInfo"
+                    },
                     "vcenterAdapters": {
                         "type": "array",
                         "description": "Registered vCenter adapters.",
@@ -4864,6 +5664,13 @@
                         "description": "Registered NSX adapters.",
                         "items": {
                             "$ref": "#/components/schemas/NsxAdapterInfo"
+                        }
+                    },
+                    "managedUnits": {
+                        "type": "array",
+                        "description": "Registered Managed Units",
+                        "items": {
+                            "$ref": "#/components/schemas/ManagedUnit"
                         }
                     }
                 },
@@ -4914,6 +5721,24 @@
                     }
                 },
                 "description": "VCF Operations node information."
+            },
+            "VcfOperationsProductInfo": {
+                "type": "object",
+                "properties": {
+                    "address": {
+                        "type": "string",
+                        "description": "FQDN of the product instance registered in VCF Ops"
+                    },
+                    "version": {
+                        "type": "string",
+                        "description": "Version of the product instance registered in VCF Ops"
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Status of the product instance registered in VCF Ops"
+                    }
+                },
+                "description": "VCF Operations product (i.e. VIDB, VCF LCM, etc.) information."
             },
             "VcenterDiscoverySpec": {
                 "required": [
@@ -4973,6 +5798,91 @@
                     }
                 },
                 "description": "NSX instance associated with vCenter instance."
+            },
+            "VcenterNetworkDiscoverySpec": {
+                "required": [
+                    "endpoint"
+                ],
+                "type": "object",
+                "properties": {
+                    "endpoint": {
+                        "$ref": "#/components/schemas/VcenterDiscoverySpec"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Filter by: network name. Optional."
+                    },
+                    "size": {
+                        "type": "integer",
+                        "description": "Size of the page to retrieve.",
+                        "format": "int32"
+                    },
+                    "page": {
+                        "type": "integer",
+                        "description": "Page number to retrieve.",
+                        "format": "int32"
+                    }
+                },
+                "description": "Specification for querying networks of a given vCenter instance."
+            },
+            "PageMetadata": {
+                "type": "object",
+                "properties": {
+                    "pageNumber": {
+                        "type": "integer",
+                        "description": "Returns the current page number",
+                        "format": "int32",
+                        "readOnly": true
+                    },
+                    "pageSize": {
+                        "type": "integer",
+                        "description": "Returns the number of elements in the current page",
+                        "format": "int32",
+                        "readOnly": true
+                    },
+                    "totalElements": {
+                        "type": "integer",
+                        "description": "Returns the total number of elements",
+                        "format": "int32",
+                        "readOnly": true
+                    },
+                    "totalPages": {
+                        "type": "integer",
+                        "description": "Returns the total number of pages",
+                        "format": "int32",
+                        "readOnly": true
+                    }
+                },
+                "description": "Represents pageable elements pagination metadata",
+                "readOnly": true
+            },
+            "PageOfVcenterNetworkInfo": {
+                "type": "object",
+                "properties": {
+                    "elements": {
+                        "type": "array",
+                        "description": "The list of elements included in this page",
+                        "items": {
+                            "$ref": "#/components/schemas/VcenterNetworkInfo"
+                        }
+                    },
+                    "pageMetadata": {
+                        "$ref": "#/components/schemas/PageMetadata"
+                    }
+                }
+            },
+            "VcenterNetworkInfo": {
+                "required": [
+                    "name"
+                ],
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "Network name."
+                    }
+                },
+                "description": "Details of a network."
             },
             "Validation": {
                 "required": [
@@ -5042,7 +5952,7 @@
                     "resultStatus": {
                         "type": "string",
                         "description": "Result status of the validation check after it has completed its execution",
-                        "example": "One among: IN_PROGRESS, SUCCEEDED, FAILED, SKIPPED, CANCELLED, CANCELLATION_IN_PROGRESS"
+                        "example": "One among: IN_PROGRESS, SUCCEEDED, FAILED, SKIPPED, CANCELLED, CANCELLATION_IN_PROGRESS, PENDING"
                     },
                     "acknowledge": {
                         "type": "boolean",
@@ -5051,10 +5961,620 @@
                     },
                     "errorResponse": {
                         "$ref": "#/components/schemas/Error"
+                    },
+                    "nestedValidationChecks": {
+                        "type": "array",
+                        "description": "List of one or more validation checks that are performed as part of the validation",
+                        "readOnly": true,
+                        "items": {
+                            "$ref": "#/components/schemas/ValidationCheck"
+                        }
                     }
                 },
                 "description": "Represents a validation check",
                 "readOnly": true
+            },
+            "SddcManagerDiscoverySpec": {
+                "required": [
+                    "address",
+                    "adminPassword",
+                    "adminUsername",
+                    "sslThumbprint"
+                ],
+                "type": "object",
+                "properties": {
+                    "address": {
+                        "type": "string",
+                        "description": "SDDC Manager instance address."
+                    },
+                    "adminUsername": {
+                        "type": "string",
+                        "description": "Admin username."
+                    },
+                    "adminPassword": {
+                        "type": "string",
+                        "description": "Admin password."
+                    },
+                    "sslThumbprint": {
+                        "type": "string",
+                        "description": "SDDC Manager SSL thumbprint (SHA256).",
+                        "example": "3D:D0:EE:B5:A0:CC:45:08:5C:4F:84:51:CD:00:B6:41:BB:4A:A2:9A:77:1C:A6:4C:6D:84:5A:D0:4F:68:7A:B8"
+                    }
+                },
+                "description": "SDDC Manager specification holding endpoint information."
+            },
+            "FleetLcm": {
+                "type": "object",
+                "properties": {
+                    "fqdn": {
+                        "type": "string",
+                        "description": "FQDN",
+                        "readOnly": true,
+                        "example": "fleetlcm.rainpole.io"
+                    },
+                    "deploymentStatus": {
+                        "type": "string",
+                        "description": "Fleet LCM deployment status. One among: NOT_FOUND, NOT_STARTED, IN_PROGRESS, FAILED, SUCCEEDED",
+                        "readOnly": true,
+                        "example": "SUCCEEDED"
+                    },
+                    "deploymentType": {
+                        "type": "string",
+                        "description": "Fleet LCM deployment type. One among: NEW, EXISTING",
+                        "readOnly": true,
+                        "example": "NEW"
+                    }
+                },
+                "description": "Fleet LCM",
+                "readOnly": true
+            },
+            "Salt": {
+                "type": "object",
+                "properties": {
+                    "deploymentStatus": {
+                        "type": "string",
+                        "description": "Salt master deployment status. One among: NOT_FOUND, NOT_STARTED, IN_PROGRESS, FAILED, SUCCEEDED",
+                        "readOnly": true,
+                        "example": "SUCCEEDED"
+                    },
+                    "deploymentType": {
+                        "type": "string",
+                        "description": "Salt master deployment type. One among: NEW, EXISTING",
+                        "readOnly": true,
+                        "example": "NEW"
+                    }
+                },
+                "description": "Salt master service",
+                "readOnly": true
+            },
+            "SaltRaas": {
+                "type": "object",
+                "properties": {
+                    "deploymentStatus": {
+                        "type": "string",
+                        "description": "Salt Raas deployment status. One among: NOT_FOUND, NOT_STARTED, IN_PROGRESS, FAILED, SUCCEEDED",
+                        "readOnly": true,
+                        "example": "SUCCEEDED"
+                    },
+                    "deploymentType": {
+                        "type": "string",
+                        "description": "Salt Raas deployment type. One among: NEW, EXISTING",
+                        "readOnly": true,
+                        "example": "NEW"
+                    }
+                },
+                "description": "Salt Raas service",
+                "readOnly": true
+            },
+            "SddcLcm": {
+                "type": "object",
+                "properties": {
+                    "fqdn": {
+                        "type": "string",
+                        "description": "FQDN",
+                        "readOnly": true,
+                        "example": "sddclcm.rainpole.io"
+                    },
+                    "deploymentStatus": {
+                        "type": "string",
+                        "description": "SDDC LCM deployment status. One among: NOT_FOUND, NOT_STARTED, IN_PROGRESS, FAILED, SUCCEEDED",
+                        "readOnly": true,
+                        "example": "SUCCEEDED"
+                    },
+                    "deploymentType": {
+                        "type": "string",
+                        "description": "SDDC LCM deployment type. One among: NEW, EXISTING",
+                        "readOnly": true,
+                        "example": "NEW"
+                    }
+                },
+                "description": "SDDC LCM",
+                "readOnly": true
+            },
+            "SddcManager": {
+                "type": "object",
+                "properties": {
+                    "fqdn": {
+                        "type": "string",
+                        "description": "FQDN of the SDDC Manager"
+                    },
+                    "version": {
+                        "type": "string",
+                        "description": "Version of the SDDC Manager",
+                        "readOnly": true
+                    },
+                    "vcfInstanceName": {
+                        "type": "string",
+                        "description": "The instance name of the system.",
+                        "readOnly": true
+                    }
+                },
+                "description": "SDDC Manager instance details."
+            },
+            "SddcManagerDiscoveryResult": {
+                "type": "object",
+                "properties": {
+                    "sddcManager": {
+                        "$ref": "#/components/schemas/SddcManager"
+                    },
+                    "managementVcenter": {
+                        "$ref": "#/components/schemas/VcenterInfo"
+                    },
+                    "vcfManagementComponents": {
+                        "$ref": "#/components/schemas/VcfManagementComponents"
+                    }
+                },
+                "description": "Discovery result from querying SDDC Manager instance."
+            },
+            "TelemetryAcceptor": {
+                "type": "object",
+                "properties": {
+                    "deploymentStatus": {
+                        "type": "string",
+                        "description": "Telemetry Acceptor deployment status. One among: NOT_FOUND, NOT_STARTED, IN_PROGRESS, FAILED, SUCCEEDED",
+                        "readOnly": true,
+                        "example": "SUCCEEDED"
+                    },
+                    "deploymentType": {
+                        "type": "string",
+                        "description": "Telemetry Acceptor deployment type. One among: NEW, EXISTING",
+                        "readOnly": true,
+                        "example": "NEW"
+                    }
+                },
+                "description": "Telemetry Acceptor",
+                "readOnly": true
+            },
+            "VcenterInfo": {
+                "type": "object",
+                "properties": {
+                    "fqdn": {
+                        "type": "string",
+                        "description": "FQDN of the vCenter",
+                        "readOnly": true
+                    },
+                    "version": {
+                        "type": "string",
+                        "description": "Version of the vCenter",
+                        "readOnly": true
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Status of the vCenter",
+                        "readOnly": true
+                    }
+                },
+                "description": "vCenter instance info."
+            },
+            "VcfAutomation": {
+                "type": "object",
+                "properties": {
+                    "fqdn": {
+                        "type": "string",
+                        "description": "FQDN",
+                        "readOnly": true,
+                        "example": "vcfautomation.rainpole.io"
+                    },
+                    "deploymentStatus": {
+                        "type": "string",
+                        "description": "VCF Automation deployment status. One among: NOT_FOUND, NOT_STARTED, IN_PROGRESS, FAILED, SUCCEEDED",
+                        "readOnly": true,
+                        "example": "SUCCEEDED"
+                    },
+                    "deploymentType": {
+                        "type": "string",
+                        "description": "VCF Automation deployment type. One among: NEW, EXISTING",
+                        "readOnly": true,
+                        "example": "NEW"
+                    }
+                },
+                "description": "VCF Automation",
+                "readOnly": true
+            },
+            "VcfManagementComponents": {
+                "type": "object",
+                "properties": {
+                    "vcfOperationsFleetManagement": {
+                        "$ref": "#/components/schemas/VcfOperationsFleetManagement"
+                    },
+                    "vcfOperations": {
+                        "$ref": "#/components/schemas/VcfOperations"
+                    },
+                    "vcfOperationsCollector": {
+                        "$ref": "#/components/schemas/VcfOperationsCollector"
+                    },
+                    "vcfAutomation": {
+                        "$ref": "#/components/schemas/VcfAutomation"
+                    },
+                    "vspCluster": {
+                        "$ref": "#/components/schemas/VspClusterDeployment"
+                    },
+                    "sddcLcm": {
+                        "$ref": "#/components/schemas/SddcLcm"
+                    },
+                    "fleetLcm": {
+                        "$ref": "#/components/schemas/FleetLcm"
+                    },
+                    "vcfOperationsLogs": {
+                        "$ref": "#/components/schemas/VcfOperationsLogs"
+                    },
+                    "telemetryAcceptor": {
+                        "$ref": "#/components/schemas/TelemetryAcceptor"
+                    },
+                    "vidb": {
+                        "$ref": "#/components/schemas/Vidb"
+                    },
+                    "salt": {
+                        "$ref": "#/components/schemas/Salt"
+                    },
+                    "saltRaas": {
+                        "$ref": "#/components/schemas/SaltRaas"
+                    }
+                },
+                "description": "VCF Management Components"
+            },
+            "VcfOperations": {
+                "type": "object",
+                "properties": {
+                    "nodes": {
+                        "type": "array",
+                        "description": "List of nodes",
+                        "readOnly": true,
+                        "items": {
+                            "$ref": "#/components/schemas/VcfOperationsNodeDetails"
+                        }
+                    },
+                    "loadBalancerFqdn": {
+                        "type": "string",
+                        "description": "Load Balancer FQDN",
+                        "readOnly": true,
+                        "example": "vcf-operations-load-balancer.rainpole.io"
+                    },
+                    "deploymentStatus": {
+                        "type": "string",
+                        "description": "VCF Operations deployment status. One among: NOT_FOUND, NOT_STARTED, IN_PROGRESS, FAILED, SUCCEEDED",
+                        "readOnly": true,
+                        "example": "SUCCEEDED"
+                    },
+                    "deploymentType": {
+                        "type": "string",
+                        "description": "VCF Operations deployment type. One among: NEW, EXISTING",
+                        "readOnly": true,
+                        "example": "NEW"
+                    }
+                },
+                "description": "VCF Operations",
+                "readOnly": true
+            },
+            "VcfOperationsCollector": {
+                "type": "object",
+                "properties": {
+                    "fqdn": {
+                        "type": "string",
+                        "description": "FQDN",
+                        "readOnly": true,
+                        "example": "vcf-operations-collector.rainpole.io"
+                    },
+                    "deploymentStatus": {
+                        "type": "string",
+                        "description": "VCF Operations collector deployment status. One among: NOT_FOUND, NOT_STARTED, IN_PROGRESS, FAILED, SUCCEEDED",
+                        "readOnly": true,
+                        "example": "SUCCEEDED"
+                    },
+                    "deploymentType": {
+                        "type": "string",
+                        "description": "VCF Operations collector deployment type. Only valid value is: NEW",
+                        "readOnly": true,
+                        "example": "NEW"
+                    }
+                },
+                "description": "VCF Operations collector",
+                "readOnly": true
+            },
+            "VcfOperationsFleetManagement": {
+                "type": "object",
+                "properties": {
+                    "fqdn": {
+                        "type": "string",
+                        "description": "FQDN",
+                        "readOnly": true,
+                        "example": "vcf-operations-fleet-management.rainpole.io"
+                    },
+                    "deploymentStatus": {
+                        "type": "string",
+                        "description": "VCF Operations fleet management deployment status. One among: NOT_FOUND, NOT_STARTED, IN_PROGRESS, FAILED, SUCCEEDED",
+                        "readOnly": true,
+                        "example": "SUCCEEDED"
+                    },
+                    "deploymentType": {
+                        "type": "string",
+                        "description": "VCF Operations fleet management deployment type. One among: NEW, EXISTING",
+                        "readOnly": true,
+                        "example": "NEW"
+                    }
+                },
+                "description": "VCF Operations fleet management",
+                "readOnly": true
+            },
+            "VcfOperationsLogs": {
+                "type": "object",
+                "properties": {
+                    "fqdn": {
+                        "type": "string",
+                        "description": "FQDN",
+                        "readOnly": true,
+                        "example": "vcf-ops-logs.rainpole.io"
+                    },
+                    "deploymentStatus": {
+                        "type": "string",
+                        "description": "VCF Operations Logs deployment status. One among: NOT_FOUND, NOT_STARTED, IN_PROGRESS, FAILED, SUCCEEDED",
+                        "readOnly": true,
+                        "example": "SUCCEEDED"
+                    },
+                    "deploymentType": {
+                        "type": "string",
+                        "description": "VCF Operations Logs deployment type. One among: NEW, EXISTING",
+                        "readOnly": true,
+                        "example": "NEW"
+                    }
+                },
+                "description": "VCF Operations Logs",
+                "readOnly": true
+            },
+            "VcfOperationsNodeDetails": {
+                "type": "object",
+                "properties": {
+                    "fqdn": {
+                        "type": "string",
+                        "description": "FQDN",
+                        "readOnly": true,
+                        "example": "vcfoperations-master.rainpole.io"
+                    },
+                    "type": {
+                        "type": "string",
+                        "description": "Node type. One among: master, replica, data",
+                        "readOnly": true,
+                        "example": "master"
+                    }
+                },
+                "description": "VCF Operations node details",
+                "readOnly": true
+            },
+            "Vidb": {
+                "type": "object",
+                "properties": {
+                    "fqdn": {
+                        "type": "string",
+                        "description": "FQDN",
+                        "readOnly": true,
+                        "example": "vidb.vcf.local"
+                    },
+                    "deploymentStatus": {
+                        "type": "string",
+                        "description": "VIDB deployment status. One among: NOT_FOUND, NOT_STARTED, IN_PROGRESS, FAILED, SUCCEEDED",
+                        "readOnly": true,
+                        "example": "SUCCEEDED"
+                    },
+                    "deploymentType": {
+                        "type": "string",
+                        "description": "VIDB deployment type. One among: NEW, EXISTING",
+                        "readOnly": true,
+                        "example": "NEW"
+                    }
+                },
+                "description": "VIDB",
+                "readOnly": true
+            },
+            "VspClusterDeployment": {
+                "type": "object",
+                "properties": {
+                    "fqdn": {
+                        "type": "string",
+                        "description": "FQDN",
+                        "readOnly": true,
+                        "example": "vspcluster.rainpole.io"
+                    },
+                    "deploymentStatus": {
+                        "type": "string",
+                        "description": "VSP cluster deployment status. One among: NOT_FOUND, NOT_STARTED, IN_PROGRESS, FAILED, SUCCEEDED",
+                        "readOnly": true,
+                        "example": "SUCCEEDED"
+                    },
+                    "deploymentType": {
+                        "type": "string",
+                        "description": "VSP cluster deployment type. One among: NEW, EXISTING",
+                        "readOnly": true,
+                        "example": "NEW"
+                    }
+                },
+                "description": "VSP Cluster Deployment",
+                "readOnly": true
+            },
+            "CapacityInfo": {
+                "type": "object",
+                "properties": {
+                    "numberOfCores": {
+                        "type": "integer",
+                        "description": "Number of cores",
+                        "format": "int32"
+                    },
+                    "memory": {
+                        "$ref": "#/components/schemas/DataMetric"
+                    },
+                    "storage": {
+                        "$ref": "#/components/schemas/DataMetric"
+                    },
+                    "numberOfEsxiHosts": {
+                        "type": "integer",
+                        "description": "Number of Esxi Hosts",
+                        "format": "int32"
+                    },
+                    "componentsVmRequirements": {
+                        "type": "array",
+                        "description": "Capacity requirements for VCF components deployment",
+                        "items": {
+                            "$ref": "#/components/schemas/ComponentVmRequirement"
+                        }
+                    },
+                    "context": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string",
+                            "description": "context for the capacity calculation"
+                        },
+                        "description": "context for the capacity calculation"
+                    }
+                },
+                "description": "Represents a usage and capacity information of a Resource",
+                "readOnly": true
+            },
+            "CapacityValidation": {
+                "required": [
+                    "availableCapacity",
+                    "description",
+                    "executionStatus",
+                    "id",
+                    "requiredCapacity",
+                    "resultStatus"
+                ],
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "ID of the validation",
+                        "readOnly": true
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Description of the validation",
+                        "readOnly": true
+                    },
+                    "executionStatus": {
+                        "type": "string",
+                        "description": "Execution status of the validation. One among: IN_PROGRESS, FAILED, COMPLETED, UNKNOWN, SKIPPED, CANCELLED, CANCELLATION_IN_PROGRESS",
+                        "readOnly": true,
+                        "example": "COMPLETED"
+                    },
+                    "resultStatus": {
+                        "type": "string",
+                        "description": "Result status of the validation after it has completed its execution. One among: SUCCEEDED, FAILED, WARNING, UNKNOWN, CANCELLATION_IN_PROGRESS",
+                        "readOnly": true,
+                        "example": "SUCCEEDED"
+                    },
+                    "validationChecks": {
+                        "type": "array",
+                        "description": "List of one or more validation checks that are performed as part of the validation",
+                        "readOnly": true,
+                        "items": {
+                            "$ref": "#/components/schemas/ValidationCheck"
+                        }
+                    },
+                    "additionalProperties": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    },
+                    "requiredCapacity": {
+                        "$ref": "#/components/schemas/CapacityInfo"
+                    },
+                    "availableCapacity": {
+                        "$ref": "#/components/schemas/CapacityInfo"
+                    }
+                },
+                "description": "Represents a capacity validation with a list of one or more validation checks and requirement and availability resoyrces that are performed as  part of the validation"
+            },
+            "ComponentVmRequirement": {
+                "type": "object",
+                "properties": {
+                    "cpuCores": {
+                        "type": "integer",
+                        "description": "Number of CPU cores",
+                        "format": "int32"
+                    },
+                    "memoryGb": {
+                        "type": "number",
+                        "description": "Memory requirement in GB",
+                        "format": "double"
+                    },
+                    "storageGb": {
+                        "type": "integer",
+                        "description": "Disks storage requirement in GB",
+                        "format": "int64"
+                    },
+                    "ipCount": {
+                        "type": "integer",
+                        "description": "Number of IP addresses required for the component",
+                        "format": "int32"
+                    },
+                    "ipCountRecommended": {
+                        "type": "integer",
+                        "description": "Recommended number of IP addresses",
+                        "format": "int32"
+                    },
+                    "ipCountLimit": {
+                        "type": "integer",
+                        "description": "Maximum allowed number of IP addresses",
+                        "format": "int32"
+                    },
+                    "workersCount": {
+                        "type": "integer",
+                        "description": "Number of worker nodes",
+                        "format": "int32"
+                    },
+                    "component": {
+                        "type": "string",
+                        "description": "VCF component"
+                    },
+                    "componentType": {
+                        "type": "string",
+                        "description": "VCF component type"
+                    }
+                },
+                "description": "Represents capacity requirement for single VCF component deployment"
+            },
+            "DataMetric": {
+                "type": "object",
+                "properties": {
+                    "value": {
+                        "type": "number",
+                        "description": "Value of the metric",
+                        "format": "double"
+                    },
+                    "unit": {
+                        "type": "string",
+                        "description": "Unit of the metric",
+                        "enum": [
+                            "B",
+                            "KB",
+                            "MB",
+                            "GB",
+                            "TB",
+                            "PB"
+                        ]
+                    }
+                },
+                "description": "Represents a single metric representing digital data"
             },
             "SddcNetworkConfigProfileSpec": {
                 "required": [
@@ -5090,6 +6610,16 @@
                         "type": "string",
                         "description": "NSX Config Type",
                         "example": "One among: NSX_SEPARATION, NO_NSX_SEPARATION"
+                    },
+                    "additionalPortGroups": {
+                        "type": "array",
+                        "description": "Additional port groups that are to be included. 0 or more of the allowed values can be included. Allowed values: FLEET_MANAGEMENT",
+                        "example": "[FLEET_MANAGEMENT]",
+                        "items": {
+                            "type": "string",
+                            "description": "Additional port groups that are to be included. 0 or more of the allowed values can be included. Allowed values: FLEET_MANAGEMENT",
+                            "example": "[FLEET_MANAGEMENT]"
+                        }
                     }
                 },
                 "description": "This specification contains the parameters needed to get pre-configured network profiles which to facilitate the configuration of the networking stack during Management Domain creation"
@@ -5247,44 +6777,12 @@
                 },
                 "description": "This specification contains certificate & certificate usage"
             },
-            "PageMetadata": {
-                "type": "object",
-                "properties": {
-                    "pageNumber": {
-                        "type": "integer",
-                        "description": "Returns the current page number",
-                        "format": "int32",
-                        "readOnly": true
-                    },
-                    "pageSize": {
-                        "type": "integer",
-                        "description": "Returns the number of elements in the current page",
-                        "format": "int32",
-                        "readOnly": true
-                    },
-                    "totalElements": {
-                        "type": "integer",
-                        "description": "Returns the total number of elements",
-                        "format": "int32",
-                        "readOnly": true
-                    },
-                    "totalPages": {
-                        "type": "integer",
-                        "description": "Returns the total number of pages",
-                        "format": "int32",
-                        "readOnly": true
-                    }
-                },
-                "description": "Represents pageable elements pagination metadata",
-                "readOnly": true
-            },
             "PageOfTrustedCertificate": {
                 "type": "object",
                 "properties": {
                     "elements": {
                         "type": "array",
                         "description": "The list of elements included in this page",
-                        "readOnly": true,
                         "items": {
                             "$ref": "#/components/schemas/TrustedCertificate"
                         }
@@ -5312,8 +6810,7 @@
                         "example": "-----BEGIN CERTIFICATE-----\nMIIFq...\n-----END CERTIFICATE-----"
                     }
                 },
-                "description": "The Trusted Certificate details.",
-                "readOnly": true
+                "description": "The Trusted Certificate details."
             },
             "BundleUploadSpec": {
                 "required": [
@@ -5333,31 +6830,9 @@
                     "signatureFilePath": {
                         "type": "string",
                         "description": "Bundle Upload Signature File Path"
-                    },
-                    "compatibilitySetsFilePath": {
-                        "type": "string",
-                        "description": "[Deprecated] Path to the software compatibility sets file",
-                        "deprecated": true
-                    },
-                    "partnerExtensionSpec": {
-                        "$ref": "#/components/schemas/PartnerExtensionSpec"
                     }
                 },
                 "description": "Bundle Upload Specification"
-            },
-            "PartnerExtensionSpec": {
-                "type": "object",
-                "properties": {
-                    "partnerBundleVersion": {
-                        "type": "string",
-                        "description": "Version of partner bundle to be uploaded. Should match one of the bundle versions available in the partner bundle metadata file"
-                    },
-                    "partnerBundleMetadataFilePath": {
-                        "type": "string",
-                        "description": "Path to the bundle metadata file. The metadata file can have details of multiple bundles"
-                    }
-                },
-                "description": "Specification for partner extensions. This specification is used in the Bundle Upload API"
             },
             "DocumentationLink": {
                 "type": "object",
@@ -5396,7 +6871,7 @@
                     "type": {
                         "type": "string",
                         "description": "Resource type",
-                        "example": "One among: SDDC_MANAGER, PSC, VCENTER, NSXT_MANAGER, VXRAIL_MANAGER, NSX_ALB, ESXI"
+                        "example": "One among: SDDC_MANAGER, PSC, VCENTER, NSXT_MANAGER, NSX_ALB, ESXI, HCX_MANAGER, VSP"
                     },
                     "name": {
                         "type": "string",
@@ -5578,7 +7053,7 @@
                         "type": "string",
                         "description": "Task status",
                         "readOnly": true,
-                        "example": "One among: PENDING, Pending, IN_PROGRESS, In Progress, SUCCESSFUL, Successful, FAILED, Failed, CANCELLED, Cancelled, COMPLETED_WITH_WARNING, SKIPPED"
+                        "example": "One among: PENDING, Pending, IN_PROGRESS, In Progress, SUCCESSFUL, Successful, FAILED, Failed, CANCELLED, Cancelled, COMPLETED_WITH_WARNING, SKIPPED, QUEUED, TIMED_OUT, Queued, Timed Out"
                     },
                     "creationTimestamp": {
                         "type": "string",
@@ -5718,6 +7193,20 @@
                 },
                 "description": "Proxy Configuration"
             },
+            "CeipUpdateSpec": {
+                "required": [
+                    "status"
+                ],
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "string",
+                        "description": "User provided CEIP operation",
+                        "example": "One among: ENABLE, DISABLE"
+                    }
+                },
+                "description": "Required action for CEIP."
+            },
             "BundleDownloadSpec": {
                 "type": "object",
                 "properties": {
@@ -5752,7 +7241,6 @@
                     "elements": {
                         "type": "array",
                         "description": "The list of elements included in this page",
-                        "readOnly": true,
                         "items": {
                             "$ref": "#/components/schemas/VcfService"
                         }
@@ -5790,7 +7278,6 @@
                     "elements": {
                         "type": "array",
                         "description": "The list of elements included in this page",
-                        "readOnly": true,
                         "items": {
                             "$ref": "#/components/schemas/Task"
                         }
@@ -5813,154 +7300,25 @@
                         "description": "The maximum number of domains allowed in subscription mode",
                         "format": "int32",
                         "readOnly": true
+                    },
+                    "vcfInstanceName": {
+                        "type": "string",
+                        "description": "The instance name of the system.",
+                        "readOnly": true
                     }
                 },
                 "description": "Represents a system"
             },
-            "VcfAutomation": {
+            "MachineDetails": {
                 "type": "object",
                 "properties": {
-                    "fqdn": {
+                    "machineId": {
                         "type": "string",
-                        "description": "FQDN",
-                        "readOnly": true,
-                        "example": "vcfautomation.rainpole.io"
-                    },
-                    "deploymentStatus": {
-                        "type": "string",
-                        "description": "VCF Automation deployment status. One among: NOT_FOUND, NOT_STARTED, IN_PROGRESS, FAILED, SUCCEEDED",
-                        "readOnly": true,
-                        "example": "SUCCEEDED"
-                    },
-                    "deploymentType": {
-                        "type": "string",
-                        "description": "VCF Automation deployment type. One among: NEW, EXISTING",
-                        "readOnly": true,
-                        "example": "NEW"
+                        "description": "Machine ID",
+                        "readOnly": true
                     }
                 },
-                "description": "VCF Automation",
-                "readOnly": true
-            },
-            "VcfManagementComponents": {
-                "type": "object",
-                "properties": {
-                    "vcfOperationsFleetManagement": {
-                        "$ref": "#/components/schemas/VcfOperationsFleetManagement"
-                    },
-                    "vcfOperations": {
-                        "$ref": "#/components/schemas/VcfOperations"
-                    },
-                    "vcfOperationsCollector": {
-                        "$ref": "#/components/schemas/VcfOperationsCollector"
-                    },
-                    "vcfAutomation": {
-                        "$ref": "#/components/schemas/VcfAutomation"
-                    }
-                },
-                "description": "VCF Management Components"
-            },
-            "VcfOperations": {
-                "type": "object",
-                "properties": {
-                    "nodes": {
-                        "type": "array",
-                        "description": "List of nodes",
-                        "readOnly": true,
-                        "items": {
-                            "$ref": "#/components/schemas/VcfOperationsNodeDetails"
-                        }
-                    },
-                    "loadBalancerFqdn": {
-                        "type": "string",
-                        "description": "Load Balancer FQDN",
-                        "readOnly": true,
-                        "example": "vcf-operations-load-balancer.rainpole.io"
-                    },
-                    "deploymentStatus": {
-                        "type": "string",
-                        "description": "VCF Operations deployment status. One among: NOT_FOUND, NOT_STARTED, IN_PROGRESS, FAILED, SUCCEEDED",
-                        "readOnly": true,
-                        "example": "SUCCEEDED"
-                    },
-                    "deploymentType": {
-                        "type": "string",
-                        "description": "VCF Operations deployment type. One among: NEW, EXISTING",
-                        "readOnly": true,
-                        "example": "NEW"
-                    }
-                },
-                "description": "VCF Operations",
-                "readOnly": true
-            },
-            "VcfOperationsCollector": {
-                "type": "object",
-                "properties": {
-                    "fqdn": {
-                        "type": "string",
-                        "description": "FQDN",
-                        "readOnly": true,
-                        "example": "vcf-operations-collector.rainpole.io"
-                    },
-                    "deploymentStatus": {
-                        "type": "string",
-                        "description": "VCF Operations collector deployment status. One among: NOT_FOUND, NOT_STARTED, IN_PROGRESS, FAILED, SUCCEEDED",
-                        "readOnly": true,
-                        "example": "SUCCEEDED"
-                    },
-                    "deploymentType": {
-                        "type": "string",
-                        "description": "VCF Operations collector deployment type. Only valid value is: NEW",
-                        "readOnly": true,
-                        "example": "NEW"
-                    }
-                },
-                "description": "VCF Operations collector",
-                "readOnly": true
-            },
-            "VcfOperationsFleetManagement": {
-                "type": "object",
-                "properties": {
-                    "fqdn": {
-                        "type": "string",
-                        "description": "FQDN",
-                        "readOnly": true,
-                        "example": "vcf-operations-fleet-management.rainpole.io"
-                    },
-                    "deploymentStatus": {
-                        "type": "string",
-                        "description": "VCF Operations fleet management deployment status. One among: NOT_FOUND, NOT_STARTED, IN_PROGRESS, FAILED, SUCCEEDED",
-                        "readOnly": true,
-                        "example": "SUCCEEDED"
-                    },
-                    "deploymentType": {
-                        "type": "string",
-                        "description": "VCF Operations fleet management deployment type. One among: NEW, EXISTING",
-                        "readOnly": true,
-                        "example": "NEW"
-                    }
-                },
-                "description": "VCF Operations fleet management",
-                "readOnly": true
-            },
-            "VcfOperationsNodeDetails": {
-                "type": "object",
-                "properties": {
-                    "fqdn": {
-                        "type": "string",
-                        "description": "FQDN",
-                        "readOnly": true,
-                        "example": "vcfoperations-master.rainpole.io"
-                    },
-                    "type": {
-                        "type": "string",
-                        "description": "Node type. One among: master, replica, data",
-                        "readOnly": true,
-                        "example": "master"
-                    }
-                },
-                "description": "VCF Operations node details",
-                "readOnly": true
+                "description": "Machine Details"
             },
             "Ceip": {
                 "required": [
@@ -5994,9 +7352,59 @@
                         "type": "string",
                         "description": "Appliance version",
                         "example": "9.0.0.0.1234567"
+                    },
+                    "dnsDomain": {
+                        "type": "string",
+                        "description": "DNS domain name"
+                    },
+                    "dnsServers": {
+                        "type": "array",
+                        "description": "DNS servers",
+                        "items": {
+                            "type": "string",
+                            "description": "DNS servers"
+                        }
+                    },
+                    "ntpServers": {
+                        "type": "array",
+                        "description": "NTP servers",
+                        "items": {
+                            "type": "string",
+                            "description": "NTP servers"
+                        }
+                    },
+                    "ipAddresses": {
+                        "type": "array",
+                        "description": "IP addresses",
+                        "items": {
+                            "$ref": "#/components/schemas/IpAddress"
+                        }
                     }
                 },
                 "description": "Appliance Information"
+            },
+            "IpAddress": {
+                "type": "object",
+                "properties": {
+                    "ipAddress": {
+                        "type": "string",
+                        "description": "IP address",
+                        "readOnly": true
+                    },
+                    "type": {
+                        "type": "string",
+                        "description": "Type of IP addresss",
+                        "readOnly": true,
+                        "example": "One among: MANAGEMENT, VSAN, VMOTION, NFS, VSAN_EXTERNAL"
+                    },
+                    "ipAddressVersion": {
+                        "type": "string",
+                        "description": "IP address version",
+                        "readOnly": true,
+                        "example": "One among: IPv4, IPv6"
+                    }
+                },
+                "description": "Represents IP address"
             },
             "PageOfSddcTask": {
                 "type": "object",
@@ -6004,7 +7412,6 @@
                     "elements": {
                         "type": "array",
                         "description": "The list of elements included in this page",
-                        "readOnly": true,
                         "items": {
                             "$ref": "#/components/schemas/SddcTask"
                         }
@@ -6020,7 +7427,6 @@
                     "elements": {
                         "type": "array",
                         "description": "The list of elements included in this page",
-                        "readOnly": true,
                         "items": {
                             "$ref": "#/components/schemas/Validation"
                         }
@@ -6036,7 +7442,6 @@
                     "elements": {
                         "type": "array",
                         "description": "The list of elements included in this page",
-                        "readOnly": true,
                         "items": {
                             "$ref": "#/components/schemas/Release"
                         }
@@ -6422,7 +7827,6 @@
                     "elements": {
                         "type": "array",
                         "description": "The list of elements included in this page",
-                        "readOnly": true,
                         "items": {
                             "$ref": "#/components/schemas/ReleaseComponentDetail"
                         }
@@ -6495,8 +7899,7 @@
                         }
                     }
                 },
-                "description": "Model for Release Component Detail",
-                "readOnly": true
+                "description": "Model for Release Component Detail"
             },
             "AlternativeApplicableSddcManagerVersion": {
                 "type": "object",
@@ -6638,8 +8041,7 @@
                         "readOnly": true
                     }
                 },
-                "description": "Model for releases with details if applicable to current domain version or not.",
-                "readOnly": true
+                "description": "Model for releases with details if applicable to current domain version or not."
             },
             "PageOfDomainFutureRelease": {
                 "type": "object",
@@ -6647,7 +8049,6 @@
                     "elements": {
                         "type": "array",
                         "description": "The list of elements included in this page",
-                        "readOnly": true,
                         "items": {
                             "$ref": "#/components/schemas/DomainFutureRelease"
                         }
@@ -6702,9 +8103,35 @@
                         "items": {
                             "$ref": "#/components/schemas/FlexibleProductPatch"
                         }
+                    },
+                    "vCenterMetadata": {
+                        "$ref": "#/components/schemas/VCenterMetadata"
                     }
                 },
                 "description": "Model for supported product async/hot patches associated with a VCF release"
+            },
+            "VCenterMetadata": {
+                "type": "object",
+                "properties": {
+                    "quickPatchTarget": {
+                        "type": "array",
+                        "description": "vCenter target versions supporting quick patch.",
+                        "items": {
+                            "type": "string",
+                            "description": "vCenter target versions supporting quick patch."
+                        }
+                    },
+                    "workloadManagementImpact": {
+                        "type": "array",
+                        "description": "vCenter quick patch supported target versions having impact on workload management operations.",
+                        "items": {
+                            "type": "string",
+                            "description": "vCenter quick patch supported target versions having impact on workload management operations."
+                        }
+                    }
+                },
+                "description": "vCenter update metadata fetched through manifests.",
+                "readOnly": true
             },
             "CustomPatches": {
                 "required": [
@@ -6749,7 +8176,7 @@
                         "type": "string",
                         "description": "Bundle Type",
                         "readOnly": true,
-                        "example": "One among: SDDC_MANAGER, VMWARE_SOFTWARE, VXRAIL"
+                        "example": "One among: SDDC_MANAGER, VMWARE_SOFTWARE"
                     },
                     "description": {
                         "type": "string",
@@ -6797,7 +8224,7 @@
                         "type": "string",
                         "description": "Bundle Download Status",
                         "readOnly": true,
-                        "example": "One among: PENDING, SCHEDULED, IN_PROGRESS, SUCCESSFUL, FAILED, RECALLED"
+                        "example": "One among: PENDING, SCHEDULED, IN_PROGRESS, SUCCESSFUL, FAILED"
                     },
                     "components": {
                         "type": "array",
@@ -6827,8 +8254,7 @@
                         "example": true
                     }
                 },
-                "description": "Bundle contains bits to install/update the appropriate Cloud Foundation software components in your management domain or workload domain.",
-                "readOnly": true
+                "description": "Bundle contains bits to install/update the appropriate Cloud Foundation software components in your management domain or workload domain."
             },
             "BundleComponent": {
                 "required": [
@@ -6887,7 +8313,6 @@
                     "elements": {
                         "type": "array",
                         "description": "The list of elements included in this page",
-                        "readOnly": true,
                         "items": {
                             "$ref": "#/components/schemas/Bundle"
                         }
@@ -6958,8 +8383,7 @@
                         "description": "Indicates whether the bundle for this component version is downloadable currently or not."
                     }
                 },
-                "description": "Model for download status for the bundle of a release component.",
-                "readOnly": true
+                "description": "Model for download status for the bundle of a release component."
             },
             "PageOfBundleDownloadStatusInfo": {
                 "type": "object",
@@ -6967,7 +8391,6 @@
                     "elements": {
                         "type": "array",
                         "description": "The list of elements included in this page",
-                        "readOnly": true,
                         "items": {
                             "$ref": "#/components/schemas/BundleDownloadStatusInfo"
                         }

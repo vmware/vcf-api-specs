@@ -30,7 +30,7 @@ The SMS SOAP service endpoint is
     https://{domain}/sms
 
 **_Note:_** There is a REST like representation of this API described with 
-OpenAPI 3.0 in [vim25/openapi/vi_json.yaml](../vim25/openapi/vi_json.yaml).
+OpenAPI 3.0 in [openapi/vi-json/vi_json.yaml](../../openapi/vi-json/vi-json.yaml).
 
 ## Build Instructions
 

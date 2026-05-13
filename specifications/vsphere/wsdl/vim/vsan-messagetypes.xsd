@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!--
-   	Copyright (c) 2005-2025
+   	Copyright (c) 2005-2026
 	Broadcom. All Rights Reserved.
 	The term "Broadcom" refers to Broadcom Inc.
 	and/or its subsidiaries.
@@ -564,6 +564,13 @@
          <element name="cluster" type="vim25:ManagedObjectReference" />
       </sequence>
    </complexType>
+   <complexType name="VsanQueryPhysicalPlacementsRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="cluster" type="vim25:ManagedObjectReference" />
+         <element name="specs" type="vsan:VsanQueryPhysicalPlacementSpecs" minOccurs="0" />
+      </sequence>
+   </complexType>
    <complexType name="QueryVsanPerfTopEntitiesRequestType">
       <sequence>
          <element name="_this" type="vim25:ManagedObjectReference" />
@@ -688,6 +695,13 @@
    <complexType name="VsanPerfGetSupportedEntityTypesRequestType">
       <sequence>
          <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="cluster" type="vim25:ManagedObjectReference" minOccurs="0" />
+      </sequence>
+   </complexType>
+   <complexType name="VsanPerfGetSupportedHotspotEntityTypesRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="cluster" type="vim25:ManagedObjectReference" minOccurs="0" />
       </sequence>
    </complexType>
    <complexType name="VsanPerfGetSupportedDiagnosticExceptionsRequestType">
@@ -720,6 +734,7 @@
          <element name="_this" type="vim25:ManagedObjectReference" />
          <element name="cluster" type="vim25:ManagedObjectReference" />
          <element name="xvcDatastore" type="vsan:VsanXVCDatastoreInfo" />
+         <element name="serverClusterInfo" type="vsan:VcRemoteVsanServerClusterInfo" minOccurs="0" />
       </sequence>
    </complexType>
    <complexType name="VsanQueryDatastoreSourceRequestType">
@@ -832,6 +847,17 @@
       </sequence>
    </complexType>
    <complexType name="VsanClusterGetClaimedCapacityRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="cluster" type="vim25:ManagedObjectReference" />
+      </sequence>
+   </complexType>
+   <complexType name="VsanGetConfigurationLimitsRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+      </sequence>
+   </complexType>
+   <complexType name="VsanGetClusterRAIDInfoRequestType">
       <sequence>
          <element name="_this" type="vim25:ManagedObjectReference" />
          <element name="cluster" type="vim25:ManagedObjectReference" />
@@ -1429,6 +1455,24 @@
          <element name="volumePolicyReconfigSpecs" type="vsan:CnsVolumePolicyReconfigSpec" minOccurs="0" maxOccurs="unbounded" />
       </sequence>
    </complexType>
+   <complexType name="CnsUpdateVolumeCryptoRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="updateSpecs" type="vsan:CnsVolumeCryptoUpdateSpec" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="CnsUnregisterVolumeRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="unregisterSpec" type="vsan:CnsUnregisterVolumeSpec" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="CnsSyncVolumeRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="syncSpecs" type="vsan:CnsSyncVolumeSpec" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
    <complexType name="VsanHostQueryVerifyNetworkSettingsRequestType">
       <sequence>
          <element name="_this" type="vim25:ManagedObjectReference" />
@@ -1712,6 +1756,32 @@
          <element name="taskId" type="xsd:string" maxOccurs="unbounded" />
       </sequence>
    </complexType>
+   <complexType name="VsanQueryHealthSummaryRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="cluster" type="vim25:ManagedObjectReference" />
+      </sequence>
+   </complexType>
+   <complexType name="VsanQueryHistoricalHealthRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="spec" type="vsan:VsanHistoricalHealthQuerySpec" />
+      </sequence>
+   </complexType>
+   <complexType name="VsanGetDpClusterSilentChecksRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="cluster" type="vim25:ManagedObjectReference" />
+      </sequence>
+   </complexType>
+   <complexType name="VsanSetDpClusterSilentChecksRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="cluster" type="vim25:ManagedObjectReference" />
+         <element name="addSilentChecks" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
+         <element name="removeSilentChecks" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
    <complexType name="VsanDownloadFileServiceOvfRequestType">
       <sequence>
          <element name="_this" type="vim25:ManagedObjectReference" />
@@ -1874,6 +1944,40 @@
    <complexType name="VsanHostCancelResourceCheckRequestType">
       <sequence>
          <element name="_this" type="vim25:ManagedObjectReference" />
+      </sequence>
+   </complexType>
+   <complexType name="VsanEnterSiteMaintenanceModeRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="faultDomainName" type="xsd:string" />
+         <element name="cluster" type="vim25:ManagedObjectReference" />
+      </sequence>
+   </complexType>
+   <complexType name="VsanExitSiteMaintenanceModeRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="faultDomainName" type="xsd:string" />
+         <element name="cluster" type="vim25:ManagedObjectReference" />
+      </sequence>
+   </complexType>
+   <complexType name="VsanPerformSiteMaintenancePrecheckRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="cluster" type="vim25:ManagedObjectReference" />
+         <element name="spec" type="vsan:VsanSiteMaintenanceSpec" />
+      </sequence>
+   </complexType>
+   <complexType name="VsanGetSiteMaintenancePrecheckStatusRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="cluster" type="vim25:ManagedObjectReference" />
+         <element name="faultDomainName" type="xsd:string" />
+      </sequence>
+   </complexType>
+   <complexType name="VsanQueryClusterSiteMaintenanceStateRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="cluster" type="vim25:ManagedObjectReference" />
       </sequence>
    </complexType>
    <complexType name="VsanVdsGetMigrationPlanRequestType">
