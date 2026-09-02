@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: 'Virtual Infrastructure JSON API'
-  version: 9.1.0.0
+  version: 9.1.1.0
 
 servers:
   - url: https://{vcenter-host}/sdk/vim25/{release}
@@ -9,9 +9,10 @@ servers:
       vcenter-host:
         default: localhost
       release:
-        default: 9.1.0.0
-        description: The vSphere release schema. The current specification covers vSphere 9.1.0.0 APIs.
+        default: 9.1.1.0
+        description: The vSphere release schema. The current specification covers vSphere 9.1.1.0 APIs.
         enum:
+          - 9.1.1.0
           - 9.1.0.0
           - 9.0.0.0
           - 8.0.3.1
@@ -15392,6 +15393,18 @@ paths:
         This task can either be one returned from a vSphere API operation or
         an extension task created by calling *TaskManager.CreateTask*.
         
+        **Audit-record posting** requires the additional
+        <code>Global.SetAuditId</code> privilege. A caller is treated as
+        posting an audit record (and the additional privilege is enforced)
+        when either of the following is true:
+        - *Event.auditId* is supplied on the event.
+        - The event type is registered in the server's audit-id mapping
+          (see *EventManager#auditMappings*); for these types the
+          server populates *Event.auditId* automatically.
+          
+        Callers that hold only <code>Global.LogEvent</code> may continue to
+        post non-audit events without an explicit auditId.
+        
         ***Required privileges:*** Global.LogEvent
       parameters:
         - $ref: '#/components/parameters/moId'
@@ -15414,6 +15427,10 @@ paths:
               *EntityEventArgument* fields
             - an invalid severity value is passed in an *EventEx*.
               
+            ***NoPermission***: if the caller supplies an explicit
+            *Event.auditId* or posts an audit-mapped event type without
+            holding <code>Global.SetAuditId</code> on the root folder.
+            
             ***InvalidEvent***: no longer thrown by this API
           content:
             application/json:
@@ -15790,6 +15807,10 @@ paths:
         
         This method will unset any public key or subject name
         associated with the extension.
+        
+        To clear (unset) the certificate and thumbprint stored for the
+        extension, pass the reserved string &quot;UNSET&quot;
+        (case-insensitive) as the &quot;certificatePem&quot; argument.
         
         ***Required privileges:*** Extension.Update
       parameters:
@@ -37857,6 +37878,8 @@ paths:
         Requires Datastore.FileManagement privilege.
         
         ***Since:*** vSphere API Release 9.0.0.0
+        
+        ***Required privileges:*** System.View
       parameters:
         - $ref: '#/components/parameters/moId'
       security:
@@ -38091,6 +38114,8 @@ paths:
         eagerzeroedthick
         \- A thin-provisioned disk will always be extended as a thin-provisioned
         disk.
+        
+        Requires Datastore.FileManagement privilege.
         
         ***Since:*** vSphere API Release 8.0.2.0
         
@@ -38464,6 +38489,8 @@ paths:
       operationId: HostVStorageObjectManager_RenameVStorageObjectEx
       description: |2
         Rename a virtual storage object.
+        
+        Requires Datastore.FileManagement privilege.
         
         ***Since:*** vSphere API Release 8.0.2.0
         
@@ -39021,6 +39048,8 @@ paths:
       operationId: HostVStorageObjectManager_UnregisterDisk_Task
       description: |2
         Convert FCD disk to legacy disk.
+        
+        Requires Datastore.FileManagement privilege.
         
         ***Since:*** vSphere API Release 9.1.0.0
       parameters:
@@ -47286,7 +47315,7 @@ paths:
         Modifies VirtualCenter Server's built-in *historical intervals*, within certain limits.
         
         **Supported Modifications**
-        <table border="1"width="100%">
+        <table border="1" width="100%">
         <tr>
         <th>key</th>
         <th>samplingPeriod</th>
@@ -56470,6 +56499,8 @@ paths:
         Requires Datastore.FileManagement privilege.
         
         ***Since:*** vSphere API Release 9.0.0.0
+        
+        ***Required privileges:*** System.View
       parameters:
         - $ref: '#/components/parameters/moId'
       security:
@@ -56529,6 +56560,8 @@ paths:
         \- A thin-provisioned disk will always be extended as a thin-provisioned
         disk.
         
+        Requires Datastore.FileManagement privilege.
+        
         ***Since:*** vSphere API Release 8.0.2.0
         
         ***Required privileges:*** System.View
@@ -56580,6 +56613,8 @@ paths:
       operationId: VStorageObjectManagerBase_RenameVStorageObjectEx
       description: |2
         Rename a virtual storage object.
+        
+        Requires Datastore.FileManagement privilege.
         
         ***Since:*** vSphere API Release 8.0.2.0
         
@@ -56735,6 +56770,8 @@ paths:
       operationId: VStorageObjectManagerBase_UnregisterDisk_Task
       description: |2
         Convert FCD disk to legacy disk.
+        
+        Requires Datastore.FileManagement privilege.
         
         ***Since:*** vSphere API Release 9.1.0.0
       parameters:
@@ -57252,6 +57289,8 @@ paths:
         Requires Datastore.FileManagement privilege.
         
         ***Since:*** vSphere API Release 9.0.0.0
+        
+        ***Required privileges:*** System.View
       parameters:
         - $ref: '#/components/parameters/moId'
       security:
@@ -57520,6 +57559,8 @@ paths:
         eagerzeroedthick
         \- A thin-provisioned disk will always be extended as a thin-provisioned
         disk.
+        
+        Requires Datastore.FileManagement privilege.
         
         ***Since:*** vSphere API Release 8.0.2.0
         
@@ -58104,6 +58145,8 @@ paths:
       description: |2
         Rename a virtual storage object.
         
+        Requires Datastore.FileManagement privilege.
+        
         ***Since:*** vSphere API Release 8.0.2.0
         
         ***Required privileges:*** System.View
@@ -58197,6 +58240,8 @@ paths:
       operationId: VcenterVStorageObjectManager_RetrieveSnapshotDetails
       description: |2
         Retrieves snapshot disk details of a given snapshot.
+        
+        Requires Datastore.FileManagement privilege.
         
         ***Required privileges:*** System.View
       parameters:
@@ -58662,6 +58707,8 @@ paths:
       operationId: VcenterVStorageObjectManager_UnregisterDisk_Task
       description: |2
         Convert FCD disk to legacy disk.
+        
+        Requires Datastore.FileManagement privilege.
         
         ***Since:*** vSphere API Release 9.1.0.0
       parameters:
@@ -65495,13 +65542,14 @@ paths:
         - VirtualMachine.Interact.DeviceConnection if changing the runtime connection
           state of a device as embodied by the Connectable property.
         - VirtualMachine.Interact.SetCDMedia if changing the backing of a CD-ROM
-          device
+          device, or configuring a USB CD-ROM device via extraConfig
         - VirtualMachine.Interact.SetFloppyMedia if changing the backing of a
           floppy device
         - VirtualMachine.Config.Rename if renaming the virtual machine
         - VirtualMachine.Config.Annotation if setting annotation a value
         - VirtualMachine.Config.AddExistingDisk if adding a virtual disk device
-          that is backed by an existing virtual disk file
+          that is backed by an existing virtual disk file, or configuring a
+          USB disk device via extraConfig
         - VirtualMachine.Config.AddNewDisk if adding a virtual disk device for which
           the backing virtual disk file is to be created
         - VirtualMachine.Config.RemoveDisk if removing a virtual disk device that
@@ -65511,7 +65559,8 @@ paths:
         - VirtualMachine.Config.RawDevice if adding, removing or editing a raw
           device mapping (RDM) or SCSI passthrough device
         - VirtualMachine.Config.AddRemoveDevice if adding or removing any
-          device other than disk, raw, or USB device
+          device other than disk, raw, or USB device, or adding or removing
+          a virtual USB device not backed by a host USB device via extraConfig
         - VirtualMachine.Config.EditDevice if changing the settings of any
           device
         - VirtualMachine.Config.Settings if changing any basic settings such as
@@ -65520,6 +65569,10 @@ paths:
           affinities, or setting network traffic shaping or virtual disk shares
         - VirtualMachine.Config.AdvancedConfig if changing values in
           extraConfig
+        - VirtualMachine.Interact.PowerOff and VirtualMachine.Inventory.Delete
+          if adding, modifying, or deleting keys in extraConfig that have
+          special semantics (for example, EAM-specific extra configuration
+          keys)
         - VirtualMachine.Config.SwapPlacement if changing swapPlacement
         - VirtualMachine.Config.HostUSBDevice if adding, removing or editing a
           VirtualUSB device backed by the host USB device.
@@ -65531,6 +65584,8 @@ paths:
           limits or the guest auto-lock feature.
         - VirtualMachine.Config.ManagedBy if changing
           *managedBy* property of the VM.
+        - VirtualMachine.Hbr.ConfigureReplication if configuring replication
+          via *repConfig*.
         - VirtualMachine.Config.UpgradeVirtualHardware if upgrading the VM's
           virtual hardware to the latest revision that is supported by the VM's host.
         - Cryptographer.Encrypt if vm home folder is encrypted or existing
@@ -77852,6 +77907,10 @@ paths:
         the same. If user choose to invoke APIs for cluster setup, please explicitly
         invoke *ClusterComputeResource.AbandonHciWorkflow* API to opt out
         the system HCI workflow after the cluster is fully configured.
+        Note: Since 9.1.1.0, *HostConnectSpec.sslThumbprint* is no longer
+        accepted in *VsanVcPostDeployConfigSpec.firstHost* or
+        *VsanVcPostDeployConfigSpec.hostsToAdd*. Callers must use
+        *HostConnectSpec.sslCertificate* instead.
         
         ***Required privileges:*** Host.Inventory.EditCluster
       parameters:
@@ -77878,7 +77937,10 @@ paths:
           description: |2
             ***NotFound***: when specified cluster doesn't exist.
             
-            ***VsanFault***: when there are too many tasks running.
+            ***VsanFault***: when there are too many tasks running, or
+            when *HostConnectSpec.sslThumbprint* is set in
+            *VsanVcPostDeployConfigSpec.firstHost* or
+            *VsanVcPostDeployConfigSpec.hostsToAdd*.
           content:
             application/json:
               schema:
@@ -107748,6 +107810,8 @@ components:
             The datastore where the virtual storage object is
             located.
             
+            ***Required privileges:*** Datastore.FileManagement
+            
             Refers instance of *Datastore*.
           allOf:
             - $ref: '#/components/schemas/ManagedObjectReference'
@@ -108420,6 +108484,8 @@ components:
             The datastore where the source virtual storage object
             is located.
             
+            ***Required privileges:*** Datastore.FileManagement
+            
             Refers instance of *Datastore*.
           allOf:
             - $ref: '#/components/schemas/ManagedObjectReference'
@@ -108698,6 +108764,8 @@ components:
           description: |2
             The datastore where the source virtual storage object
             is located.
+            
+            ***Required privileges:*** Datastore.FileManagement
             
             Refers instance of *Datastore*.
           allOf:
@@ -109039,6 +109107,9 @@ components:
           description: |2
             PEM encoded certificate. If not specified, the
             certificate passed over SSL handshake is used.
+            If set to the reserved string
+            &quot;UNSET&quot; (case-insensitive), the
+            stored certificate and thumbprint are cleared.
           type: string
       required:
         - extensionKey
@@ -111974,6 +112045,8 @@ components:
             The datastore where the source virtual storage object
             is located.
             
+            ***Required privileges:*** Datastore.FileManagement
+            
             Refers instance of *Datastore*.
           allOf:
             - $ref: '#/components/schemas/ManagedObjectReference'
@@ -112043,6 +112116,8 @@ components:
             The datastore where the source virtual storage object
             is located.
             
+            ***Required privileges:*** Datastore.FileManagement
+            
             Refers instance of *Datastore*.
           allOf:
             - $ref: '#/components/schemas/ManagedObjectReference'
@@ -112073,6 +112148,8 @@ components:
             The datastore where the source virtual storage object
             is located.
             
+            ***Required privileges:*** Datastore.FileManagement
+            
             Refers instance of *Datastore*.
           allOf:
             - $ref: '#/components/schemas/ManagedObjectReference'
@@ -112101,6 +112178,8 @@ components:
         datastore:
           description: |2
             The datastore where the virtual disk is located.
+            
+            ***Required privileges:*** Datastore.FileManagement
             
             Refers instance of *Datastore*.
           allOf:
@@ -125336,13 +125415,13 @@ components:
             on the <code>objectType</code>.
               
               
-            <table border="1"cellpadding="5">
+            <table border="1" cellpadding="5">
             <tr><td>**PbmObjectType**</td><td>**key value**</td></tr>
             <tr><td>virtualMachine</td><td>_virtual-machine-MOR_</td></tr>
             <tr><td>virtualDiskId</td>
             <td>_virtual-disk-MOR_:_VirtualDisk.key_</td></tr>
             <tr><td>datastore</td><td>_datastore-MOR_</td></tr>
-            <tr><td colspan="2"align="right">MOR = ManagedObjectReference</td></tr>
+            <tr><td colspan="2" align="right">MOR = ManagedObjectReference</td></tr>
             </table>
           type: string
         serverUuid:
@@ -127921,7 +128000,7 @@ components:
             These names shouldn't be used as a K8s `StorageClass`'s name associated with any other
             profiles.
             Note that, it doesn't indicate that `StorageClass` with following names actually exists,
-            i.e. it's not a profile-K8s `StorageClass` association data. These are used to keep
+            i.e. it's not a profile->K8s `StorageClass` association data. These are used to keep
             track of all the reserved K8s compliant names which can't be used for any other profile and
             used to avoid any K8s compliant name collision when a profile is being created.
             It can include the following:
@@ -140886,7 +140965,7 @@ components:
           
         For ESX systems, a single instance of this data object exists. It cannot
         be modified. It has these properties:
-        <table border="1"width="100%">
+        <table border="1" width="100%">
         <tr>
         <th>key</th>
         <th>samplingPeriod</th>
@@ -140932,7 +141011,7 @@ components:
            
         Default properties for the four built-in historical intervals
         include:
-        <table border="1"width="100%">
+        <table border="1" width="100%">
         <tr>
         <th>key</th>
         <th>samplingPeriod</th>
@@ -141607,7 +141686,11 @@ components:
             entry in *HttpNfcLease.info*.
           type: string
         sha1:
+          deprecated: true
           description: |2
+            Deprecated as of VCF 9.2, use *HttpNfcLeaseManifestEntry.checksum* and *HttpNfcLeaseManifestEntry.checksumType*,
+            which should have a supported *HttpNfcLeaseManifestEntryChecksumType_enum* value, instead.
+            
             SHA-1 checksum of the data stream sent from the server.
             
             This can be used
@@ -162381,9 +162464,9 @@ components:
             True if the ping test for network latency using small-sized packets is successful
             between all connected hosts.  
             The network latency test fails when:
-            - The ping latency between any two data hosts 5ms or
-            - The ping latency between a data site and a witness(non-ROBO) 200ms or
-            - The ping latency between a data site and a witness(ROBO) 500ms
+            - The ping latency between any two data hosts > 5ms or
+            - The ping latency between a data site and a witness(non-ROBO) > 200ms or
+            - The ping latency between a data site and a witness(ROBO) > 500ms
           type: boolean
         potentialMulticastIssue:
           description: |2
@@ -171220,7 +171303,7 @@ components:
         This class defines Network Filter configuration.
         
         ** Supported Qualifier and Actions **
-        <table border="1"width="100%">
+        <table border="1" width="100%">
         <tr>
         <th>Network Filter Config</th>
         <th>Supported classes</th>
@@ -171737,7 +171820,7 @@ components:
         This class defines Traffic Filter configuration.
         
         ** Supported Qualifier and Actions **
-        <table border="1"width="100%">
+        <table border="1" width="100%">
         <tr>
         <th>Traffic Filter Config</th>
         <th>Supported classes</th>
@@ -259029,6 +259112,8 @@ components:
             
             Note this may become deprecated in the future releases. We
             discourage any unnecessary dependency on this field.
+            
+            Reconfigure privilege: VirtualMachine.Hbr.ConfigureReplication
           allOf:
             - $ref: '#/components/schemas/ReplicationConfigSpec'
         vAppConfigRemoved:
@@ -259160,6 +259245,8 @@ components:
           description: |2
             Whether to allow tunneling of clients from the guest VM into the
             common message bus on the host network.
+            
+            Reconfigure privilege: VirtualMachine.Config.Settings
           type: boolean
         crypto:
           description: |2
@@ -259193,6 +259280,8 @@ components:
             required for an encrypted VM.
             \- If this property is unset, the mode of encrypted Fault Tolerance
             will be set to opportunistic.
+            
+            Reconfigure privilege: VirtualMachine.Config.Settings
             
             ***Since:*** vSphere API Release 7.0.2.0
           type: string
@@ -268274,7 +268363,7 @@ components:
             
             It is in json or yaml format.
             The max size of the metadata is 524288 bytes.
-            See detail information about <a href="https://cloudinit.readthedocs.io/en/latest/topics/instancedata.html#"target="_blank">Instance Metadata</a>.
+            See detail information about <a href="https://cloudinit.readthedocs.io/en/latest/topics/instancedata.html#" target="_blank">Instance Metadata</a>.
           type: string
         userdata:
           description: |2
@@ -268282,7 +268371,7 @@ components:
             configure the VM.
             
             The max size of the userdata is 524288 bytes.
-            See detail information about <a href="https://cloudinit.readthedocs.io/en/latest/topics/format.html"target="_blank">User-Data formats</a>.
+            See detail information about <a href="https://cloudinit.readthedocs.io/en/latest/topics/format.html" target="_blank">User-Data formats</a>.
           type: string
       required:
         - metadata
@@ -268608,7 +268697,7 @@ components:
         The GuiRunOnce data object type maps to the GuiRunOnce key in the
         `sysprep.xml` answer file. These values are transferred into the
         `sysprep.xml` file that VirtualCenter stores on the target virtual disk. For
-        more detailed information, see <a href="https://technet.microsoft.com/en-us/library/cc771830(v=ws.10).aspx"target="_blank">Performing Unattended Installations</a>.
+        more detailed information, see <a href="https://technet.microsoft.com/en-us/library/cc771830(v=ws.10).aspx" target="_blank">Performing Unattended Installations</a>.
       properties:
         commandList:
           description: |2
@@ -268643,7 +268732,7 @@ components:
         
         These values are plugged directly into the `sysprep.xml` file
         that VirtualCenter stores on the target virtual disk. For more detailed
-        information, see <a href="https://technet.microsoft.com/en-us/library/cc771830(v=ws.10).aspx"target="_blank">Performing Unattended Installations</a>.
+        information, see <a href="https://technet.microsoft.com/en-us/library/cc771830(v=ws.10).aspx" target="_blank">Performing Unattended Installations</a>.
       properties:
         password:
           description: |2
@@ -268667,7 +268756,7 @@ components:
             The time zone index for the virtual machine.
             
             Numbers correspond to time zones
-            listed at <a href="https://support.microsoft.com/en-us/help/973627/microsoft-time-zone-index-values"target="_blank">Microsoft Time Zone Index Values</a>.
+            listed at <a href="https://support.microsoft.com/en-us/help/973627/microsoft-time-zone-index-values" target="_blank">Microsoft Time Zone Index Values</a>.
           type: integer
           format: int32
         autoLogon:
@@ -268839,7 +268928,7 @@ components:
         The Identification data object type maps to the Identification key in the
         `sysprep.xml` answer file. These values are transferred into the
         `sysprep.xml` file that VirtualCenter stores on the target virtual disk. For
-        more detailed information, see <a href="https://technet.microsoft.com/en-us/library/cc771830(v=ws.10).aspx"target="_blank">Performing Unattended Installations</a>.
+        more detailed information, see <a href="https://technet.microsoft.com/en-us/library/cc771830(v=ws.10).aspx" target="_blank">Performing Unattended Installations</a>.
       properties:
         joinWorkgroup:
           description: |2
@@ -268970,7 +269059,7 @@ components:
         
         These values are transferred into the
         `sysprep.xml` file that VirtualCenter stores on the target virtual disk. For
-        more detailed information, see <a href="https://technet.microsoft.com/en-us/library/cc771830(v=ws.10).aspx"target="_blank">Performing Unattended Installations</a>.
+        more detailed information, see <a href="https://technet.microsoft.com/en-us/library/cc771830(v=ws.10).aspx" target="_blank">Performing Unattended Installations</a>.
         LicenseFilePrintData provides licensing information for Windows server operating
         systems.
       properties:
@@ -269079,14 +269168,14 @@ components:
           description: |2
             The case-sensitive timezone, such as Europe/Sofia.
             
-            <a href="timezone.html"title="Display list of Valid timeZone values...">
+            <a href="timezone.html" title="Display list of Valid timeZone values...">
             **Valid timeZone values**</a> are based on the tz (timezone)
             database used by Linux and other Unix systems.
             The values are strings (xsd:string) in the form "Area/Location," in which
             Area is a continent or ocean name, and Location is the city, island, or
             other regional designation.
             
-            See the <a href="https://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=2145518"target="_blank">List of supported time zones for different vSphere versions in Linux/Unix systems</a>.
+            See the <a href="https://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=2145518" target="_blank">List of supported time zones for different vSphere versions in Linux/Unix systems</a>.
           type: string
         hwClockUTC:
           description: |2
@@ -269112,7 +269201,7 @@ components:
             
             Please set the compatible customization method to a supported string value
             e.g. "GOSC\_METHOD\_1".  
-            See <a href="https://kb.vmware.com/s/article/95903"target="_blank">Supported compatible customization method list</a>.
+            See <a href="https://kb.vmware.com/s/article/95903" target="_blank">Supported compatible customization method list</a>.
             
             ***Since:*** vSphere API Release 8.0.3.0
           type: string
@@ -269376,7 +269465,7 @@ components:
         
         The sysprep
         type encloses all the individual keys listed in a `sysprep.xml` file. For
-        more detailed information, see <a href="https://technet.microsoft.com/en-us/library/cc771830(v=ws.10).aspx"target="_blank">Performing Unattended Installations</a>.
+        more detailed information, see <a href="https://technet.microsoft.com/en-us/library/cc771830(v=ws.10).aspx" target="_blank">Performing Unattended Installations</a>.
       properties:
         guiUnattended:
           description: |2
@@ -269411,7 +269500,7 @@ components:
             The script to run before and after GOS customization.
             
             The script must be a batch file for Windows virtual machines.
-            For additional information, refer to <a href="https://knowledge.broadcom.com/external/article?legacyId=74880"target="_blank">Setting the customization script for virtual machines in vSphere</a>.
+            For additional information, refer to <a href="https://knowledge.broadcom.com/external/article?legacyId=74880" target="_blank">Setting the customization script for virtual machines in vSphere</a>.
             
             ***Since:*** vSphere API Release 9.1.0.0
           type: string
@@ -269463,8 +269552,8 @@ components:
           description: |2
             Text for the `sysprep.xml` answer file.
             
-            For additional details, see <a href="https://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=2151684"target="_blank">Using custom sysprep.xml for vCenter Guest Customization</a> and
-            <a href="https://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=1029174"target="_blank">Specifying network settings in custom sysprep.xml</a>.
+            For additional details, see <a href="https://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=2151684" target="_blank">Using custom sysprep.xml for vCenter Guest Customization</a> and
+            <a href="https://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=1029174" target="_blank">Specifying network settings in custom sysprep.xml</a>.
           type: string
       required:
         - value
@@ -269565,7 +269654,7 @@ components:
         The UserData data object type maps to the UserData key in the `sysprep.xml`
         answer file. These values are transferred directly into the `sysprep.xml`
         file that VirtualCenter stores on the target virtual disk. For more detailed
-        information, see <a href="https://technet.microsoft.com/en-us/library/cc771830(v=ws.10).aspx"target="_blank">Performing Unattended Installations</a>.
+        information, see <a href="https://technet.microsoft.com/en-us/library/cc771830(v=ws.10).aspx" target="_blank">Performing Unattended Installations</a>.
       properties:
         fullName:
           description: |2
@@ -280361,7 +280450,7 @@ components:
         
         {
         
-        faultDomainId: <a validfaultdomainid>
+        faultDomainId: <a valid fault domain id>
         
         deviceGroupId: ffffffff-ffff-ffff-ffff-ffffffffffff
         
@@ -286946,6 +287035,16 @@ components:
         properties:
           description: |2
             The additional properties of the object store instance.
+            
+            example values:
+            {
+            "name": "object-store-name",
+            "policy": {
+            "id": "policy-id",
+            "name": "policy-name",
+            "vsanExpression": "((...))"
+            }
+            }
           type: string
       required:
         - id
@@ -302982,7 +303081,9 @@ components:
         List of supported algorithms for checksum calculation.
         
         Possible values:
-        - `sha1`
+        - `sha1`: 
+          
+          Deprecated as of VCF 9.2, use *sha256* instead.
         - `sha256`
       enum:
         - 'sha1'

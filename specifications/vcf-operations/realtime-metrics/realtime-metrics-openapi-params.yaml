@@ -120,6 +120,17 @@ sourceIdQueryParam:
     type: string
     example: 59e196ae-45c9-4bff-8176-5e6812435f8a
 
+sourceIdRequiredQueryParam:
+  name: sourceId
+  in: query
+  description: Source Id against which we need to query data for, like VC Instance UUID, NSX Id etc.
+  required: true
+  style: form
+  explode: true
+  schema:
+    type: string
+    example: 59e196ae-45c9-4bff-8176-5e6812435f8a
+
 externalTagsFilterQueryParam:
   name: externalTagsFilter
   in: query

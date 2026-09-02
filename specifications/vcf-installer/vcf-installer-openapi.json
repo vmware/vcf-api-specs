@@ -7,7 +7,7 @@
         "license": {
             "name": "VMware Cloud Foundation"
         },
-        "version": "9.1.0.0"
+        "version": "9.1.1.0"
     },
     "servers": [
         {
@@ -75,22 +75,22 @@
                 "description": "Get the depot configuration. In a fresh setup, this would be empty.",
                 "operationId": "getDepotSettings",
                 "responses": {
-                    "500": {
-                        "description": "Internal Server Error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
-                    },
                     "200": {
                         "description": "OK",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/DepotSettings"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
                                 }
                             }
                         }
@@ -101,8 +101,8 @@
                 "tags": [
                     "DepotSettings"
                 ],
-                "summary": "Configure the depot credentials",
-                "description": "Update depot settings. Depot settings can be updated with VMware Depot account",
+                "summary": "Configure depot settings",
+                "description": "Updates the depot settings using a VMware Depot account. If a trusted certificate chain is provided for an offline HTTPS depot configuration, each certificate in the chain is added to the appliance trust stores (`VCF CS keystore` and `JVM cacerts`). The certificates are also propagated to the OS trust store (`/etc/ssl/certs`) on the VMs.",
                 "operationId": "updateDepotSettings",
                 "requestBody": {
                     "content": {
@@ -315,8 +315,8 @@
                             }
                         }
                     },
-                    "500": {
-                        "description": "Internal Server Error",
+                    "400": {
+                        "description": "Installation already exists",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -325,8 +325,8 @@
                             }
                         }
                     },
-                    "400": {
-                        "description": "Installation already exists",
+                    "500": {
+                        "description": "Internal Server Error",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -502,12 +502,12 @@
                 "summary": "Retrieve a list of VCF (or VVF) installation validations",
                 "operationId": "getSddcSpecValidations",
                 "responses": {
-                    "501": {
-                        "description": "Not Implemented",
+                    "200": {
+                        "description": "Success",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Error"
+                                    "$ref": "#/components/schemas/PageOfValidation"
                                 }
                             }
                         }
@@ -532,12 +532,12 @@
                             }
                         }
                     },
-                    "200": {
-                        "description": "Success",
+                    "501": {
+                        "description": "Not Implemented",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/PageOfValidation"
+                                    "$ref": "#/components/schemas/Error"
                                 }
                             }
                         }
@@ -562,16 +562,6 @@
                     "required": true
                 },
                 "responses": {
-                    "202": {
-                        "description": "Accepted",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Validation"
-                                }
-                            }
-                        }
-                    },
                     "200": {
                         "description": "Success",
                         "content": {
@@ -582,8 +572,28 @@
                             }
                         }
                     },
+                    "202": {
+                        "description": "Accepted",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Validation"
+                                }
+                            }
+                        }
+                    },
                     "400": {
                         "description": "Bad user input",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -604,16 +614,6 @@
                     },
                     "500": {
                         "description": "Internal Server Error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -644,6 +644,16 @@
                     "required": true
                 },
                 "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SddcManagerDiscoveryResult"
+                                }
+                            }
+                        }
+                    },
                     "400": {
                         "description": "Bad Request",
                         "content": {
@@ -660,16 +670,6 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
-                    },
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/SddcManagerDiscoveryResult"
                                 }
                             }
                         }
@@ -696,16 +696,6 @@
                     "required": true
                 },
                 "responses": {
-                    "400": {
-                        "description": "Bad user input",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
-                    },
                     "202": {
                         "description": "Accepted",
                         "content": {
@@ -716,8 +706,8 @@
                             }
                         }
                     },
-                    "500": {
-                        "description": "Internal Server Error",
+                    "400": {
+                        "description": "Bad user input",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -728,6 +718,16 @@
                     },
                     "403": {
                         "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -800,22 +800,22 @@
                     "required": true
                 },
                 "responses": {
-                    "500": {
-                        "description": "InternalServerError",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
-                    },
                     "200": {
                         "description": "OK",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/InstallerSpec"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "InternalServerError",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
                                 }
                             }
                         }
@@ -858,8 +858,8 @@
                 "tags": [
                     "Trusted Certificates"
                 ],
-                "summary": "Add a trusted certificate to the appliance's trust store",
-                "description": "Add a trusted certificate to the appliance's trust store.",
+                "summary": "Add a trusted certificate to the appliance trust stores",
+                "description": "Adds the certificate to the VCF CS keystore, JVM cacerts, and the OS trust store (/etc/ssl/certs).",
                 "operationId": "addTrustedCertificate",
                 "requestBody": {
                     "content": {
@@ -995,22 +995,22 @@
                     "required": true
                 },
                 "responses": {
-                    "410": {
-                        "description": "This API is no longer supported from VCF 9.0. Please refer to POST v1/product-binaries instead.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
-                    },
                     "202": {
                         "description": "Accepted",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/Task"
+                                }
+                            }
+                        }
+                    },
+                    "410": {
+                        "description": "This API is no longer supported from VCF 9.0. Please refer to POST v1/product-binaries instead.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
                                 }
                             }
                         }
@@ -1059,6 +1059,16 @@
                     "required": true
                 },
                 "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
                     "400": {
                         "description": "Bad Request",
                         "content": {
@@ -1088,16 +1098,6 @@
                                 }
                             }
                         }
-                    },
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        }
                     }
                 }
             }
@@ -1117,21 +1117,12 @@
                         "description": "Task id to retrieve",
                         "required": true,
                         "schema": {
+                            "minLength": 1,
                             "type": "string"
                         }
                     }
                 ],
                 "responses": {
-                    "500": {
-                        "description": "Unexpected error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
-                    },
                     "200": {
                         "description": "A task object.",
                         "content": {
@@ -1144,6 +1135,16 @@
                     },
                     "404": {
                         "description": "Task not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Unexpected error",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1168,11 +1169,25 @@
                         "description": "Task id for cancelling",
                         "required": true,
                         "schema": {
+                            "minLength": 1,
                             "type": "string"
                         }
                     }
                 ],
                 "responses": {
+                    "200": {
+                        "description": "Task was cancelled successfully."
+                    },
+                    "404": {
+                        "description": "Task not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
                     "409": {
                         "description": "Task can not be cancelled. Only a IN_PROGRESS task can be cancelled.",
                         "content": {
@@ -1185,19 +1200,6 @@
                     },
                     "500": {
                         "description": "Unexpected error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
-                    },
-                    "200": {
-                        "description": "Task was cancelled successfully."
-                    },
-                    "404": {
-                        "description": "Task not found",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1222,13 +1224,17 @@
                         "description": "Task id retry",
                         "required": true,
                         "schema": {
+                            "minLength": 1,
                             "type": "string"
                         }
                     }
                 ],
                 "responses": {
-                    "500": {
-                        "description": "Unexpected error",
+                    "200": {
+                        "description": "Task was retried successfully."
+                    },
+                    "404": {
+                        "description": "Task not found",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1236,9 +1242,6 @@
                                 }
                             }
                         }
-                    },
-                    "200": {
-                        "description": "Task was retried successfully."
                     },
                     "409": {
                         "description": "Task can not be retried. Only a failed Task can be retried.",
@@ -1250,8 +1253,8 @@
                             }
                         }
                     },
-                    "404": {
-                        "description": "Task not found",
+                    "500": {
+                        "description": "Unexpected error",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1473,22 +1476,22 @@
                     "required": true
                 },
                 "responses": {
-                    "400": {
-                        "description": "Bad request",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
-                    },
                     "202": {
                         "description": "Accepted",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/Task"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
                                 }
                             }
                         }
@@ -1549,16 +1552,6 @@
                     "required": true
                 },
                 "responses": {
-                    "409": {
-                        "description": "The request could not be completed due to a conflict with the current state",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
-                    },
                     "202": {
                         "description": "Accepted",
                         "content": {
@@ -1571,6 +1564,16 @@
                     },
                     "400": {
                         "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "The request could not be completed due to a conflict with the current state",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1706,16 +1709,6 @@
                             }
                         }
                     },
-                    "405": {
-                        "description": "Not allowed",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
-                    },
                     "400": {
                         "description": "Bad Request",
                         "content": {
@@ -1728,6 +1721,16 @@
                     },
                     "404": {
                         "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Not allowed",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1770,6 +1773,16 @@
                     }
                 ],
                 "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Bundle"
+                                }
+                            }
+                        }
+                    },
                     "404": {
                         "description": "Bundle Not Found",
                         "content": {
@@ -1786,16 +1799,6 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
-                    },
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Bundle"
                                 }
                             }
                         }
@@ -1844,8 +1847,8 @@
                             }
                         }
                     },
-                    "500": {
-                        "description": "Internal Server Error",
+                    "409": {
+                        "description": "Conflict",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1854,8 +1857,8 @@
                             }
                         }
                     },
-                    "409": {
-                        "description": "Conflict",
+                    "500": {
+                        "description": "Internal Server Error",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1916,8 +1919,8 @@
                             }
                         }
                     },
-                    "500": {
-                        "description": "Internal Server Error",
+                    "409": {
+                        "description": "Conflict",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1926,8 +1929,8 @@
                             }
                         }
                     },
-                    "409": {
-                        "description": "Conflict",
+                    "500": {
+                        "description": "Internal Server Error",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1999,22 +2002,22 @@
                     }
                 ],
                 "responses": {
-                    "404": {
-                        "description": "VcfService not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
-                    },
                     "200": {
                         "description": "Ok",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/VcfService"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "VcfService not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
                                 }
                             }
                         }
@@ -2149,22 +2152,22 @@
                     }
                 ],
                 "responses": {
-                    "500": {
-                        "description": "Unexpected error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
-                    },
                     "200": {
                         "description": "Returns the list of tasks.",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/PageOfTask"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Unexpected error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
                                 }
                             }
                         }
@@ -2191,8 +2194,8 @@
                             }
                         }
                     },
-                    "500": {
-                        "description": "Internal Server Error",
+                    "403": {
+                        "description": "Forbidden",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -2201,8 +2204,8 @@
                             }
                         }
                     },
-                    "403": {
-                        "description": "Forbidden",
+                    "500": {
+                        "description": "Internal Server Error",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -2461,16 +2464,6 @@
                     }
                 ],
                 "responses": {
-                    "501": {
-                        "description": "Not Implemented",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
-                    },
                     "200": {
                         "description": "Success",
                         "content": {
@@ -2493,6 +2486,16 @@
                     },
                     "500": {
                         "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "501": {
+                        "description": "Not Implemented",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -2636,6 +2639,16 @@
                             }
                         }
                     },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
                     "404": {
                         "description": "Release Not Found",
                         "content": {
@@ -2648,16 +2661,6 @@
                     },
                     "500": {
                         "description": "Internal Server Error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -2753,18 +2756,18 @@
                     }
                 ],
                 "responses": {
-                    "400": {
-                        "description": "Bad Request",
+                    "200": {
+                        "description": "Ok",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Error"
+                                    "$ref": "#/components/schemas/PageOfReleaseComponentDetail"
                                 }
                             }
                         }
                     },
-                    "500": {
-                        "description": "InternalServerError",
+                    "400": {
+                        "description": "Bad Request",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -2783,12 +2786,12 @@
                             }
                         }
                     },
-                    "200": {
-                        "description": "Ok",
+                    "500": {
+                        "description": "InternalServerError",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/PageOfReleaseComponentDetail"
+                                    "$ref": "#/components/schemas/Error"
                                 }
                             }
                         }
@@ -2942,16 +2945,6 @@
                             }
                         }
                     },
-                    "422": {
-                        "description": "Unprocessable Entity",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
-                    },
                     "400": {
                         "description": "Bad Request",
                         "content": {
@@ -2962,8 +2955,8 @@
                             }
                         }
                     },
-                    "500": {
-                        "description": "InternalServerError",
+                    "404": {
+                        "description": "Not Found",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -2972,8 +2965,18 @@
                             }
                         }
                     },
-                    "404": {
-                        "description": "Not Found",
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "InternalServerError",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -3026,28 +3029,18 @@
                     }
                 ],
                 "responses": {
-                    "422": {
-                        "description": "Unprocessable Entity",
+                    "200": {
+                        "description": "Ok",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Error"
+                                    "$ref": "#/components/schemas/CustomPatches"
                                 }
                             }
                         }
                     },
                     "400": {
                         "description": "Bad Request",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "InternalServerError",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -3066,12 +3059,22 @@
                             }
                         }
                     },
-                    "200": {
-                        "description": "Ok",
+                    "422": {
+                        "description": "Unprocessable Entity",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/CustomPatches"
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "InternalServerError",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
                                 }
                             }
                         }
@@ -3182,22 +3185,22 @@
                     }
                 ],
                 "responses": {
-                    "404": {
-                        "description": "Domain Not Found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
-                    },
                     "200": {
                         "description": "OK",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/PageOfBundle"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Domain Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
                                 }
                             }
                         }
@@ -3241,6 +3244,59 @@
                 }
             }
         },
+        "/v1/tasks/history": {
+            "delete": {
+                "tags": [
+                    "Tasks"
+                ],
+                "summary": "Delete Task History",
+                "description": "Delete the history of one or more tasks by ID. Only tasks in a terminal/immutable state (completed successfully or failed non-retriable) can be deleted. Each task is processed independently; the response reports per-task success and failure.",
+                "operationId": "deleteTaskHistories",
+                "requestBody": {
+                    "description": "List of task IDs whose history should be deleted",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TaskHistoryDeletionRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Operation completed. Check 'successful' and 'failed' lists in the response for per-task results.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TaskHistoryDeletionResult"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body (e.g. empty taskIds list).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Unexpected error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/v1/sddc-manager/trusted-certificates/{alias}": {
             "delete": {
                 "tags": [
@@ -3261,6 +3317,13 @@
                     }
                 ],
                 "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "x-vmw-compiler-skip": true
+                    },
                     "500": {
                         "description": "Internal server error",
                         "content": {
@@ -3270,13 +3333,6 @@
                                 }
                             }
                         }
-                    },
-                    "204": {
-                        "description": "No Content"
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "x-vmw-compiler-skip": true
                     }
                 }
             }
@@ -3331,6 +3387,8 @@
                         "description": "IP/Hostname of the depot"
                     },
                     "port": {
+                        "maximum": 9223372036854775807,
+                        "minimum": 0,
                         "type": "integer",
                         "description": "Port of the depot",
                         "format": "int32"
@@ -3341,6 +3399,14 @@
                         "pattern": "^(https?://[^\\s]+)$",
                         "type": "string",
                         "description": "Depot URL (Currently used only for VCF offline depot). Supports HTTP no-auth for unauthenticated offline depot access."
+                    },
+                    "trustedCertificates": {
+                        "type": "array",
+                        "description": "Trusted certificate chain for the HTTPs offline depot",
+                        "items": {
+                            "type": "string",
+                            "description": "Trusted certificate chain for the HTTPs offline depot"
+                        }
                     }
                 },
                 "description": "Depot Configuration"
@@ -3568,6 +3634,8 @@
                         "description": "Enable vSAN DIT encryption"
                     },
                     "rekeyInterval": {
+                        "maximum": 9223372036854775807,
+                        "minimum": 0,
                         "type": "integer",
                         "description": "Periodical rekeying interval in minutes for vSAN DIT encryption",
                         "format": "int32"
@@ -3582,6 +3650,7 @@
                 "type": "object",
                 "properties": {
                     "subdomain": {
+                        "minLength": 1,
                         "pattern": "^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$",
                         "type": "string",
                         "description": "Tenant Sub domain. Includes the full domain suffix",
@@ -3609,16 +3678,20 @@
                 "type": "object",
                 "properties": {
                     "vlan": {
+                        "maximum": 9223372036854775807,
+                        "minimum": 0,
                         "type": "integer",
                         "description": "VLAN for Distributed Transit Gateway",
                         "format": "int64"
                     },
                     "gatewayCidr": {
+                        "minLength": 1,
                         "pattern": "^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\/(([0-9])|([12][0-9])|(3[0-2]))$",
                         "type": "string",
                         "description": "Gateway CIDR for Distributed Transit Gateway"
                     },
                     "externalIpBlockCidr": {
+                        "minLength": 1,
                         "pattern": "^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\/(([0-9])|([12][0-9])|(3[0-2]))$",
                         "type": "string",
                         "description": "External IP Block CIDR for VPCs, required for external connectivity via DTGW"
@@ -3638,6 +3711,8 @@
                 "type": "object",
                 "properties": {
                     "dvsName": {
+                        "maxLength": 80,
+                        "minLength": 0,
                         "type": "string",
                         "description": "vSphere Distributed Switch Name. It will be auto-generated if blank",
                         "example": "VdsName"
@@ -3653,10 +3728,10 @@
                         }
                     },
                     "mtu": {
-                        "maximum": 9190,
-                        "minimum": 1280,
+                        "maximum": 9223372036854775807,
+                        "minimum": 0,
                         "type": "integer",
-                        "description": "Distributed vSphere Switch MTU (default value is 9000). If not specified during cluster creation or domain creation (with NSX sharing), this value will be automatically populated with the NSX Global Config Physical Uplink MTU from the associated NSX cluster.",
+                        "description": "Distributed vSphere Switch MTU (default value is 9000). If not specified during cluster creation or domain creation (with NSX sharing), this value will be automatically populated with the Physical Uplink MTU specified in the NSX Global Config from the associated NSX cluster.",
                         "format": "int32",
                         "example": 9000
                     },
@@ -3818,11 +3893,13 @@
                 "type": "object",
                 "properties": {
                     "start": {
+                        "minLength": 1,
                         "pattern": "^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])$",
                         "type": "string",
                         "description": "The first IP Address of the IP Address Range"
                     },
                     "end": {
+                        "minLength": 1,
                         "pattern": "^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])$",
                         "type": "string",
                         "description": "The last IP Address of the IP Address Range"
@@ -3837,6 +3914,7 @@
                 "type": "object",
                 "properties": {
                     "name": {
+                        "minLength": 1,
                         "pattern": "^[a-zA-Z0-9-_]+$",
                         "type": "string",
                         "description": "Name of the IP address pool"
@@ -3868,6 +3946,7 @@
                 "type": "object",
                 "properties": {
                     "ipAddressPoolRanges": {
+                        "minItems": 1,
                         "type": "array",
                         "description": "List of the IP allocation ranges. Atleast 1 IP address range has to be specified",
                         "items": {
@@ -3875,10 +3954,12 @@
                         }
                     },
                     "cidr": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "The subnet representation, contains the network address and the prefix length"
                     },
                     "gateway": {
+                        "minLength": 1,
                         "pattern": "^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])$",
                         "type": "string",
                         "description": "The default gateway address of the network"
@@ -3953,6 +4034,8 @@
                         "description": "LAG name"
                     },
                     "uplinksCount": {
+                        "maximum": 9223372036854775807,
+                        "minimum": 0,
                         "type": "integer",
                         "description": "Number of uplinks/ports in this LAG",
                         "format": "int32"
@@ -3985,6 +4068,7 @@
                 "type": "object",
                 "properties": {
                     "hostname": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Host name",
                         "example": "license-server.rainpole.io"
@@ -4017,6 +4101,7 @@
                 "type": "object",
                 "properties": {
                     "serverName": {
+                        "minItems": 1,
                         "type": "array",
                         "description": "NFS Server name used for cluster creation",
                         "items": {
@@ -4025,6 +4110,7 @@
                         }
                     },
                     "path": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Shared directory path used for NFS based cluster creation"
                     },
@@ -4076,7 +4162,7 @@
                 "properties": {
                     "transportZones": {
                         "type": "array",
-                        "description": "The list of transport zones to be associated with the vSphere Distributed Switch managed by NSX",
+                        "description": "The list of transport zones to be associated with the vSphere Distributed Switch managed by NSX. When creating a new cluster in an existing domain configured for NSX Overlay, only the VLAN transport zones specified in the input will be configured for the cluster. Any overlay transport zones specified in the input will be ignored, and the domain's default overlay transport zone will be used instead.",
                         "items": {
                             "$ref": "#/components/schemas/TransportZone"
                         }
@@ -4094,10 +4180,26 @@
                 },
                 "description": "This specification contains the configurations to be associated with the vSphere Distributed Switch managed by NSX"
             },
+            "OverlayVtepSpec": {
+                "type": "object",
+                "properties": {
+                    "vtepType": {
+                        "pattern": "(NO_IP)",
+                        "type": "string",
+                        "description": "The overlay VTEP configuration type for configuring vSphere cluster for NSX Overlay",
+                        "nullable": true,
+                        "example": "One among: NO_IP"
+                    }
+                },
+                "description": "This specification defines the NSX overlay VTEP configuration for the vSphere cluster in terms of IP assignment type for the VTEPs. Specifying OverlayVtepSpec with VtepType NO_IP disables VTEP creation on hosts, enabling the NSX VLAN Backed VPC configuration. At this point in time, configuring the NSX overlay VTEP by the means of DHCP or static IP pool assignment types can be done without specifying any OverlayVtepSpec.",
+                "nullable": true
+            },
             "ResourcePoolSpec": {
                 "type": "object",
                 "properties": {
                     "name": {
+                        "maxLength": 80,
+                        "minLength": 0,
                         "type": "string",
                         "description": "Resource Pool name. It will be auto-generated if blank"
                     },
@@ -4217,11 +4319,15 @@
                 "type": "object",
                 "properties": {
                     "datacenterName": {
+                        "maxLength": 80,
+                        "minLength": 0,
                         "type": "string",
                         "description": "vCenter Datacenter Name. It will be auto-generated if blank.",
                         "example": "DatacenterName"
                     },
                     "clusterName": {
+                        "maxLength": 80,
+                        "minLength": 0,
                         "type": "string",
                         "description": "vCenter Cluster Name. It will be auto-generated if blank.",
                         "example": "ClusterName"
@@ -4253,6 +4359,7 @@
                         "example": "root"
                     },
                     "password": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Password"
                     }
@@ -4381,6 +4488,7 @@
                 "type": "object",
                 "properties": {
                     "networkType": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Network Type. One among: VSAN, VMOTION, MANAGEMENT, VM_MANAGEMENT, NFS, FLEET_MANAGEMENT or any custom network type",
                         "example": "MANAGEMENT"
@@ -4424,7 +4532,7 @@
                         }
                     },
                     "vlanId": {
-                        "maximum": 4094,
+                        "maximum": 9223372036854775807,
                         "minimum": 0,
                         "type": "integer",
                         "description": "VLAN ID",
@@ -4432,8 +4540,8 @@
                         "example": 1000
                     },
                     "mtu": {
-                        "maximum": 9190,
-                        "minimum": 1280,
+                        "maximum": 9223372036854775807,
+                        "minimum": 0,
                         "type": "integer",
                         "description": "MTU size",
                         "format": "int32"
@@ -4460,6 +4568,8 @@
                         }
                     },
                     "portGroupKey": {
+                        "maxLength": 80,
+                        "minLength": 0,
                         "type": "string",
                         "description": "Name of the Distributed Portgroup to be created. It will be autogenerated if null"
                     },
@@ -4501,6 +4611,7 @@
                         "example": "medium"
                     },
                     "vipFqdn": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Hostname for VIP so that common SSL certificates can be installed across all managers."
                     },
@@ -4523,6 +4634,8 @@
                         "description": "NSX audit password. The password must be at least 12 characters long. Must contain at-least 1 uppercase, 1 lowercase, 1 special character and 1 digit. In addition, a character cannot be repeated 3 or more times consectively. If blank, the SDDC Local Admin Password will be used (if provided) or password will be auto-generated."
                     },
                     "transportVlanId": {
+                        "maximum": 9223372036854775807,
+                        "minimum": 0,
                         "type": "integer",
                         "description": "Transport VLAN ID. Default '0' if not specified",
                         "format": "int32",
@@ -4543,6 +4656,9 @@
                         "description": "Enable NSX Edge Cluster synchronization. Applicable only when NSX exists and is being imported. If enabled and your NSX deployment has one or more Edge clusters, the import process will add the discovered Edge node VMs to the VCF inventory, including their user credentials. As part of this process, a one-time reset of the Edge node credential passwords will be done. The updated passwords may be retrieved from the VCF credential store if desired. Once an Edge cluster's node VMs have been imported, any node VMs added to that Edge cluster will also be imported and subject to the same one-time password reset.",
                         "example": true,
                         "default": false
+                    },
+                    "overlayVtepSpec": {
+                        "$ref": "#/components/schemas/OverlayVtepSpec"
                     },
                     "version": {
                         "type": "string",
@@ -4584,7 +4700,7 @@
                         "pattern": "(VCF|VCF_COMPLETE|VCF_EXTEND|VVF|VCF_BOOTSTRAP)",
                         "type": "string",
                         "description": "Type of workflow to initiate creation and/or validation of SDDC. If building a secondary VCF instance to connect it to the fleet, specify workflowType as VCF_EXTEND.",
-                        "example": "One among: VCF, VCF_EXTEND, VVF"
+                        "example": "One among: VCF, VCF_COMPLETE, VCF_EXTEND, VVF"
                     },
                     "hostSpecs": {
                         "type": "array",
@@ -4784,8 +4900,10 @@
                 "type": "object",
                 "properties": {
                     "platformFqdn": {
+                        "minLength": 1,
+                        "pattern": "^$|^[a-zA-Z0-9]([-a-zA-Z0-9]{0,61}[a-zA-Z0-9])?(?:\\..*)?$",
                         "type": "string",
-                        "description": "VSP cluster primary FQDN.",
+                        "description": "VSP cluster primary FQDN. Short hostname part of the FQDN must be maximum 63 characters in length and may contain alphanumeric characters and dashes.",
                         "example": "vsp-cluster.rainpole.io"
                     },
                     "systemUserPassword": {
@@ -4803,18 +4921,18 @@
                     },
                     "size": {
                         "type": "string",
-                        "description": "Size of VSP cluster. One among: small, medium, large",
-                        "example": "Small"
+                        "description": "Size of VSP cluster. One among: small, small_ha, medium, large (small_ha is for management VSP cluster only and cannot be used for consumption VSP cluster (VCF Automation)).",
+                        "example": "small"
                     },
                     "internalClusterCidrIpv4": {
                         "type": "string",
-                        "description": "Internal Cluster CIDR for IPv4. The set of addresses must be completely unique and not in use anywhere in your entire environment.",
+                        "description": "Internal Cluster CIDR for IPv4. The set of addresses must be completely unique and not in use anywhere in your entire environment. Supported values: 198.18.0.0/15, 240.0.0.0/15, 250.0.0.0/15.",
                         "example": "198.18.0.0/15",
                         "default": "198.18.0.0/15"
                     },
                     "internalClusterCidrIpv6": {
                         "type": "string",
-                        "description": "Internal Cluster CIDR for IPv6. The set of addresses must be completely unique and not in use anywhere in your entire environment.",
+                        "description": "Internal Cluster CIDR for IPv6. The set of addresses must be completely unique and not in use anywhere in your entire environment. Supported values: fd00::/111, fd00::0/111, fc00::/111, fc00::0/111, fc00::4:0/111, fc00::0004:0/111.",
                         "example": "fd00::/111",
                         "default": "fd00::/111"
                     },
@@ -4873,12 +4991,14 @@
                 "type": "object",
                 "properties": {
                     "policy": {
+                        "minLength": 1,
                         "pattern": "(FAILOVER_ORDER|LOADBALANCE_SRCID|LOADBALANCE_SRC_MAC)",
                         "type": "string",
                         "description": "The teaming policy associated with the uplink profile",
                         "example": "One among: FAILOVER_ORDER, LOADBALANCE_SRCID, LOADBALANCE_SRC_MAC"
                     },
                     "activeUplinks": {
+                        "minItems": 1,
                         "type": "array",
                         "description": "The list of active uplinks",
                         "items": {
@@ -4926,6 +5046,7 @@
                         "description": "The name of the transport zone"
                     },
                     "transportType": {
+                        "minLength": 1,
                         "pattern": "(VLAN|OVERLAY)",
                         "type": "string",
                         "description": "The type of the transport zone",
@@ -4942,13 +5063,15 @@
                 "type": "object",
                 "properties": {
                     "hostname": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Host name",
                         "example": "vcfautomation.rainpole.io"
                     },
                     "platformFqdn": {
+                        "pattern": "^$|^[a-zA-Z0-9]([-a-zA-Z0-9]{0,61}[a-zA-Z0-9])?(?:\\..*)?$",
                         "type": "string",
-                        "description": "FQDN of the VSP platform (required when useExistingDeployment is not 'true')",
+                        "description": "FQDN of the VSP platform (required when useExistingDeployment is not 'true'). Short hostname part of the FQDN must be maximum 63 characters in length and may contain alphanumeric characters and dashes.",
                         "example": "vsp-platform.rainpole.io"
                     },
                     "adminUserPassword": {
@@ -5024,6 +5147,7 @@
                 "type": "object",
                 "properties": {
                     "networkName": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Name of the network to be used for deployment"
                     },
@@ -5046,6 +5170,8 @@
                         "description": "Gateway for IPv6 network"
                     },
                     "ipv6Prefix": {
+                        "maximum": 9223372036854775807,
+                        "minimum": 0,
                         "type": "integer",
                         "description": "Prefix for IPv6 network",
                         "format": "int32"
@@ -5060,6 +5186,7 @@
                 "type": "object",
                 "properties": {
                     "hostname": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Host name",
                         "example": "vcf-operations-collector.rainpole.io"
@@ -5101,6 +5228,7 @@
                 "type": "object",
                 "properties": {
                     "hostname": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Host name",
                         "example": "vcfoperations-master.rainpole.io"
@@ -5148,7 +5276,7 @@
                     "applianceSize": {
                         "pattern": "(xsmall|small|medium|large|xlarge)",
                         "type": "string",
-                        "description": "VCF Operations appliance size. One among: xsmall, small, medium, large, xlarge for Simple deployment model and one among: medium, large, xlarge for High Availability. Default value if not provided is medium for both deployment models.",
+                        "description": "VCF Operations appliance size. One among: xsmall, small, medium, large, xlarge for Simple deployment model and one among: small, medium, large, xlarge for High Availability. Default value if not provided is medium for both deployment models.",
                         "example": "medium"
                     },
                     "loadBalancerFqdn": {
@@ -5176,6 +5304,7 @@
                 "type": "object",
                 "properties": {
                     "hostname": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "VIDB hostname.",
                         "example": "vidb.vcf.local"
@@ -5214,11 +5343,13 @@
                 "type": "object",
                 "properties": {
                     "id": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "VmNic ID of vSphere host to be associated with VDS, once added to cluster",
                         "example": "vmnic0"
                     },
                     "uplink": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "The uplink name of the vSphere Distributed Switch to be associated",
                         "example": "uplink1"
@@ -5227,11 +5358,16 @@
                 "description": "This specification contains vmnic to uplink configurations for vSphere host."
             },
             "VpcSpec": {
-                "required": [
-                    "dtgwSpec"
-                ],
                 "type": "object",
                 "properties": {
+                    "vpcNetworkConfigurationType": {
+                        "pattern": "(VLAN_BACKED_VPC|FULL_STACK_VPC)",
+                        "type": "string",
+                        "description": "VPC network configuration type. Only applicable for shell domains. Allowed values: VLAN_BACKED_VPC, FULL_STACK_VPC. Defaults to FULL_STACK_VPC when not provided.",
+                        "nullable": true,
+                        "example": "One among: VLAN_BACKED_VPC, FULL_STACK_VPC, VPC_UNSUPPORTED, INVALID_TYPE",
+                        "default": "FULL_STACK_VPC"
+                    },
                     "dtgwSpec": {
                         "$ref": "#/components/schemas/DtgwSpec"
                     }
@@ -5244,6 +5380,10 @@
                     "enabled": {
                         "type": "boolean",
                         "description": "Whether the vSAN ESA is enabled."
+                    },
+                    "skipHclAutoDiskClaim": {
+                        "type": "boolean",
+                        "description": "Whether to enable or disable vSAN auto disk claim for vSAN ESA cluster"
                     }
                 },
                 "description": "This spec contains cluster vSAN ESA configuration"
@@ -5252,6 +5392,8 @@
                 "type": "object",
                 "properties": {
                     "datastoreName": {
+                        "maxLength": 80,
+                        "minLength": 0,
                         "type": "string",
                         "description": "Datastore Name. It will be auto-generated if blank"
                     },
@@ -5436,6 +5578,7 @@
                         "readOnly": true
                     },
                     "status": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "SDDC Task status. One among: IN_PROGRESS, COMPLETED_WITH_SUCCESS, ROLLBACK_SUCCESS, COMPLETED_WITH_FAILURE",
                         "readOnly": true,
@@ -5750,21 +5893,32 @@
                 "type": "object",
                 "properties": {
                     "address": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "vCenter address."
                     },
                     "username": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "SSO username."
                     },
                     "password": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "SSO password."
                     },
                     "sslThumbprint": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "vCenter SSL thumbprint (SHA256)",
                         "example": "3D:D0:EE:B5:A0:CC:45:08:5C:4F:84:51:CD:00:B6:41:BB:4A:A2:9A:77:1C:A6:4C:6D:84:5A:D0:4F:68:7A:B8"
+                    },
+                    "vcfOpsNodesToVerify": {
+                        "type": "array",
+                        "description": "VCF Operations nodes to verify against this vCenter. For each node whose type is not cloudproxy or witness, the discovery checks whether a VM with the node's address exists and returns the results in foundVmAddresses and missingVmAddresses. Nodes are typically obtained from the VCF Operations discovery (discoverVcfOps).",
+                        "items": {
+                            "$ref": "#/components/schemas/VcfOperationsNodeInfo"
+                        }
                     }
                 },
                 "description": "vCenter specification holding endpoint information which to query for topology/discovery data."
@@ -5782,6 +5936,26 @@
                     },
                     "nsxInfo": {
                         "$ref": "#/components/schemas/VcenterNsxInfo"
+                    },
+                    "foundVmAddresses": {
+                        "type": "array",
+                        "description": "Node addresses from vcfOpsNodesToVerify whose VMs were found in this vCenter.",
+                        "readOnly": true,
+                        "items": {
+                            "type": "string",
+                            "description": "Node addresses from vcfOpsNodesToVerify whose VMs were found in this vCenter.",
+                            "readOnly": true
+                        }
+                    },
+                    "missingVmAddresses": {
+                        "type": "array",
+                        "description": "Node addresses from vcfOpsNodesToVerify whose VMs were NOT found in this vCenter.",
+                        "readOnly": true,
+                        "items": {
+                            "type": "string",
+                            "description": "Node addresses from vcfOpsNodesToVerify whose VMs were NOT found in this vCenter.",
+                            "readOnly": true
+                        }
                     }
                 },
                 "description": "Topology discovery result from querying vCenter instance."
@@ -5899,6 +6073,7 @@
                         "readOnly": true
                     },
                     "description": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Description of the validation",
                         "readOnly": true
@@ -5939,6 +6114,7 @@
                 "type": "object",
                 "properties": {
                     "description": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Description of the validation check",
                         "readOnly": true
@@ -5984,18 +6160,22 @@
                 "type": "object",
                 "properties": {
                     "address": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "SDDC Manager instance address."
                     },
                     "adminUsername": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Admin username."
                     },
                     "adminPassword": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Admin password."
                     },
                     "sslThumbprint": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "SDDC Manager SSL thumbprint (SHA256).",
                         "example": "3D:D0:EE:B5:A0:CC:45:08:5C:4F:84:51:CD:00:B6:41:BB:4A:A2:9A:77:1C:A6:4C:6D:84:5A:D0:4F:68:7A:B8"
@@ -6465,6 +6645,7 @@
                         "readOnly": true
                     },
                     "description": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Description of the validation",
                         "readOnly": true
@@ -6584,6 +6765,7 @@
                 "type": "object",
                 "properties": {
                     "storageType": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Storage type of the Management Domain",
                         "enum": [
@@ -6594,6 +6776,7 @@
                         ]
                     },
                     "hostSpecs": {
+                        "minItems": 1,
                         "type": "array",
                         "description": "List of hosts which will be used for the Management Domain",
                         "items": {
@@ -6606,10 +6789,10 @@
                         "example": "vcf.vmware.com"
                     },
                     "nsxConfigType": {
-                        "pattern": "(NSX_SEPARATION|NO_NSX_SEPARATION)",
+                        "pattern": "(NSX_SEPARATION|NO_NSX_SEPARATION|NSX_SEPARATION_VTEP_LESS)",
                         "type": "string",
                         "description": "NSX Config Type",
-                        "example": "One among: NSX_SEPARATION, NO_NSX_SEPARATION"
+                        "example": "One among: NSX_SEPARATION, NO_NSX_SEPARATION, NSX_SEPARATION_VTEP_LESS"
                     },
                     "additionalPortGroups": {
                         "type": "array",
@@ -6729,6 +6912,7 @@
                         }
                     },
                     "subdomain": {
+                        "minLength": 1,
                         "pattern": "^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$",
                         "type": "string",
                         "description": "Tenant Sub domain. Includes the full domain suffix",
@@ -6764,6 +6948,7 @@
                 "type": "object",
                 "properties": {
                     "certificate": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Certificate in PEM format",
                         "example": "-----BEGIN CERTIFICATE-----\nMIIFq...\n-----END CERTIFICATE-----"
@@ -6902,16 +7087,19 @@
                 "type": "object",
                 "properties": {
                     "name": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Stage name",
                         "readOnly": true
                     },
                     "type": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Stage type",
                         "readOnly": true
                     },
                     "description": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Stage description",
                         "readOnly": true
@@ -6952,16 +7140,19 @@
                 "type": "object",
                 "properties": {
                     "name": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Sub-task name",
                         "readOnly": true
                     },
                     "type": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Sub-task type",
                         "readOnly": true
                     },
                     "description": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Sub-task description",
                         "readOnly": true
@@ -7031,11 +7222,13 @@
                 "type": "object",
                 "properties": {
                     "id": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Task ID",
                         "readOnly": true
                     },
                     "name": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Task name",
                         "readOnly": true
@@ -7050,6 +7243,7 @@
                         "example": "Sample values: HOST_COMMISSION, HOST_DECOMMISSION"
                     },
                     "status": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Task status",
                         "readOnly": true,
@@ -7115,6 +7309,8 @@
                 "type": "object",
                 "properties": {
                     "maxAllowedDomainsInSubscription": {
+                        "minimum": 0,
+                        "exclusiveMinimum": true,
                         "type": "integer",
                         "description": "new limit of amount of domains in subscription mode",
                         "format": "int32"
@@ -7461,16 +7657,19 @@
                 "type": "object",
                 "properties": {
                     "bundleId": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Bundle ID of the patch bundle",
                         "readOnly": true
                     },
                     "bundleType": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Bundle type of the patch bundle",
                         "readOnly": true
                     },
                     "bundleElements": {
+                        "minItems": 1,
                         "type": "array",
                         "description": "Bundle elements of the patch bundle",
                         "readOnly": true,
@@ -7481,6 +7680,7 @@
                         }
                     },
                     "cumulativeFromVcfVersion": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Minimum VCF version that this patch bundle can be directly applied on",
                         "readOnly": true
@@ -7497,6 +7697,7 @@
                 "type": "object",
                 "properties": {
                     "name": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Name of the product. e.g ESX",
                         "readOnly": true
@@ -7512,6 +7713,7 @@
                         "readOnly": true
                     },
                     "publicName": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Public name of the product, e.g VMware ESXi",
                         "readOnly": true
@@ -7551,11 +7753,13 @@
                 "type": "object",
                 "properties": {
                     "product": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Name of the product e.g. \"VCF\"",
                         "readOnly": true
                     },
                     "version": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Version of the release",
                         "readOnly": true
@@ -7576,6 +7780,7 @@
                         "readOnly": true
                     },
                     "bom": {
+                        "minItems": 1,
                         "type": "array",
                         "description": "Release bill of materials",
                         "readOnly": true,
@@ -7648,21 +7853,25 @@
                 "type": "object",
                 "properties": {
                     "id": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Release version",
                         "readOnly": true
                     },
                     "productName": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Product name for which the release update is provided",
                         "readOnly": true
                     },
                     "baseProductVersion": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Base product version for the release",
                         "readOnly": true
                     },
                     "description": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Description of the release update",
                         "readOnly": true
@@ -7727,16 +7936,19 @@
                 "type": "object",
                 "properties": {
                     "bundleType": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Bundle type of the patch bundle",
                         "readOnly": true
                     },
                     "bundleVersion": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Bundle Version of the product",
                         "readOnly": true
                     },
                     "version": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Product version",
                         "readOnly": true
@@ -7753,6 +7965,7 @@
                 "type": "object",
                 "properties": {
                     "productVersion": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Product version of the install/patch bundle",
                         "readOnly": true
@@ -7776,6 +7989,7 @@
                 "type": "object",
                 "properties": {
                     "bundles": {
+                        "minItems": 1,
                         "type": "array",
                         "description": "List of bundle artifacts for corresponding product patch/install version",
                         "readOnly": true,
@@ -7797,21 +8011,26 @@
                 "type": "object",
                 "properties": {
                     "id": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Bundle id",
                         "readOnly": true
                     },
                     "type": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Type of bundle. ex) PATCH, INSTALL",
                         "readOnly": true
                     },
                     "name": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Patch/Install bundle name",
                         "readOnly": true
                     },
                     "size": {
+                        "minimum": 0,
+                        "exclusiveMinimum": true,
                         "type": "integer",
                         "description": "Binary size",
                         "format": "int64",
@@ -7847,11 +8066,13 @@
                 "type": "object",
                 "properties": {
                     "name": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Product name",
                         "readOnly": true
                     },
                     "sku": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "SKU of the install/patch bundle",
                         "readOnly": true
@@ -7886,6 +8107,7 @@
                 "type": "object",
                 "properties": {
                     "releaseVersion": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "VCF/VVF release version",
                         "readOnly": true
@@ -7957,11 +8179,13 @@
                         "example": "One among: APPLICABLE, NOT_APPLICABLE"
                     },
                     "product": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Name of the product e.g. \"VCF\"",
                         "readOnly": true
                     },
                     "version": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Version of the release",
                         "readOnly": true
@@ -7982,6 +8206,7 @@
                         "readOnly": true
                     },
                     "bom": {
+                        "minItems": 1,
                         "type": "array",
                         "description": "Release bill of materials",
                         "readOnly": true,
@@ -8092,6 +8317,7 @@
                 "type": "object",
                 "properties": {
                     "version": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "Domain VCF release version",
                         "readOnly": true
@@ -8140,6 +8366,7 @@
                 "type": "object",
                 "properties": {
                     "releaseVersion": {
+                        "minLength": 1,
                         "type": "string",
                         "description": "VCF/VVF release version",
                         "readOnly": true
@@ -8397,6 +8624,53 @@
                     },
                     "pageMetadata": {
                         "$ref": "#/components/schemas/PageMetadata"
+                    }
+                }
+            },
+            "TaskHistoryDeletionRequest": {
+                "required": [
+                    "taskIds"
+                ],
+                "type": "object",
+                "properties": {
+                    "taskIds": {
+                        "minItems": 1,
+                        "type": "array",
+                        "items": {
+                            "minLength": 1,
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "TaskHistoryDeletionError": {
+                "type": "object",
+                "properties": {
+                    "taskId": {
+                        "type": "string"
+                    },
+                    "errorCode": {
+                        "type": "string"
+                    },
+                    "message": {
+                        "type": "string"
+                    }
+                }
+            },
+            "TaskHistoryDeletionResult": {
+                "type": "object",
+                "properties": {
+                    "successful": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "failed": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TaskHistoryDeletionError"
+                        }
                     }
                 }
             }

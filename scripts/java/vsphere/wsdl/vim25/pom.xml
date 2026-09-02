@@ -63,38 +63,6 @@ SPDX-License-Identifier: Apache-2.0-->
                 </executions>
             </plugin>
             <plugin>
-                <!--
-                Using the xml-maven-plugin to add if-exists="true" to all bindings tags of the episode file.
-                This plugin should be removed once we move to CXF 4.1.0 or above,
-                as the newer major versions use JAXB 4 where if-exists="true" is added by default.
-                With the removal of this plugin, add-if-exists.xslt should be deleted as well.
-                -->
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>xml-maven-plugin</artifactId>
-                <version>1.2.0</version>
-                <executions>
-                    <execution>
-                        <id>transform-episode</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>transform</goal>
-                        </goals>
-                        <configuration>
-                            <transformationSets>
-                                <transformationSet>
-                                    <dir>${project.build.directory}</dir>
-                                    <includes>
-                                        <include>${episode.file.name}</include>
-                                    </includes>
-                                    <stylesheet>${basedir}/add-if-exists.xslt</stylesheet>
-                                    <outputDir>${project.build.directory}</outputDir>
-                                </transformationSet>
-                            </transformationSets>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>

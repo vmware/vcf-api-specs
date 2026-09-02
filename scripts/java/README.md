@@ -4,7 +4,7 @@
 
 Each sub-folder contains a Maven 3.9-based project which can be used to generate client-side bindings. Use the `mvnw` wrapper to execute the commands below. Replace `sub-project` with the name of one of the root-projects (e.g. vim25).
 
-Note: The source and target compatibility of the bindings are set to Java 11
+Note: The source and target compatibility of the bindings are set to Java 17
 
 ## Building the bindings
 
