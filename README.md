@@ -1,4 +1,4 @@
-# VMware VCF API Specifications
+# VCF API Specifications
 
 ## Overview
 

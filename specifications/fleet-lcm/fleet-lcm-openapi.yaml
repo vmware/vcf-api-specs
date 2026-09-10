@@ -374,6 +374,63 @@ paths:
           description: Internal server error
       tags:
       - SDDC LCM
+  /v1/sddc-lcms/{sddcLcmId}/trusted-certificates:
+    post:
+      description: "Add or update a trusted certificate on the given SDDC LCM for\
+        \ a component FQDN. This is a pass-through to SDDC LCM POST /v1/trusted-certificates\
+        \ (nothing is stored on Fleet LCM). Returns a task; poll GET /v1/tasks/{taskId}\
+        \ for the result."
+      operationId: addTrustedCertificateToSddcLcm
+      parameters:
+      - description: Id of SDDC LCM.
+        explode: true
+        in: path
+        name: sddcLcmId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrustedCertificateSpec'
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+          description: "Accepted - trusted certificate task started. Poll GET /v1/tasks/{taskId}\
+            \ for result."
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      tags:
+      - SDDC LCM
   /v1/sddc-lcms/{sddcLcmId}/backups:
     get:
       description: List backups for a SDDC LCM. Implicitly sorted by name.
@@ -568,6 +625,82 @@ paths:
           description: Internal server error
       tags:
       - SDDC LCM
+  /v1/sddc-lcms/{sddcLcmId}/sddcs/resources/query:
+    post:
+      description: |
+        Start an asynchronous fetch of SDDC resources from the SDDC LCM's management vCenter,
+        proxied to SDDC LCM POST /v1/sddcs/resources/query. When `resourceTypes` is omitted, all
+        supported resource types are returned (currently: networks/DVPGs enriched with VDS name,
+        datacenter name, and vCenter name). When `resourceTypes` is specified, only the listed
+        types are included. Additional resource types (datastores, datacenters, resource pools) will
+        be added in future changes. Poll GET /v1/tasks/{taskId} for completion; when succeeded,
+        the task result holds SddcResourcesFetchResult.
+
+        **Current limitation:** The response only includes resources from the management vCenter,
+        since today this API is consumed solely by VCFA and vRNI installation flows which always
+        deploy on the management vCenter.
+
+        **Future:** When HA or multiple VCFA deployments are supported (where VCFA may be installed
+        on different clusters across multiple vCenters managed by the same SDDC LCM), the response
+        will be extended to include resources from all managed vCenters.
+      operationId: fetchSddcLcmResources
+      parameters:
+      - description: Id of SDDC LCM.
+        explode: true
+        in: path
+        name: sddcLcmId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SddcResourcesFetchSpec'
+        description: Optional resource type filter and pagination parameters.
+        required: false
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+          description: "Accepted - fetch task started. Poll GET /v1/tasks/{taskId}\
+            \ for result."
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      tags:
+      - SDDC LCM
   /v1/components:
     get:
       description: Get components by filter criteria and helps paginate based on sddclcms.
@@ -625,6 +758,14 @@ paths:
         required: false
         schema:
           type: boolean
+        style: form
+      - description: Filter components by their import status.
+        explode: true
+        in: query
+        name: importStatus
+        required: false
+        schema:
+          $ref: '#/components/schemas/ComponentImportStatus'
         style: form
       - description: "Page Number (1-based, defaults to 1)"
         explode: true
@@ -2075,6 +2216,23 @@ paths:
           type: array
           uniqueItems: true
         style: form
+      - description: Filter components by component ID (exact match). Multiple values
+          can be provided as comma-separated list. Only components whose ID is in
+          the list are returned.
+        explode: true
+        in: query
+        name: componentId
+        required: false
+        schema:
+          example:
+          - c5abbd8c-b94e-40d3-bc0e-68e9b0a4489a
+          - 2547462d-f206-4e18-abf8-7a413aaba306
+          items:
+            format: uuid
+            type: string
+          type: array
+          uniqueItems: true
+        style: form
       responses:
         "200":
           content:
@@ -2745,6 +2903,15 @@ components:
       schema:
         type: boolean
       style: form
+    componentFilterImportStatusQueryParam:
+      description: Filter components by their import status.
+      explode: true
+      in: query
+      name: importStatus
+      required: false
+      schema:
+        $ref: '#/components/schemas/ComponentImportStatus'
+      style: form
     sddcLcmBackupScheduleEnabledQueryParam:
       description: Backup schedule enabled.
       explode: true
@@ -3035,6 +3202,24 @@ components:
         type: array
         uniqueItems: true
       style: form
+    componentIdFilterQueryParam:
+      description: Filter components by component ID (exact match). Multiple values
+        can be provided as comma-separated list. Only components whose ID is in the
+        list are returned.
+      explode: true
+      in: query
+      name: componentId
+      required: false
+      schema:
+        example:
+        - c5abbd8c-b94e-40d3-bc0e-68e9b0a4489a
+        - 2547462d-f206-4e18-abf8-7a413aaba306
+        items:
+          format: uuid
+          type: string
+        type: array
+        uniqueItems: true
+      style: form
     taskCreatedByQueryParam:
       description: Filter tasks by creator (username or service account)
       in: query
@@ -3152,6 +3337,12 @@ components:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
       description: Unauthorized
+    Forbidden:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+      description: Forbidden
     InternalServerError:
       content:
         application/json:
@@ -3331,7 +3522,7 @@ components:
             fqdn: fqdn
           backupConfigSpec:
             incrementalSchedule:
-              interval: 1
+              interval: 240
               fallbackToFull: true
               enabled: true
             encryptionPassphrase: encryptionPassphrase
@@ -3363,7 +3554,7 @@ components:
             fqdn: fqdn
           backupConfigSpec:
             incrementalSchedule:
-              interval: 1
+              interval: 240
               fallbackToFull: true
               enabled: true
             encryptionPassphrase: encryptionPassphrase
@@ -3404,7 +3595,7 @@ components:
           fqdn: fqdn
         backupConfigSpec:
           incrementalSchedule:
-            interval: 1
+            interval: 240
             fallbackToFull: true
             enabled: true
           encryptionPassphrase: encryptionPassphrase
@@ -3511,7 +3702,7 @@ components:
             type: MANAGEMENT
           backupConfig:
             incrementalSchedule:
-              interval: 1
+              interval: 240
               fallbackToFull: true
               enabled: true
             storage:
@@ -3557,7 +3748,7 @@ components:
             type: MANAGEMENT
           backupConfig:
             incrementalSchedule:
-              interval: 1
+              interval: 240
               fallbackToFull: true
               enabled: true
             storage:
@@ -3614,7 +3805,7 @@ components:
           type: MANAGEMENT
         backupConfig:
           incrementalSchedule:
-            interval: 1
+            interval: 240
             fallbackToFull: true
             enabled: true
           storage:
@@ -3716,6 +3907,7 @@ components:
               dnsSuffix: dnsSuffix
               deploymentOption: deploymentOption
               networkName: networkName
+              networkMoId: networkMoId
               ipv6Settings:
                 address: address
                 netmask: netmask
@@ -3745,6 +3937,7 @@ components:
               dnsSuffix: dnsSuffix
               deploymentOption: deploymentOption
               networkName: networkName
+              networkMoId: networkMoId
               ipv6Settings:
                 address: address
                 netmask: netmask
@@ -3780,6 +3973,7 @@ components:
               dnsSuffix: dnsSuffix
               deploymentOption: deploymentOption
               networkName: networkName
+              networkMoId: networkMoId
               ipv6Settings:
                 address: address
                 netmask: netmask
@@ -3809,6 +4003,7 @@ components:
               dnsSuffix: dnsSuffix
               deploymentOption: deploymentOption
               networkName: networkName
+              networkMoId: networkMoId
               ipv6Settings:
                 address: address
                 netmask: netmask
@@ -3893,6 +4088,7 @@ components:
           type: string
       required:
       - deploymentType
+      - sddcLcmId
       type: object
     VspClusterIPv4Pool:
       properties:
@@ -3965,6 +4161,7 @@ components:
       required:
       - componentType
       - deploymentType
+      - sddcLcmId
       - version
       type: object
     OvaComponentSpec:
@@ -3994,6 +4191,7 @@ components:
             dnsSuffix: dnsSuffix
             deploymentOption: deploymentOption
             networkName: networkName
+            networkMoId: networkMoId
             ipv6Settings:
               address: address
               netmask: netmask
@@ -4023,6 +4221,7 @@ components:
             dnsSuffix: dnsSuffix
             deploymentOption: deploymentOption
             networkName: networkName
+            networkMoId: networkMoId
             ipv6Settings:
               address: address
               netmask: netmask
@@ -4052,6 +4251,7 @@ components:
       - componentType
       - deploymentType
       - nodeSpecs
+      - sddcLcmId
       type: object
     OvaComponentUpdateSpec:
       example:
@@ -4080,6 +4280,7 @@ components:
             dnsSuffix: dnsSuffix
             deploymentOption: deploymentOption
             networkName: networkName
+            networkMoId: networkMoId
             ipv6Settings:
               address: address
               netmask: netmask
@@ -4109,6 +4310,7 @@ components:
             dnsSuffix: dnsSuffix
             deploymentOption: deploymentOption
             networkName: networkName
+            networkMoId: networkMoId
             ipv6Settings:
               address: address
               netmask: netmask
@@ -4160,6 +4362,7 @@ components:
           dnsSuffix: dnsSuffix
           deploymentOption: deploymentOption
           networkName: networkName
+          networkMoId: networkMoId
           ipv6Settings:
             address: address
             netmask: netmask
@@ -4207,6 +4410,7 @@ components:
         dnsSuffix: dnsSuffix
         deploymentOption: deploymentOption
         networkName: networkName
+        networkMoId: networkMoId
         ipv6Settings:
           address: address
           netmask: netmask
@@ -4239,6 +4443,15 @@ components:
         ipv6Settings:
           $ref: '#/components/schemas/IPv6Settings'
         networkName:
+          type: string
+        networkMoId:
+          description: |
+            Managed Object ID of the vSphere portgroup to attach the deployed VM to.
+            Takes precedence over networkName when both are supplied.
+            Use this for precision when the same portgroup name exists across multiple VDSes.
+            Only resolved for component install requests. Scaleout/add-node requests
+            (OvaComponentUpdateSpec) do not resolve this field and silently fall back
+            to networkName.
           type: string
         extraConfigProperties:
           additionalProperties:
@@ -4341,6 +4554,7 @@ components:
       example:
         components:
         - componentType: componentType
+          importStatus: IMPORT_FAILED
           fqdn: fqdn
           certificate: certificate
           vspCluster:
@@ -4348,6 +4562,9 @@ components:
             certificate: certificate
             id: id
             type: MANAGEMENT
+          importAttempt:
+            taskId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            stageId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           version: version
           sddcLcmId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           deploymentType: OVA
@@ -4379,6 +4596,7 @@ components:
           id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           componentTypeDescription: VCF Operations
         - componentType: componentType
+          importStatus: IMPORT_FAILED
           fqdn: fqdn
           certificate: certificate
           vspCluster:
@@ -4386,6 +4604,9 @@ components:
             certificate: certificate
             id: id
             type: MANAGEMENT
+          importAttempt:
+            taskId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            stageId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           version: version
           sddcLcmId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           deploymentType: OVA
@@ -4433,6 +4654,7 @@ components:
       description: Installed Component subject to lifecycle.
       example:
         componentType: componentType
+        importStatus: IMPORT_FAILED
         fqdn: fqdn
         certificate: certificate
         vspCluster:
@@ -4440,6 +4662,9 @@ components:
           certificate: certificate
           id: id
           type: MANAGEMENT
+        importAttempt:
+          taskId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          stageId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
         version: version
         sddcLcmId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
         deploymentType: OVA
@@ -4515,6 +4740,10 @@ components:
         sddcLcmId:
           format: uuid
           type: string
+        importStatus:
+          $ref: '#/components/schemas/ComponentImportStatus'
+        importAttempt:
+          $ref: '#/components/schemas/ImportAttempt'
         vcenter:
           $ref: '#/components/schemas/Vcenter'
         vspCluster:
@@ -4522,6 +4751,27 @@ components:
       required:
       - id
       title: Component
+      type: object
+    ComponentImportStatus:
+      description: Status of the last component import operation.
+      enum:
+      - IMPORT_FAILED
+      - IMPORT_SUCCEEDED
+      type: string
+    ImportAttempt:
+      description: Details of the most recent component import attempt.
+      example:
+        taskId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        stageId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+      properties:
+        taskId:
+          description: Identifier of the top-level import task.
+          format: uuid
+          type: string
+        stageId:
+          description: Identifier of the failed stage within the import task.
+          format: uuid
+          type: string
       type: object
     Nodes:
       example:
@@ -5004,6 +5254,10 @@ components:
           description: Comma-separated list of IP Addresses to exclude from Internet
             proxy server
           type: string
+        readTimeout:
+          description: Read timeout for Internet Proxy Server in minutes (valid range
+            15-480)
+          type: integer
       type: object
     VspVolumes:
       items:
@@ -5104,6 +5358,133 @@ components:
           description: Whether the datastore is the default.
           type: boolean
       type: object
+    InventoryNetworksFetchSpec:
+      description: |
+        Optional pagination controls for the inventory networks fetch task. If the request body is
+        omitted entirely, defaults to page 1 with a page size of 50. Use the `pageMetadata` field
+        in the completed task result to determine total pages and elements; start a new fetch task
+        with the desired `pageNumber` to retrieve additional pages.
+      properties:
+        pageNumber:
+          default: 1
+          description: Page number (1-based). Defaults to 1 if not provided.
+          minimum: 1
+          type: integer
+        pageSize:
+          default: 50
+          description: Number of networks per page. Defaults to 50 if not provided;
+            maximum allowed is 50.
+          maximum: 50
+          minimum: 1
+          type: integer
+      type: object
+    SddcResourceType:
+      description: Resource type to include in the SDDC resources fetch result.
+      enum:
+      - NETWORK
+      type: string
+    SddcResourcesFetchSpec:
+      description: Request body for fetching SDDC resources from vCenter.
+      example:
+        resourceTypes:
+        - NETWORK
+        - NETWORK
+        pageNumber: 1
+        pageSize: 1
+      properties:
+        resourceTypes:
+          description: |
+            Resource types to include in the response. When omitted, all supported resource types are returned. When specified, only the listed types are included.
+          items:
+            $ref: '#/components/schemas/SddcResourceType'
+          minItems: 1
+          type: array
+        pageNumber:
+          description: 1-based page number. Defaults to 1 if not provided.
+          format: int32
+          minimum: 1
+          type: integer
+        pageSize:
+          description: Page size per resource type (capped by server defaults). Defaults
+            to 50.
+          format: int32
+          minimum: 1
+          type: integer
+      type: object
+    SddcResourcesFetchResult:
+      description: |
+        Result of a SDDC resources fetch task (type = SDDC_RESOURCES_FETCH). Returned when
+        GET /v1/tasks/{taskId} completes successfully. Contains a flat list of SDDC resources
+        with a single shared pageMetadata. Each element carries a `resourceType` field as a
+        discriminator identifying its kind (e.g. NETWORK). When no `resourceTypes` filter was
+        provided, all currently supported types are included. When a filter was provided, only
+        the matching types appear.
+      properties:
+        type:
+          example: SDDC_RESOURCES_FETCH
+          type: string
+        elements:
+          description: |
+            Flat list of SDDC resources across all requested resource types. Each element carries
+            a `resourceType` discriminator field identifying its kind (e.g. NETWORK).
+          items:
+            $ref: '#/components/schemas/SddcResource'
+          type: array
+        pageMetadata:
+          allOf:
+          - $ref: '#/components/schemas/PageMetadata'
+          description: Shared pagination metadata for the flat elements list.
+      required:
+      - type
+      type: object
+    SddcResource:
+      description: |
+        Common representation of an SDDC resource. `resourceType` identifies the kind;
+        the corresponding type-specific sub-object (`network`, `datastore`, …) carries
+        kind-specific fields. Adding a new resource type is purely additive — existing
+        consumers are unaffected because unknown fields are ignored during deserialization.
+
+        To add a new resource type, add its constant to `SddcResourceConstants`, add its
+        schema as a new optional property here, and register it in `SddcResourceModel`.
+      properties:
+        resourceType:
+          description: Identifies the resource type (e.g. NETWORK).
+          example: NETWORK
+          type: string
+        moid:
+          description: vSphere Managed Object ID common to all resource types (e.g.
+            dvportgroup-101).
+          type: string
+        name:
+          description: Resource display name common to all resource types.
+          type: string
+        network:
+          $ref: '#/components/schemas/SddcNetwork'
+      required:
+      - moid
+      - name
+      - resourceType
+      type: object
+    SddcNetwork:
+      description: Network-specific fields for a distributed virtual port group (DVPG)
+        resource.
+      properties:
+        isDefault:
+          description: |
+            True when this DVPG is connected to the vCenter appliance VM, false otherwise.
+            Always present in the response.
+          type: boolean
+        vdsName:
+          description: Display name of the parent Distributed Virtual Switch.
+          type: string
+        datacenterName:
+          description: Display name of the vCenter datacenter that owns the DVS.
+          type: string
+        vcenterName:
+          description: FQDN / address of the vCenter instance this network belongs
+            to.
+          type: string
+      type: object
     ComponentStatuses:
       description: Component current statuses
       example:
@@ -5140,7 +5521,7 @@ components:
       description: Backup configuration for a component/cluster.
       example:
         incrementalSchedule:
-          interval: 1
+          interval: 240
           fallbackToFull: true
           enabled: true
         encryptionPassphrase: encryptionPassphrase
@@ -5248,7 +5629,7 @@ components:
       description: Configuration for incremental backups. Incremental backups require
         full backups to be enabled.
       example:
-        interval: 1
+        interval: 240
         fallbackToFull: true
         enabled: true
       properties:
@@ -5259,9 +5640,10 @@ components:
           description: Shows whether to fallback to a full backup.
           type: boolean
         interval:
-          default: 15
+          default: 240
           description: Interval in minutes for an incremental backup to be created.
-          minimum: 1
+            Minimum is 4 hours.
+          minimum: 240
           type: integer
       type: object
     BackupRetentionConfigSpec:
@@ -5334,7 +5716,7 @@ components:
       description: Backup configuration for a component/cluster.
       example:
         incrementalSchedule:
-          interval: 1
+          interval: 240
           fallbackToFull: true
           enabled: true
         storage:
@@ -5405,7 +5787,7 @@ components:
       allOf:
       - $ref: '#/components/schemas/IncrementalBackupConfigSpec'
       example:
-        interval: 1
+        interval: 240
         fallbackToFull: true
         enabled: true
     BackupRetentionConfig:
@@ -5447,6 +5829,34 @@ components:
       - port
       - thumbprint
       - username
+      type: object
+    TrustedCertificateSpec:
+      example:
+        fqdn: fqdn
+        port: 1
+        certificate: certificate
+        skipValidations: false
+      properties:
+        certificate:
+          description: PEM-encoded X.509 certificate or chain. Multiple PEM blocks
+            concatenated are accepted.
+          type: string
+        fqdn:
+          description: FQDN of the component to trust the certificate for.
+          type: string
+        skipValidations:
+          default: false
+          description: "Skip all certificate validations, including on the SDDC LCM,\
+            \ and write the certificate unconditionally."
+          type: boolean
+        port:
+          default: 443
+          description: TLS port of the component. Defaults to 443 when not specified.
+          minimum: 1
+          type: integer
+      required:
+      - certificate
+      - fqdn
       type: object
     BackupRestoreSpec:
       description: Backup and Restore Spec
@@ -5619,38 +6029,47 @@ components:
       type: object
     ComponentsResourceRequirements:
       example:
-        totalStorage: 1
+        totalStorage: 5
         components:
-        - minInstances: 9
+        - minInstances: 2
           componentType: componentType
-          numberOfInstances: 7
-          deploymentType: OVA
-          memory: 5.637376656633329
-          workerNodeRequirement: workerNodeRequirement
-          ipCount: 2
-          ipCountLimit: 4
+          memory: 7.061401241503109
+          ipCountLimit: 1
           numberOfCores: 5
-          storage: 2
-          maxInstances: 3
-          ipCountRecommended: 7
-        - minInstances: 9
+          storage: 9
+          ipCountRecommended: 1
+          workersCount: 1
+          numberOfInstances: 3
+          deploymentType: OVA
+          cpuCores: 2.3021358869347655
+          workerNodeRequirement: workerNodeRequirement
+          ipCount: 7
+          maxInstances: 4
+        - minInstances: 2
           componentType: componentType
-          numberOfInstances: 7
-          deploymentType: OVA
-          memory: 5.637376656633329
-          workerNodeRequirement: workerNodeRequirement
-          ipCount: 2
-          ipCountLimit: 4
+          memory: 7.061401241503109
+          ipCountLimit: 1
           numberOfCores: 5
-          storage: 2
-          maxInstances: 3
-          ipCountRecommended: 7
-        totalMemory: 6.027456183070403
+          storage: 9
+          ipCountRecommended: 1
+          workersCount: 1
+          numberOfInstances: 3
+          deploymentType: OVA
+          cpuCores: 2.3021358869347655
+          workerNodeRequirement: workerNodeRequirement
+          ipCount: 7
+          maxInstances: 4
+        totalMemory: 1.4658129805029452
         totalNumberOfCores: 0
+        totalCpuCores: 6.027456183070403
       properties:
         totalNumberOfCores:
-          description: Number of vCPU cores
+          description: Total number of vCPU cores
           type: integer
+        totalCpuCores:
+          description: Total amount of vCPU cores. Fractional amounts are supported.
+          format: double
+          type: number
         totalMemory:
           format: double
           type: number
@@ -5664,22 +6083,28 @@ components:
       type: object
     ComponentResourceRequirements:
       example:
-        minInstances: 9
+        minInstances: 2
         componentType: componentType
-        numberOfInstances: 7
-        deploymentType: OVA
-        memory: 5.637376656633329
-        workerNodeRequirement: workerNodeRequirement
-        ipCount: 2
-        ipCountLimit: 4
+        memory: 7.061401241503109
+        ipCountLimit: 1
         numberOfCores: 5
-        storage: 2
-        maxInstances: 3
-        ipCountRecommended: 7
+        storage: 9
+        ipCountRecommended: 1
+        workersCount: 1
+        numberOfInstances: 3
+        deploymentType: OVA
+        cpuCores: 2.3021358869347655
+        workerNodeRequirement: workerNodeRequirement
+        ipCount: 7
+        maxInstances: 4
       properties:
         numberOfCores:
-          description: Number of vCPU cores
+          description: Number of vCPU cores.
           type: integer
+        cpuCores:
+          description: Amount of vCPU cores required. Fractional amounts are supported.
+          format: double
+          type: number
         memory:
           format: double
           type: number
@@ -5707,6 +6132,9 @@ components:
           type: integer
         ipCountRecommended:
           description: Recommended amount of IPs
+          type: integer
+        workersCount:
+          description: Amount of worker nodes
           type: integer
         deploymentType:
           description: Type of the component. VSP_SERVICE type entities are not included
@@ -5826,6 +6254,7 @@ components:
       - OPS_DATA_PLATFORM
       - VCFA
       - OPS_NETWORKS
+      - OPS_NETWORKS_COLLECTOR
       - VIDB
       - VSP
       - VCF_FLEET_LCM
@@ -6000,6 +6429,13 @@ components:
       - VSP_COMPONENT_SPEC_FQDN
       - IP_IN_USE
       - VSP_COMPONENT_NETWORK_CONNECTIVITY
+      - VSP_FIREWALL_BLOCKED
+      - VSP_CLUSTER_SPEC_MISSING_IP_POOL_DETAILS
+      - VSP_CLUSTER_SPEC_CONFLICTING_IP_POOL_DETAILS
+      - VSP_CLUSTER_SPEC_INVALID_IP_ADDRESSES
+      - VSP_CLUSTER_SPEC_DUPLICATE_IP_ADDRESSES
+      - VSP_CLUSTER_SPEC_FQDN_CONFLICT_WITH_IP_POOL
+      - VSP_CLUSTER_SPEC_INVALID_CIDR
       - VSP_CLUSTER_IP_POOL
       - OVA_NODE_SPEC_FQDN
       - OVA_NODE_SPEC_MISSING_ADDRESS
@@ -6023,6 +6459,7 @@ components:
       - INVALID_PASSWORD
       - PASSWORD_COMPLEXITY
       - EXISTING_COMPONENT_WITH_TYPE
+      - SDDC_LCM_IDS_NOT_FOUND
       - DUPLICATE_COMPONENT_TYPE_SPEC
       - NOT_PRIMARY_SDDC_LCM
       - OPS_NETWORKS_INVALID_DEPLOYMENT_SIZE
@@ -6033,6 +6470,10 @@ components:
       - OPS_NETWORKS_INVALID_CLUSTER_NODE_COUNT
       - OPS_CA_ENABLED
       - OPS_REPLICA_NODE_ALREADY_EXISTS
+      - OVA_INVALID_NODE_TYPE
+      - OPS_NODE_VERSION_MISMATCH
+      - VSP_INVALID_HOSTNAME_IN_PLATFORM_FQDN
+      - VCFA_INTERNAL_CLUSTER_CIDR_NOT_VALID
       type: string
     Validation:
       properties:
@@ -6041,6 +6482,8 @@ components:
         errorCode:
           $ref: '#/components/schemas/ValidationErrorCode'
         message:
+          $ref: '#/components/schemas/LocalizableMessage'
+        resolution:
           $ref: '#/components/schemas/LocalizableMessage'
       type: object
     ValidationResult:
@@ -7582,15 +8025,67 @@ components:
       type: string
     VcfaUpgradeSpec:
       description: |
-        Payload for initiating a VCFA component upgrade operation. It encapsulates the user inputs required for the upgrade request.
+        Payload for initiating a VCFA upgrade operation.
+        It encapsulates the user inputs required for deploying the VCFA consumption cluster (VSP cluster).
+
+        Note: The IP pool size constraints in this spec (minimum 5, maximum 256 IPs) apply
+        specifically to the VCFA consumption cluster. Other cluster types have different
+        requirements (e.g., VMSP management cluster: minimum 10 IPs for VVF, 12 IPs for VCF).
       properties:
         targetVspClusterFqdn:
+          description: FQDN of the target VSP cluster
+          example: vcfa-vsp1.example.com
           type: string
         targetVspClusterPassword:
+          description: Password for the target VSP cluster
           format: password
           type: string
         targetVspClusterIpPoolCidr:
+          description: |
+            CIDR notation for the VCFA consumption cluster (VSP cluster) IP pool (e.g., "10.0.0.0/24")
+
+            Specifies the IP network in CIDR format for the target VSP cluster.
+            Must provide between 5 and 256 available IP addresses (VCFA consumption cluster requirement).
+
+
+            Mutually exclusive with targetVspClusterIpPoolRange and targetVspClusterIpPoolAddresses.
+          example: 10.0.0.0/24
+          pattern: "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\\
+            /([0-9]|[1-2][0-9]|3[0-2])$"
           type: string
+        targetVspClusterIpPoolRange:
+          $ref: '#/components/schemas/VspClusterIpRange_1'
+        targetVspClusterIpPoolAddresses:
+          description: |
+            List of individual IP addresses for the VCFA consumption cluster (VSP cluster) IP pool
+            (e.g., ["10.0.0.80", "10.0.0.81", "10.0.0.82"])
+
+
+            Must provide between 5 and 256 addresses (VCFA consumption cluster requirement).
+            Addresses do NOT need to be contiguous.
+            Supports non-contiguous IP allocations.
+
+            Mutually exclusive with targetVspClusterIpPoolCidr and targetVspClusterIpPoolRange.
+          items:
+            example: 10.0.0.80
+            format: ipv4
+            pattern: "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+            type: string
+          maxItems: 256
+          minItems: 5
+          type: array
+        targetVspClusterExcludedAddresses:
+          description: |
+            List of IP addresses to exclude from the VSP cluster IP pool.
+
+            Useful when you have reserved IPs within a CIDR block or range that
+            should not be used for the deployment.
+          items:
+            example: 10.0.0.90
+            format: ipv4
+            pattern: "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+            type: string
+          type: array
       type: object
     OpsLogsUpgradeSpec:
       description: |
@@ -8216,6 +8711,66 @@ components:
           format: uri
           type: string
       type: object
+    InventoryNetworksResult:
+      description: Result of an inventory networks fetch task. Returned when GET task
+        for a fetch task completes successfully.
+      properties:
+        type:
+          example: INVENTORY_NETWORKS_FETCH
+          type: string
+        inventoryNetworks:
+          $ref: '#/components/schemas/InventoryNetworks'
+      required:
+      - inventoryNetworks
+      - type
+      type: object
+    InventoryNetworks:
+      description: |
+        Paginated snapshot of networks discovered for SDDC inventory (management domain and,
+        where applicable, other domains). Returned as the payload of a successful
+        INVENTORY_NETWORKS_FETCH task result.
+
+        The structure matches InventoryDatastores-style pagination: a page of inventory network
+        entries plus page metadata describing the current slice and overall result set (totals,
+        page number, page size).
+      properties:
+        networks:
+          description: |
+            Networks for the requested page. Ordering is defined by SDDC LCM; callers must not
+            assume a stable sort across fetches unless documented by the service.
+          items:
+            $ref: '#/components/schemas/InventoryNetwork'
+          type: array
+        pageMetadata:
+          allOf:
+          - $ref: '#/components/schemas/PageMetadata'
+          description: |
+            Pagination metadata for this response (e.g. page number, page size, total elements,
+            total pages). Use with optional fetch pagination to walk the full set.
+      required:
+      - networks
+      - pageMetadata
+      type: object
+    InventoryNetwork:
+      description: Inventory network from SDDC LCM infrastructure (e.g. vSphere port
+        group).
+      properties:
+        id:
+          description: Network identifier (e.g. vSphere Managed Object ID).
+          type: string
+        name:
+          description: Name of the network.
+          type: string
+        isDefault:
+          description: |
+            Whether this network is the default. Omitted from JSON when false or unset; present
+            only when true.
+          type: boolean
+          x-field-extra-annotation: '@com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_DEFAULT)'
+      required:
+      - id
+      - name
+      type: object
     ComponentDesiredSpec:
       description: |
         Specifications related to the component's desired configuration and the source for its upgrade artifacts.
@@ -8297,6 +8852,32 @@ components:
           type: boolean
       required:
       - performBackup
+      type: object
+    VspClusterIpRange_1:
+      description: |
+        IP range specification for the VCFA consumption cluster (VSP cluster) IP pool.
+
+        Defines a contiguous block of IP addresses from startIpAddress to endIpAddress (inclusive).
+        Example: startIpAddress "10.0.0.80", endIpAddress "10.0.0.89" represents 10 IPs.
+
+        Must provide between 5 and 256 contiguous IP addresses (VCFA consumption cluster requirement).
+        Other cluster types have different minimum IP requirements.
+      properties:
+        startIpAddress:
+          description: Starting IPv4 address of the range (inclusive)
+          example: 10.0.0.80
+          format: ipv4
+          pattern: "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+          type: string
+        endIpAddress:
+          description: Ending IPv4 address of the range (inclusive)
+          example: 10.0.0.89
+          format: ipv4
+          pattern: "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+          type: string
+      required:
+      - endIpAddress
+      - startIpAddress
       type: object
     performComponentAction_request:
       discriminator:
@@ -8429,11 +9010,15 @@ components:
           PRECHECK: '#/components/schemas/PrecheckResult'
           OPS_LOGS_UPGRADE: '#/components/schemas/OpsLogsUpgradeResult'
           VALIDATION: '#/components/schemas/ValidationResult'
+          INVENTORY_NETWORKS_FETCH: '#/components/schemas/InventoryNetworksResult'
+          SDDC_RESOURCES_FETCH: '#/components/schemas/SddcResourcesFetchResult'
         propertyName: type
       oneOf:
       - $ref: '#/components/schemas/PrecheckResult'
       - $ref: '#/components/schemas/OpsLogsUpgradeResult'
       - $ref: '#/components/schemas/ValidationResult'
+      - $ref: '#/components/schemas/InventoryNetworksResult'
+      - $ref: '#/components/schemas/SddcResourcesFetchResult'
   securitySchemes:
     basicAuth:
       scheme: basic

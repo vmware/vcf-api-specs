@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: VCF Operations for networks API Reference
   description: VCF Operations for networks API Reference
-  version: 9.1.0.0
+  version: 9.1.1.0
 servers:
   - url: /api/ni
 tags:
@@ -22400,6 +22400,7 @@ components:
         - LDAP
         - LOCAL
         - VIDM
+        - SSO
     UserGroupType:
       type: string
       description: The type of user-group.
@@ -22409,6 +22410,7 @@ components:
         - LDAP
         - LOCAL
         - VIDM
+        - SSO
     Role:
       type: string
       description: Role assigned the user/group.
@@ -31529,6 +31531,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Node'
+        clusterInfo:
+          type: object
+          properties:
+            isClustered:
+              type: boolean
+              description: true for vRNI platform cluster, false for single node platform and collector
+            primaryNode:
+              type: string
+              description: primaryNode should be platform1 IP for platform cluster, N/A for single node and collector
+            isPrimaryNode:
+              type: boolean
+              description: true for platform1 in vRNI platform cluster, false otherwise
+            clusterType:
+              type: string
+              description: clusterType should be SINGLE_CLUSTER_CERT
+            clusterFqdns:
+              type: array
+              description: clusterFqdns array should include all platform cluster IPs, or platform IP for single node, or collector IP for collector
+              items:
+                type: string
     CertificateUpdateRequest:
       type: object
       properties:

@@ -5,7 +5,7 @@
 openapi: 3.0.2
 info:
   title: Realtime Metrics APIs
-  version: 9.1.0.0
+  version: 9.1.1.0
   license:
     name: 'Copyright © 2025-26 Broadcom Inc. and/or its subsidiaries. All Rights Reserved.'
   description: |
@@ -63,7 +63,7 @@ paths:
       operationId: query
       parameters:
         - $ref: '#/components/parameters/queryQueryParam'
-        - $ref: '#/components/parameters/sourceIdQueryParam'
+        - $ref: '#/components/parameters/sourceIdRequiredQueryParam'
         - $ref: '#/components/parameters/timeQueryParam'
         - $ref: '#/components/parameters/timeoutQueryParam'
         - $ref: '#/components/parameters/limitQueryParam'
@@ -98,7 +98,7 @@ paths:
       operationId: queryRange
       parameters:
         - $ref: '#/components/parameters/queryQueryParam'
-        - $ref: '#/components/parameters/sourceIdQueryParam'
+        - $ref: '#/components/parameters/sourceIdRequiredQueryParam'
         - $ref: '#/components/parameters/timeoutQueryParam'
         - $ref: '#/components/parameters/startQueryParam'
         - $ref: '#/components/parameters/endQueryParam'
@@ -196,6 +196,8 @@ components:
       $ref: 'realtime-metrics-openapi-params.yaml#/queryQueryParam'
     sourceIdQueryParam:
       $ref: 'realtime-metrics-openapi-params.yaml#/sourceIdQueryParam'
+    sourceIdRequiredQueryParam:
+      $ref: 'realtime-metrics-openapi-params.yaml#/sourceIdRequiredQueryParam'
     timeQueryParam:
       $ref: 'realtime-metrics-openapi-params.yaml#/timeQueryParam'
     timeoutQueryParam:

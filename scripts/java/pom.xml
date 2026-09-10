@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0-->
     <packaging>pom</packaging>
 
     <properties>
-        <maven.compiler.release>11</maven.compiler.release>
+        <maven.compiler.release>17</maven.compiler.release>
         <vcf.sdk.groupId>com.vmware.custom_sdk</vcf.sdk.groupId>
         <revision>0.0.1</revision>
         <wsdl.root>../../../../../specifications/vsphere/wsdl</wsdl.root>
@@ -39,7 +39,7 @@ SPDX-License-Identifier: Apache-2.0-->
             <dependency>
                 <groupId>jakarta.xml.ws</groupId>
                 <artifactId>jakarta.xml.ws-api</artifactId>
-                <version>3.0.1</version>
+                <version>4.0.3</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -50,7 +50,7 @@ SPDX-License-Identifier: Apache-2.0-->
                 <plugin>
                     <groupId>org.apache.cxf</groupId>
                     <artifactId>cxf-codegen-plugin</artifactId>
-                    <version>4.0.9</version>
+                    <version>4.1.7</version>
                     <executions>
                         <execution>
                             <id>generate-bindings</id>
@@ -102,3 +102,4 @@ SPDX-License-Identifier: Apache-2.0-->
     </modules>
 
 </project>
+

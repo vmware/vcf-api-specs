@@ -6,9 +6,8 @@ definitions:
     - properties:
         alg:
           description: |
-            The Application Layer Gateway (ALG) protocol.
-            Please note, protocol NBNS_BROADCAST and NBDG_BROADCAST are  deprecated.
-            Please use UDP protocol and create L4 Port Set type of service instead.
+            The Application Layer Gateway (ALG) protocol for this service entry. NBNS_BROADCAST
+            and NBDG_BROADCAST are deprecated; use a UDP L4PortSetServiceEntry instead.
           enum:
           - ORACLE_TNS
           - FTP
@@ -20,7 +19,7 @@ definitions:
           - NBDG_BROADCAST
           - TFTP
           title: |-
-            The Application Layer Gateway (ALG) protocol
+            Application Layer Gateway (ALG) protocol
           type: string
         destination_ports:
           description: |-
@@ -1298,8 +1297,8 @@ definitions:
         format: ipv4
         type: string
     required:
-    - op_code
     - dst_ip
+    - op_code
     type: object
     x-vmw-nsx-module: Traceflow
   ArpSnoopingConfig:
@@ -1722,8 +1721,8 @@ definitions:
           type: string
           x-deprecated: true
       required:
-      - tenant
       - status
+      - tenant
       type: object
       x-vmw-nsx-module: PolicyEnforcementPointManagement
     description: |-
@@ -1951,8 +1950,8 @@ definitions:
           True if backup is successfully completed, else false
         type: boolean
     required:
-    - success
     - backup_id
+    - success
     title: |-
       Backup operation status
     type: object
@@ -1970,10 +1969,10 @@ definitions:
         restore_status:
           $ref: '#/definitions/ClusterRestoreStatus'
       required:
-      - backup_config
       - backup_operation_history
-      - current_backup_operation_status
+      - backup_config
       - restore_status
+      - current_backup_operation_status
       type: object
       x-vmw-nsx-module: BackupConfiguration
     description: |-
@@ -2199,9 +2198,16 @@ definitions:
             Enforcement Point Id
           type: string
         resource_type:
+          description: |-
+            The type of this resource.
+            Value is "ConsolidatedStatusPerEnforcementPoint" for basic status,
+            or "ConsolidatedStatusNsxT" when detailed enforced status is included.
           enum:
           - ConsolidatedStatusPerEnforcementPoint
           - ConsolidatedStatusNsxT
+          readOnly: true
+          title: |-
+            Resource Type
           type: string
         site_path:
           description: |-
@@ -2214,8 +2220,9 @@ definitions:
       - resource_type
       type: object
       x-vmw-nsx-module: PolicyRealizedState
-    description: |
-      Consolidated Realized Status Per Enforcement Point.
+    description: |-
+      Base type for Consolidated Realized Status Per Enforcement Point.
+      This type serves as the base for NSX-T specific consolidated status.
     title: |-
       Base class for ConsolidatedStatusPerEnforcementPoint
     x-vmw-nsx-module: PolicyRealizedState
@@ -2321,13 +2328,13 @@ definitions:
     - properties:
         destination_groups:
           description: |
-            We need paths as duplicate names may exist for groups under different
-            domains. Along with paths we support IP Address of type IPv4 and IPv6.
-            IP Address can be in one of the format(CIDR, IP Address, Range of IP Address).
-            In order to specify all groups, use the constant "ANY". This
-            is case insensitive. If "ANY" is used, it should be the ONLY element
-            in the group array. Error will be thrown if ANY is used in conjunction
-            with other values.
+            Specifies the destinations to match for this rule. This field accepts Group paths
+            (e.g., "/infra/domains/default/groups/db-vms") or direct IP addresses.
+            Group paths reference Group objects that define collections of workloads.
+            IP addresses can be specified in CIDR notation, as individual addresses, or as ranges.
+            Use the constant "ANY" to match all destinations. "ANY" is case-insensitive and must be
+            the ONLY element in the array if used. An error will be thrown if "ANY" is used
+            in conjunction with other values.
           items:
             type: string
           maxItems: 128
@@ -2347,7 +2354,10 @@ definitions:
         direction:
           default: IN_OUT
           description: |
-            Define direction of traffic.
+            Specifies the direction of traffic to which this rule applies:
+            - IN: Applies to incoming traffic only (traffic coming into the workload)
+            - OUT: Applies to outgoing traffic only (traffic leaving the workload)
+            - IN_OUT: Applies to both incoming and outgoing traffic (default)
           enum:
           - IN
           - OUT
@@ -2394,8 +2404,8 @@ definitions:
         notes:
           description: |
             User level field which will be printed in CLI and packet logs.
-            Even though there is no limitation on length of the notes, internally
-            notes will get truncated after 39 characters.
+            The notes field accepts up to 2048 characters. Internally,
+            notes are truncated after 39 characters in CLI and packet logs.
           maxLength: 2048
           readOnly: false
           title: |-
@@ -2403,24 +2413,34 @@ definitions:
           type: string
         profiles:
           description: |
-            Holds the list of layer 7 service profile paths. These profiles accept
-            attributes and sub-attributes of various network services
-            (e.g. L4 AppId, encryption algorithm, domain name, etc) as key value
-            pairs. Instead of Layer 7 service profiles you can use a L7 access profile.
-            One of either Layer 7 service profiles or L7 Access Profile can be used in firewall rule.
-            In case of L7 access profile only one is allowed.
+            Paths to context profile objects (PolicyContextProfile) or L7 access profile
+            objects (L7AccessProfile) for advanced traffic inspection and filtering.
+            These profiles enable matching on Layer 7 attributes and sub-attributes of
+            network services such as:
+            - Application IDs (AppId)
+            - Encryption algorithms and TLS versions
+            - Domain names and URLs
+            - HTTP methods
+            - CIFS/SMB versions
+            You can use either context profiles (PolicyContextProfile) or an
+            L7 access profile (L7AccessProfile), but not both.
+            When using an L7 access profile, only one profile path is allowed.
           items:
             type: string
           maxItems: 128
           title: |-
-            Layer 7 service profiles or TLS action profile
+            Context profiles or L7 access profile paths
           type: array
         rule_id:
-          description: "This is a unique 4 byte positive number that is assigned by\
-            \ the system. \nThis rule id is passed all the way down to the data path.\
-            \ The first 1GB\n(1000 to 2^30) will be shared by GM and LM with zebra\
-            \ style striped\nnumber space. For E.g 1000 to (1Million -1) by LM, (1M\
-            \ - 2M-1) by GM\nand so on.\n"
+          description: "This is a unique positive integer identifier assigned by the\
+            \ system for each rule.\nThe rule_id is passed down to the data path for\
+            \ rule matching and statistics.\nThe system allocates rule IDs from a\
+            \ shared number space between Global Manager (GM) \nand Local Manager\
+            \ (LM) using a zebra-style striped allocation:\n- 1000 to 999,999: allocated\
+            \ by LM\n- 1,000,000 to 1,999,999: allocated by GM\n- 2,000,000 to 2,999,999:\
+            \ allocated by LM\n- And so on, alternating in ranges of 1 million\nThe\
+            \ rule_id is typically a small integer (1-4 digits for most deployments)\
+            \ rather \nthan utilizing the full 32-bit range.\n"
           format: int64
           readOnly: true
           title: |-
@@ -2428,61 +2448,63 @@ definitions:
           type: integer
         scope:
           description: |
-            The list of policy paths where the rule is applied
-            LR/Edge/T0/T1/LRP etc. Note that a given rule can be applied
-            on multiple LRs/LRPs.
+            The list of group paths to which the rule applies. This determines
+            which workloads (VMs, containers, etc.) the rule is enforced on.
+            For Gateway Firewall rules, this can also include Tier-0, Tier-1,
+            or interface paths to specify where the rule is enforced.
+            Note that a given rule can be applied to multiple groups or network entities.
           items:
             type: string
           maxItems: 128
           type: array
         sequence_number:
           description: |
-            This field is used to resolve conflicts between multiple
-            Rules under Security or Gateway Policy for a Domain
-            If no sequence number is specified in the payload, a value of 0 is
-            assigned by default. If there are multiple rules with the same
-            sequence number then their order is not deterministic. If a specific
-            order of rules is desired, then one has to specify unique sequence
-            numbers or use the POST request on the rule entity with
-            a query parameter action=revise to let the framework assign a
-            sequence number
+            This field is used to resolve conflicts between multiple Rules under a Security
+            or Gateway Policy for a Domain. Rules are evaluated in ascending sequence number
+            order. If no sequence number is specified in the payload, the system assigns a
+            default value of 0. If there are multiple rules with the same sequence number
+            then their order is not deterministic. If a specific order of rules is desired,
+            specify unique sequence numbers or use the POST request on the rule entity with
+            a query parameter action=revise to let the framework assign a sequence number.
           format: int32
           minimum: 0
           title: |-
-            Sequence number of the this Rule
+            Sequence number of this Rule
           type: integer
         service_entries:
           description: |
-            In order to specify raw services this can be used,
-            along with services which contains path to services.
+            Can be used to specify raw service entries inline,
+            along with "services", which contains paths to services.
             This can be empty or null.
           items:
             $ref: '#/definitions/ServiceEntry'
           maxItems: 128
           title: |-
-            Raw services
+            Raw service entries
           type: array
         services:
           description: |
+            Paths to Service objects (e.g., "/infra/services/HTTP") that define
+            the network services (protocols and ports) to which this rule applies.
             In order to specify all services, use the constant "ANY".
-            This is case insensitive. If "ANY" is used, it should
+            This is case-insensitive. If "ANY" is used, it should
             be the ONLY element in the services array. Error will be thrown
             if ANY is used in conjunction with other values.
           items:
             type: string
           maxItems: 128
           title: |-
-            Names of services
+            Service paths
           type: array
         source_groups:
           description: |
-            We need paths as duplicate names may exist for groups under different
-            domains. Along with paths we support IP Address of type IPv4 and IPv6.
-            IP Address can be in one of the format(CIDR, IP Address, Range of IP Address).
-            In order to specify all groups, use the constant "ANY". This
-            is case insensitive. If "ANY" is used, it should be the ONLY element
-            in the group array. Error will be thrown if ANY is used in conjunction
-            with other values.
+            Specifies the sources to match for this rule. This field accepts Group paths
+            (e.g., "/infra/domains/default/groups/web-vms") or direct IP addresses.
+            Group paths reference Group objects that define collections of workloads.
+            IP addresses can be specified in CIDR notation, as individual addresses, or as ranges.
+            Use the constant "ANY" to match all sources. "ANY" is case-insensitive and must be
+            the ONLY element in the array if used. An error will be thrown if "ANY" is used
+            in conjunction with other values.
           items:
             type: string
           maxItems: 128
@@ -2512,7 +2534,7 @@ definitions:
     description: |-
       A rule indicates the action to be performed for various types of traffic flowing between workload groups.
     title: |-
-      A rule represent base properties for ,dfw, forwarding, redirection rule
+      A rule represents base properties for DFW, GFW, forwarding, and redirection rules
     x-vmw-nsx-module: Policy
   BaseRuleListResult:
     allOf:
@@ -2615,8 +2637,8 @@ definitions:
           Internal uri of the call
         type: string
     required:
-    - uri
     - method
+    - uri
     title: |-
       A single request within a batch of operations
     type: object
@@ -3305,8 +3327,8 @@ definitions:
             Source IP Addresses for BGP peering
           type: array
       required:
-      - remote_as_num
       - neighbor_address
+      - remote_as_num
       type: object
       x-vmw-nsx-module: PolicyConnectivity
     description: |
@@ -3856,8 +3878,8 @@ definitions:
             Policy path of the VLAN transport zone assigned to the underlay L2 zone for bridging.
           type: string
       required:
-      - bridge_profile_path
       - vlan_ids
+      - bridge_profile_path
       - vlan_transport_zone_path
       type: object
       x-vmw-nsx-module: PolicyVpcSubnet
@@ -3978,8 +4000,8 @@ definitions:
           Policy path of the VLAN transport zone assigned to the underlay L2 zone for bridging.
         type: string
     required:
-    - bridge_profile_path
     - vlan_ids
+    - bridge_profile_path
     title: |-
       Bridge Profile Configuration
     type: object
@@ -4071,8 +4093,7 @@ definitions:
         ha_mode:
           default: ACTIVE_STANDBY
           description: |
-            High-availability mode for the transit gateway centralized services (gateway connections, VPN).
-            Values ACTIVE_ACTIVE and ACTIVE_STANDBY.
+            High-availability mode
           enum:
           - ACTIVE_ACTIVE
           - ACTIVE_STANDBY
@@ -4224,9 +4245,9 @@ definitions:
       type: object
       x-vmw-nsx-module: PolicyTransitGateway
     description: |-
-      Child wrapper object for transit gateway centralized service configuration, used in hierarchical API.
+      Child wrapper object for transit gateway centralized config, used in hierarchical API.
     title: |-
-      Wrapper object for transit gateway centralized service configuration
+      Wrapper object for transit gateway centralized config
     x-vmw-nsx-module: PolicyTransitGateway
   ChildClusterSecurityConfiguration:
     allOf:
@@ -5747,6 +5768,21 @@ definitions:
     title: |-
       Wrapper object for MetadataProxyConfig
     x-vmw-nsx-module: PolicyMetadataProxy
+  ChildMpsExclusion:
+    allOf:
+    - $ref: '#/definitions/ChildPolicyConfigResource'
+    - properties:
+        MpsExclusion:
+          $ref: '#/definitions/MpsExclusion'
+      required:
+      - MpsExclusion
+      type: object
+      x-vmw-nsx-module: PolicyAntiMalware
+    description: |-
+      Child wrapper object for MpsExclusion, used in hierarchical API
+    title: |-
+      Wrapper object for MpsExclusion
+    x-vmw-nsx-module: PolicyAntiMalware
   ChildNetworkSpan:
     allOf:
     - $ref: '#/definitions/ChildPolicyConfigResource'
@@ -8541,9 +8577,9 @@ definitions:
           Field data type
         type: string
     required:
-    - label
     - type
     - field
+    - label
     title: |-
       Grid Column
     type: object
@@ -8634,6 +8670,7 @@ definitions:
           type: integer
         services:
           description: |
+            Paths to Service objects (e.g., "/infra/services/HTTP").
             In order to specify all services, use the constant "ANY".
             This is case insensitive. If "ANY" is used, it should
             be the ONLY element in the services array. Error will be thrown
@@ -8642,7 +8679,7 @@ definitions:
             type: string
           maxItems: 128
           title: |-
-            Names of services
+            Paths to services
           type: array
         source_groups:
           description: |
@@ -8987,9 +9024,9 @@ definitions:
             Value
           type: string
       required:
-      - member_type
-      - value
       - key
+      - value
+      - member_type
       type: object
       x-vmw-nsx-module: Policy
     description: |
@@ -9041,8 +9078,8 @@ definitions:
       value_constraint:
         $ref: '#/definitions/ValueConstraintExpression'
     required:
-    - operator
     - value_constraint
+    - operator
     title: |-
       Represents the leaf level conditional value constraint.
     type: object
@@ -9456,6 +9493,14 @@ definitions:
     description: |-
       Describes status of configuration of an entity
     properties:
+      core_allocation_profile:
+        description: |
+          This holds the core allocation profile realized at edge cluster member.
+        enum:
+        - L4FORWARDING
+        - SECURITY
+        readOnly: true
+        type: string
       failure_code:
         description: |-
           Error code
@@ -9736,8 +9781,18 @@ definitions:
         consolidated_status:
           $ref: '#/definitions/ConsolidatedStatus'
         consolidated_status_per_enforcement_point:
-          description: |-
-            List of Consolidated Realized Status per enforcement point.
+          description: "List of Consolidated Realized Status per enforcement point.\n\
+            An enforcement point represents an enforcing system \u2014 NSX is the\
+            \ default; others\ninclude Antrea, or a site (on the global manager).\n\
+            Within an NSX enforcement point, ESXi(for distributed firewall) and\n\
+            Edge Nodes (for gateway firewall) are tracked as Transport Nodes, not\
+            \ as\nenforcement points.\nEach item is a ConsolidatedStatusPerEnforcementPoint\
+            \ or its sub-type ConsolidatedStatusNsxT.\nThe resource_type field indicates\
+            \ the effective response shape:\n\"ConsolidatedStatusNsxT\" when include_enforced_status=true\
+            \ \u2014 the enforced_status field\nis populated with detailed per-transport-node\
+            \ enforcement information.\n\"ConsolidatedStatusPerEnforcementPoint\"\
+            \ when include_enforced_status=false (default) \u2014\nthe enforced_status\
+            \ field is absent."
           items:
             $ref: '#/definitions/ConsolidatedStatusPerEnforcementPoint'
           readOnly: true
@@ -9844,8 +9899,9 @@ definitions:
           $ref: '#/definitions/EnforcedStatusDetailsNsxT'
       type: object
       x-vmw-nsx-module: PolicyRealizationStatus
-    description: |
-      Detailed Realized Status of an intent object on an NSX-T type of enforcement point.
+    description: |-
+      Consolidated Realized Status for NSX-T enforcement points.
+      The enforced_status field is optional and only populated when the include_enforced_status query parameter is set to true.
     title: |-
       NSX-T Consolidated Status
     x-vmw-nsx-module: PolicyRealizationStatus
@@ -10133,8 +10189,8 @@ definitions:
           Value for metadata key
         type: string
     required:
-    - value
     - key
+    - value
     title: |-
       Key value structure for holding metadata of context profile attributes
     type: object
@@ -10886,9 +10942,9 @@ definitions:
           subnet of client network
         type: string
     required:
-    - mac_address
-    - start_time
     - ip_address
+    - start_time
+    - mac_address
     type: object
     x-vmw-nsx-module: AggSvcDhcp
   DhcpLeases:
@@ -11086,7 +11142,7 @@ definitions:
         preferred_edge_paths:
           description: |
             Policy paths to edge nodes on which the DHCP servers run. The first edge node
-            is assigned as active edge, and second one as stanby edge. If only one edge node
+            is assigned as active edge, and second one as standby edge. If only one edge node
             is specified, the DHCP servers will run without HA support.
             When this property is not specified, edge nodes are auto-assigned during
             realization of the DHCP server.
@@ -11433,8 +11489,8 @@ definitions:
         options:
           $ref: '#/definitions/DhcpV4Options'
       required:
-      - mac_address
       - ip_address
+      - mac_address
       type: object
       x-vmw-nsx-module: PolicyConnectivity
     description: |
@@ -11498,9 +11554,9 @@ definitions:
         type: string
     required:
     - iaid
-    - start_time
-    - duid
     - ia_type
+    - duid
+    - start_time
     type: object
     x-vmw-nsx-module: AggSvcDhcp
   DhcpV6StaticBindingConfig:
@@ -11794,13 +11850,13 @@ definitions:
         type: integer
       last_event_time_created:
         description: |-
-          Time of last successfully received and record event from event log server.
+          Time of last successfully received and record event from event log server. This is a unix timestamp in milliseconds.
         format: int64
         readOnly: true
         type: integer
       last_polling_time:
         description: |-
-          Last polling time
+          Last polling time. This is a unix timestamp in milliseconds.
         format: int64
         readOnly: true
         type: integer
@@ -12134,15 +12190,15 @@ definitions:
           Total DHCP Requests
         type: integer
     required:
+    - informs
     - nacks
     - offers
-    - acks
-    - discovers
-    - requests
     - errors
-    - declines
-    - informs
     - releases
+    - discovers
+    - declines
+    - acks
+    - requests
     type: object
     x-vmw-nsx-module: AggSvcL2Types
   DistributedFloodProtectionProfile:
@@ -12243,6 +12299,16 @@ definitions:
           title: |-
             EVPN Connectivity Type
           type: string
+        direct_path:
+          default: false
+          description: |
+            Controls how learned routes are installed into Distributed Transit Gateway.
+            If this field is set to false, only default routes are installed as it happens today.
+            No change in the behavior. If this field is set to true, all learned routes are
+            installed in addition to default routes.
+          title: |-
+            Direct Path route installation
+          type: boolean
         l3_vni:
           description: |
             L3 VNI for overlay traffic.
@@ -12273,10 +12339,10 @@ definitions:
             Route Targets with format in ASN:<number>
           type: array
       required:
-      - route_controller_path
+      - l3_vni
       - route_targets
       - route_distinguisher
-      - l3_vni
+      - route_controller_path
       type: object
       x-vmw-nsx-module: PolicyGatewayConnection
     description: |
@@ -12811,8 +12877,8 @@ definitions:
           Value for item to be displayed in dropdown
         type: string
     required:
-    - value
     - field
+    - value
     title: |-
       Dropdown item definition
     type: object
@@ -13159,8 +13225,8 @@ definitions:
             Names of service profiles
           type: array
       required:
-      - groups
       - service_profiles
+      - groups
       type: object
       x-vmw-nsx-module: PolicyGuestIntrospection
     description: |-
@@ -13401,8 +13467,8 @@ definitions:
             cases where the target does not specify the type.
           type: string
       required:
-      - operator
       - count
+      - operator
       type: object
       x-vmw-nsx-module: PolicyConstraints
     description: |
@@ -13749,9 +13815,9 @@ definitions:
             Policy path to the vni pool
           type: string
       required:
-      - transport_zone_path
-      - mappings
       - vni_pool_path
+      - mappings
+      - transport_zone_path
       type: object
       x-vmw-nsx-module: PolicyConnectivity
     description: |
@@ -13960,8 +14026,8 @@ definitions:
             External ID member type
           type: string
       required:
-      - member_type
       - external_ids
+      - member_type
       type: object
       x-vmw-nsx-module: Policy
     description: |-
@@ -14288,6 +14354,14 @@ definitions:
         title: |-
           Network Detection Response feature count
         type: string
+      NETWORK_TRAFFIC_ANALYSIS:
+        default: UNAVAILABLE
+        description: |-
+          Network Traffic Analysis feature count.
+        readOnly: true
+        title: |-
+          Network Traffic Analysis feature count
+        type: string
     type: object
     x-vmw-nsx-module: SecurityLicenseUsage
   FederationComponentUpgradeStatus:
@@ -14392,13 +14466,13 @@ definitions:
           type: integer
         site_allocation_indices:
           description: |
-            Indicies for cross site allocation for edge cluster
+            Indices for cross site allocation for edge cluster
             and its members referred by gateway.
           items:
             $ref: '#/definitions/SiteAllocationIndexForEdge'
           readOnly: true
           title: |
-            Indicies for cross site allocation
+            Indices for cross site allocation
           type: array
         transit_segment_id:
           description: |
@@ -14653,8 +14727,8 @@ definitions:
             A conditional operator
           type: string
       required:
-      - operator
       - checks
+      - operator
       type: object
       x-vmw-nsx-module: PolicyConstraints
     description: |
@@ -14830,8 +14904,8 @@ definitions:
           SSH fingerprint of server
         type: string
     required:
-    - authentication_scheme
     - protocol_name
+    - authentication_scheme
     - ssh_fingerprint
     title: |-
       Protocol to transfer backup file to remote server
@@ -14861,8 +14935,8 @@ definitions:
           Value
         type: string
     required:
-    - field_names
     - value
+    - field_names
     title: |-
       Filter request
     type: object
@@ -14900,9 +14974,9 @@ definitions:
         enable_firewall:
           default: true
           description: |
-            If set to true, Firewall is enabled.
+            If set to true, Distributed Firewall (DFW) is enabled.
           title: |-
-            Firewall enable flag
+            Distributed Firewall (DFW) enable flag
           type: boolean
         global_addrset_mode_enabled:
           default: true
@@ -14951,8 +15025,8 @@ definitions:
           Member type
         type: string
     required:
-    - member_type
     - count
+    - member_type
     title: |-
       Firewall exclude list members count
     type: object
@@ -15711,11 +15785,11 @@ definitions:
     - properties:
         rules:
           description: |-
-            Rules that are a part of this SecurityPolicy
+            Rules that are a part of this GatewayPolicy
           items:
             $ref: '#/definitions/Rule'
           title: |-
-            Rules that are a part of this SecurityPolicy
+            Rules that are a part of this GatewayPolicy
           type: array
       type: object
       x-vmw-nsx-module: Policy
@@ -15859,8 +15933,8 @@ definitions:
           Recovery site path
         type: string
     required:
-    - to_primary_site_path
     - tier0_gateway_path
+    - to_primary_site_path
     title: |-
       Recovery site config
     type: object
@@ -16740,11 +16814,11 @@ definitions:
           Thumbprint
         type: string
     required:
-    - gm_ip
     - gm_username
-    - thumbprint
-    - pub_url
     - gm_password
+    - gm_ip
+    - pub_url
+    - thumbprint
     title: |-
       GM Import Specification
     type: object
@@ -17310,8 +17384,8 @@ definitions:
           List of tags for the member type
         type: array
     required:
-    - member_type
     - tags
+    - member_type
     title: |-
       Group tags list for a particular member type
     type: object
@@ -17826,8 +17900,8 @@ definitions:
             Port
           type: integer
       required:
-      - collector_port
       - collector_ip_address
+      - collector_port
       type: object
       x-vmw-nsx-module: PolicyIPFIXDFW
     description: |
@@ -18349,12 +18423,14 @@ definitions:
           type: array
         digest_algorithms:
           description: |-
-            Algorithm to be used for message digest during Internet Key Exchange(IKE) negotiation. A default value of SHA2_256 will be applied only when the supplied encryption algorithms contain either AES_128 or AES_256.
+            Algorithm to be used for message digest during Internet Key Exchange(IKE) negotiation. A default value of SHA2_256 will be applied only when the supplied encryption algorithms contain either AES_128 or AES_256. SHA1 is deprecated. Please use some other Digest Algorithm.
           items:
             description: |
               The IkeDigestAlgorithms are used to verify message
               integrity during Ike negotiation. SHA1 produces 160
               bits hash and SHA2_XXX produces XXX bit hash.
+              Please note, SHA1 is deprecated. Please use some other
+              Digest Algorithm such as SHA2_256, SHA2_384 or SHA2_512.
             enum:
             - SHA1
             - SHA2_256
@@ -18818,13 +18894,15 @@ definitions:
           type: array
         digest_algorithms:
           description: |-
-            Algorithm to be used for message digest. Default digest algorithm is implicitly covered by default encryption algorithm "AES_GCM_128".
+            Algorithm to be used for message digest. Default digest algorithm is implicitly covered by default encryption algorithm "AES_GCM_128". SHA1 is deprecated. Please use some other Digest Algorithm.
           items:
             description: |
               The IPSecDigestAlgorithms are used to verify message
               integrity during IPSec VPN tunnel establishment.
               SHA1 produces 160 bits hash and SHA2_XXX produces
               XXX bit hash.
+              Please note, SHA1 is deprecated. Please use some other
+              Digest Algorithm such as SHA2_256, SHA2_384 or SHA2_512.
             enum:
             - SHA1
             - SHA2_256
@@ -19178,8 +19256,8 @@ definitions:
         sync_settings:
           $ref: '#/definitions/DirectoryDomainSyncSettings'
       required:
-      - netbios_name
       - base_distinguished_name
+      - netbios_name
       type: object
       x-vmw-nsx-module: PolicyIdentity
     description: |-
@@ -19505,9 +19583,10 @@ definitions:
         title: |-
           Identity (Directory) Group SID (security identifier)
         type: string
+        x-deprecated: true
     required:
-    - distinguished_name
     - domain_base_distinguished_name
+    - distinguished_name
     title: |-
       Identity (Directory) group
     type: object
@@ -19668,8 +19747,8 @@ definitions:
           Number of active user sessions/logins
         type: integer
     required:
-    - num_concurrent_users
     - num_user_sessions
+    - num_concurrent_users
     title: |-
       Identity Firewall statistics data
     type: object
@@ -19695,12 +19774,13 @@ definitions:
         type: string
       login_time:
         description: |-
-          Login time.
+          Login time. This is a unix timestamp in milliseconds.
         format: int64
         type: integer
       logout_time:
         description: |
-          Logout time if applicable.  An active user session has no logout time.
+          Logout time if applicable. This is a unix timestamp in milliseconds.
+          An active user session has no logout time.
           Non-active user session is stored (up to last 5 most recent entries) per
           VM and per user.
         format: int64
@@ -19784,9 +19864,9 @@ definitions:
           Directory Group to user session data mappings
         type: array
     required:
+    - active_user_sessions
     - dir_group_to_user_session_data_mappings
     - archived_user_sessions
-    - active_user_sessions
     title: |-
       Identity Firewall user session data list and Directory Group to user mappings
     type: object
@@ -19853,8 +19933,8 @@ definitions:
           Virtual machine external ID or BIOS UUID
         type: string
     required:
-    - active_sessions
     - vm_ext_id
+    - active_sessions
     title: |-
       Identity Firewall user login/session data for a single VM
     type: object
@@ -19978,7 +20058,7 @@ definitions:
     - properties:
         publish_time:
           description: |
-            Time when the custom signature was published.
+            Time when the custom signature was published. This is a unix timestamp in milliseconds.
           format: int64
           readOnly: true
           type: integer
@@ -20023,7 +20103,7 @@ definitions:
     - properties:
         publish_time:
           description: |
-            Time when the custom signature was published.
+            Time when the custom signature was published. This is a unix timestamp in milliseconds.
           format: int64
           readOnly: true
           type: integer
@@ -20270,8 +20350,8 @@ definitions:
             Signature Ids.
           type: array
       required:
-      - signature_ids
       - pcap_ids
+      - signature_ids
       type: object
       x-vmw-nsx-module: PolicyIDS
     description: |
@@ -20360,8 +20440,8 @@ definitions:
             IDS zipped pcap file status
           type: string
       required:
-      - signature_ids
       - pcap_ids
+      - signature_ids
       type: object
       x-vmw-nsx-module: PolicyIDS
     description: |
@@ -20637,11 +20717,45 @@ definitions:
     title: |-
       Intrusion Detection System Profile severity
     x-vmw-nsx-module: PolicyIDS
+  IdsProfileSignature:
+    description: "Provides a single IDPS signature's information\u2014its ID, revision,\
+      \ and action.\nThis signature is effective on the given profile.\n"
+    properties:
+      action:
+        description: |
+          The action that has to be performed when the signature is matched.
+        enum:
+        - ALERT
+        - DROP
+        - REJECT
+        title: |-
+          IDS signature's action
+        type: string
+      revision:
+        description: |
+          The revision number of the IDS signature.
+        format: int64
+        title: |-
+          Signature Revision
+        type: integer
+      signature_id:
+        description: |
+          Represents the IDS Signature's id.
+        title: |-
+          Signature ID
+        type: string
+    required:
+    - revision
+    - signature_id
+    - action
+    title: |-
+      IDS Profile Signature
+    type: object
+    x-vmw-nsx-module: PolicyIDS
   IdsProfileSignatures:
-    description: |
-      An entity that holds the list of IDS signatures attached
-      to an IDS Profile depending upon the Profile's criteria.
-      These are the Signatures which needs to be detected.
+    description: "This entity holds the list of IDS signatures attached to an IDS\
+      \ Profile.\nThese signatures are determined either by using the criteria given\
+      \ on that profile \nor by directly including the signatures in the profile.\n"
     properties:
       profile_path:
         description: |
@@ -20650,14 +20764,14 @@ definitions:
           IDS Profile path
         type: string
       signatures:
-        description: |-
-          List of IDS signature ids which need to be detected.
+        description: "Effective signatures of the IDS profile. Each signature contains\
+          \ the signature ID, \nrevision number, and the action to be performed when\
+          \ matched.\n"
         items:
-          type: string
+          $ref: '#/definitions/IdsProfileSignature'
         maxItems: 30000
-        minItems: 1
         title: |-
-          IDS Signatures
+          IDS profile's Signatures
         type: array
     title: |-
       IDS Profile Signatures
@@ -20769,11 +20883,13 @@ definitions:
     x-vmw-nsx-module: PolicyIDSStats
   IdsRuleStatisticsForEnforcementPoint:
     description: |-
-      IDS Rule statistics for a specfic enforcement point.
+      IDS Rule statistics for a specific enforcement point.
     properties:
       enforcement_point:
-        description: |-
-          IDS Rule statistics for a single enforcement point
+        description: |
+          Path of the enforcement point for which statistics are reported.
+          On Global Manager, specifying an enforcement_point_path is mandatory.
+          On Local Manager, if omitted, statistics are aggregated across all enforcement points.
         readOnly: true
         title: |-
           Enforcement point path
@@ -20853,8 +20969,10 @@ definitions:
       enforcement point.
     properties:
       enforcement_point:
-        description: |-
-          Enforcement point to fetch the statistics from.
+        description: |
+          Path of the enforcement point for which statistics are reported.
+          On Global Manager, specifying an enforcement_point_path is mandatory.
+          On Local Manager, if omitted, statistics are aggregated across all enforcement points.
         readOnly: true
         title: |-
           Enforcement point path
@@ -21233,9 +21351,9 @@ definitions:
           Rate filter activation timeout in seconds
         type: integer
     required:
-    - time_period
     - count
     - timeout
+    - time_period
     title: |-
       IDS signature rate filter
     type: object
@@ -21345,9 +21463,9 @@ definitions:
           Signature threshold tracking type
         type: string
     required:
-    - time_period
-    - count
     - threshold_type
+    - count
+    - time_period
     title: |-
       IDS signature threshold values
     type: object
@@ -21407,7 +21525,7 @@ definitions:
           type: string
         update_time:
           description: |
-            Time when this version was downloaded and saved.
+            Time when this version was downloaded and saved. This is a unix timestamp in milliseconds.
           format: int64
           readOnly: true
           type: integer
@@ -21563,8 +21681,8 @@ definitions:
         site_settings:
           $ref: '#/definitions/IdsSiteSettings'
       required:
-      - site_path
       - signature_version_path
+      - site_path
       type: object
       x-vmw-nsx-module: IDSSiteVersionMapping
     description: |
@@ -21954,8 +22072,8 @@ definitions:
       value:
         $ref: '#/definitions/InjectionValue'
     required:
-    - value
     - key
+    - value
     title: |-
       Injection
     type: object
@@ -22880,8 +22998,8 @@ definitions:
             Single IP count
           type: integer
       required:
-      - ip_block_address_type
       - ip_block_visibility
+      - ip_block_address_type
       type: object
       x-vmw-nsx-module: PolicyLimit
     description: |
@@ -22924,8 +23042,8 @@ definitions:
           format: ip
           type: string
       required:
-      - end
       - start
+      - end
       type: object
       x-vmw-nsx-module: Ipam
     description: |-
@@ -22939,9 +23057,10 @@ definitions:
         format: ipv4
         type: string
       flags:
-        default: 0
-        description: |-
-          IP flags
+        default: 2
+        description: |
+          The DF bit has to be set because traceflow does not
+          support tracking IP fragment behavior.
         format: int64
         maximum: 8
         minimum: 0
@@ -23122,8 +23241,8 @@ definitions:
             Retransmission interval
           type: integer
       required:
-      - ra_mode
       - ra_config
+      - ra_mode
       type: object
       x-vmw-nsx-module: PolicyConnectivity
     x-vmw-nsx-module: PolicyConnectivity
@@ -23207,8 +23326,8 @@ definitions:
         readOnly: false
         type: string
     required:
-    - value
     - key
+    - value
     type: object
     x-vmw-nsx-module: CertificateManager
   KeyValuePair:
@@ -23232,8 +23351,8 @@ definitions:
           Value
         type: string
     required:
-    - value
     - key
+    - value
     title: |-
       An arbitrary key-value pair
     type: object
@@ -23796,9 +23915,9 @@ definitions:
           type: array
           uniqueItems: true
       required:
-      - local_address
-      - l3vpn_session
       - remote_public_address
+      - l3vpn_session
+      - local_address
       type: object
       x-vmw-nsx-module: PolicyL3Vpn
     description: |
@@ -23914,8 +24033,8 @@ definitions:
           type: array
           uniqueItems: true
       required:
-      - sources
       - destinations
+      - sources
       type: object
       x-vmw-nsx-module: PolicyL3Vpn
     description: |
@@ -25019,8 +25138,8 @@ definitions:
             The URL that the HTTP request is redirected to
           type: string
       required:
-      - redirect_url
       - redirect_status
+      - redirect_url
       type: object
       x-vmw-nsx-module: PolicyLoadBalancer
     description: |
@@ -25147,8 +25266,8 @@ definitions:
           - REGEX
           type: string
       required:
-      - cookie_name
       - cookie_value
+      - cookie_name
       type: object
       x-vmw-nsx-module: PolicyLoadBalancer
     description: |
@@ -25248,8 +25367,8 @@ definitions:
             Value of HTTP request header
           type: string
       required:
-      - header_value
       - header_name
+      - header_value
       type: object
       x-vmw-nsx-module: PolicyLoadBalancer
     description: |
@@ -25488,8 +25607,8 @@ definitions:
           - REGEX
           type: string
       required:
-      - header_value
       - header_name
+      - header_value
       type: object
       x-vmw-nsx-module: PolicyLoadBalancer
     description: |
@@ -25543,8 +25662,8 @@ definitions:
             Value of header field
           type: string
       required:
-      - header_value
       - header_name
+      - header_value
       type: object
       x-vmw-nsx-module: PolicyLoadBalancer
     description: |
@@ -27264,8 +27383,8 @@ definitions:
             Data to send
           type: string
       required:
-      - send
       - receive
+      - send
       type: object
       x-vmw-nsx-module: PolicyLoadBalancer
     description: |
@@ -27795,8 +27914,8 @@ definitions:
           Value of HTTP request header
         type: string
     required:
-    - header_value
     - header_name
+    - header_value
     type: object
     x-vmw-nsx-module: LoadBalancer
   LdapIdentitySource:
@@ -28466,8 +28585,8 @@ definitions:
           Policy path to prefix lists
         type: array
     required:
-    - nexthop_address
     - prefix_list_paths
+    - nexthop_address
     title: |-
       Local egress routing policy
     type: object
@@ -29188,8 +29307,8 @@ definitions:
           id of the transport node where the router status is retrieved.
         type: string
     required:
-    - transport_node_id
     - high_availability_status
+    - transport_node_id
     type: object
     x-vmw-nsx-module: AggSvcLogicalRouter
   LogicalSwitchStatistics:
@@ -29524,6 +29643,16 @@ definitions:
           title: |-
             Detection Types
           type: string
+        file_size:
+          description: |
+            Maximum file size in MB for malware scanning. Allowed range is 1 to 64 MB. Default is 64 MB.
+            Please refer to the compatibility matrix with Security Service Platform (SSP) for supported versions.
+          format: int32
+          maximum: 64
+          minimum: 1
+          title: |-
+            File Size
+          type: integer
         file_type:
           description: |
             Represents different type of files extensions supported in Malware Prevention.
@@ -29541,6 +29670,23 @@ definitions:
             type: string
           title: |-
             File Type
+          type: array
+        fileless_enabled:
+          description: |
+            Enables or disables fileless malware detection. Default is true.
+            Please refer to the compatibility matrix with Security Service Platform (SSP) for supported versions.
+          title: |-
+            Fileless Support Enabled
+          type: boolean
+        local_exclusions:
+          description: |
+            List of MpsExclusion paths applicable to this profile for excluding specific files or extensions from scanning.
+            Local exclusions apply only to this profile, while global exclusions apply to all profiles by default.
+            Please refer to the compatibility matrix with Security Service Platform (SSP) for supported versions.
+          items:
+            type: string
+          title: |-
+            Profile local exclusions
           type: array
       required:
       - detection_type
@@ -29824,8 +29970,8 @@ definitions:
             Policy paths to Certificate Authority (CA) certificates
           type: array
       required:
-      - edge_cluster_path
       - server_address
+      - edge_cluster_path
       type: object
       x-vmw-nsx-module: PolicyMetadataProxy
     description: |-
@@ -29877,11 +30023,11 @@ definitions:
           succeeded responses from  nova server
         type: integer
     required:
-    - requests_to_nova_server
-    - error_responses_from_nova_server
-    - requests_from_clients
-    - succeeded_responses_from_nova_server
     - segment_path
+    - requests_from_clients
+    - error_responses_from_nova_server
+    - requests_to_nova_server
+    - succeeded_responses_from_nova_server
     - responses_to_clients
     type: object
     x-vmw-nsx-module: PolicyMetadataProxy
@@ -30070,6 +30216,57 @@ definitions:
       Error class for all the MPS related errors
     type: object
     x-vmw-nsx-module: NsxMalwarePreventionDeployment
+  MpsExclusion:
+    allOf:
+    - $ref: '#/definitions/PolicyConfigResource'
+    - properties:
+        exclusion_type:
+          description: |
+            Type of exclusion (paths or file extensions).
+          enum:
+          - PATHS
+          - EXTENSIONS
+          title: |-
+            Exclusion Type
+          type: string
+        exclusions:
+          description: |
+            List of paths or file extensions to exclude.
+          items:
+            type: string
+          minItems: 1
+          title: |-
+            Exclusion List
+          type: array
+        is_global:
+          default: false
+          description: |
+            When true, this exclusion applies globally to all the MalwarePrevention profiles.
+            When false, exclusion will not be applicable by default, to apply the exclusion user have to select it under MalwarePrevention Profile.
+          title: |-
+            Is Global
+          type: boolean
+        os_type:
+          description: |
+            Target OS for this exclusion.
+          enum:
+          - WINDOWS
+          - LINUX
+          - ANY
+          title: |-
+            OS Type
+          type: string
+      required:
+      - exclusions
+      - exclusion_type
+      - os_type
+      type: object
+      x-vmw-nsx-module: PolicyAntiMalware
+    description: |
+      A single malware prevention exclusion with OS type, exclusion type, list, and metadata.
+    title: |-
+      MPS Exclusion
+    x-vmw-nsx-module: PolicyAntiMalware
   MpsOvfSpec:
     description: |-
       MPS Ovf Specification
@@ -30462,10 +30659,10 @@ definitions:
             Version
           type: string
       required:
+      - log_token
+      - instance_id
       - managed_by
       - deployed_by
-      - instance_id
-      - log_token
       type: object
       x-vmw-nsx-module: NSXDeploymentInfo
     description: |-
@@ -31026,6 +31223,7 @@ definitions:
           - DISTRIBUTED_BAREMETAL
           - DISTRIBUTED_IPFIX_BAREMETAL
           - DISTRIBUTED_INTELLIGENCE_BAREMETAL
+          - NETWORK_TRAFFIC_ANALYSIS
           type: string
         readOnly: true
         title: |-
@@ -32141,8 +32339,11 @@ definitions:
           traceflow metadata requirement of 16 bytes), the traceflow request
           will fail with an appropriate message.  The frame will be zero padded to
           the requested size.
+          The frame size up to 9000 is only available to the overlay segment port
+          and subnet port. The VLAN segment port, DHCP port, Edge uplink port, and
+          service interface can only support traceflow packet with a frame size up to 1000.
         format: int64
-        maximum: 1000
+        maximum: 9000
         minimum: 60
         title: |-
           Requested total size of the (logical) packet in bytes
@@ -32222,8 +32423,8 @@ definitions:
           The type of the packets
         type: string
     required:
-    - packet_type
     - counter
+    - packet_type
     type: object
     x-vmw-nsx-module: AggSvcL2Types
   PacketsDroppedBySecurity:
@@ -32445,8 +32646,8 @@ definitions:
           Status Of an Edge Node
         type: string
     required:
-    - status
     - policy_edge_node_path
+    - status
     type: object
     x-vmw-nsx-module: PolicyEdgeClusterStatistics
   PendingChangesInfoNsxT:
@@ -32592,9 +32793,9 @@ definitions:
           Variable chosen for Y value of the point of the graph
         type: string
     required:
-    - y_value
     - x_value
     - field
+    - y_value
     title: |-
       Definition of a point of graph
     type: object
@@ -32605,33 +32806,35 @@ definitions:
     - properties:
         category:
           description: |
-            - Distributed Firewall -
-            Policy framework provides five pre-defined categories for classifying
-            a security policy. They are "Ethernet","Emergency", "Infrastructure"
-            "Environment" and "Application". There is a pre-determined order in
-            which the policy framework manages the priority of these security
-            policies. Ethernet category is for supporting layer 2 firewall rules.
-            The other four categories are applicable for layer 3 rules. Amongst
-            them, the Emergency category has the highest priority followed by
-            Infrastructure, Environment and then Application rules. Administrator
-            can choose to categorize a security policy into the above categories
-            or can choose to leave it empty. If empty it will have the least
-            precedence w.r.t the above four categories.
-            - Edge Firewall -
-            Policy Framework for Edge Firewall provides six pre-defined categories
-            "Emergency", "SystemRules", "SharedPreRules", "LocalGatewayRules",
-            "AutoServiceRules" and "Default", in order of priority of rules.
-            All categories are allowed for Gatetway Policies that belong
-            to 'default' Domain. However, for user created domains, category is
-            restricted to "SharedPreRules" or "LocalGatewayRules" only. Also, the
-            users can add/modify/delete rules from only the "SharedPreRules" and
-            "LocalGatewayRules" categories. If user doesn't specify the category
-            then defaulted to "Rules". System generated category is used by NSX
-            created rules, for example BFD rules. Autoplumbed category used by
-            NSX verticals to autoplumb data path rules. Finally, "Default" category
-            is the placeholder default rules with lowest in the order of priority.
+            Classifies this security policy into an evaluation-priority category. Categories are
+            evaluated in a fixed priority order.
+
+            Distributed Firewall (DFW) categories, in priority order (highest first):
+              Ethernet - Layer 2 firewall rules only.
+              Emergency - Highest priority L3 rules (common to both DFW and Edge FW).
+              Infrastructure - Second priority L3 rules.
+              Environment - Third priority L3 rules.
+              Application - Lowest explicit L3 rules.
+              ThreatRules - IDPS-only. Threat-based rules applied after Application.
+              EmergencyThreatRules - IDPS-only. Highest priority threat-based rules.
+
+            Edge (Gateway) Firewall categories, in priority order (highest first):
+              Emergency, SystemRules, SharedPreRules, SharedExternalRules,
+              LocalGatewayRules, AutoServiceRules, Default.
+              For user-created domains, only SharedPreRules and LocalGatewayRules are allowed.
+              If not specified, defaults to LocalGatewayRules.
+
+            Bridge Firewall category:
+              LocalBridgeRules - Rules for bridge firewall policies.
+
+            Distributed IDS/IPS (E-W IDPS) categories:
+              ThreatRules - Threat-based IDS/IPS rules applied after Application.
+              EmergencyThreatRules - Highest priority threat-based IDS/IPS rules.
+
+            Gateway IDS/IPS (N-S IDPS) category:
+              LocalGatewayRules - IDS/IPS rules applied on the gateway.
           title: |-
-            A way to classify a security policy, if needed.
+            Security policy category
           type: string
         comments:
           description: |-
@@ -32658,7 +32861,7 @@ definitions:
           type: boolean
         lock_modified_by:
           description: |
-            ID of the user who last modified the lock for the secruity policy.
+            ID of the user who last modified the lock for the security policy.
           readOnly: true
           title: |-
             User who locked the security policy
@@ -32698,7 +32901,10 @@ definitions:
         scope:
           description: |
             The list of group paths where the rules in this policy will get
-            applied. This scope will take precedence over rule level scope.
+            applied. Each path references a Group object that defines a collection
+            of workloads (VMs, containers, etc.). This scope determines which
+            workloads the security policy's rules are enforced on.
+            This scope will take precedence over rule level scope.
             Supported only for security and redirection policies. In case of
             RedirectionPolicy, it is expected only when the policy is NS and
             redirecting to service chain.
@@ -32732,26 +32938,25 @@ definitions:
           type: integer
         stateful:
           description: |
-            Stateful or Stateless nature of security policy is enforced on all
-            rules in this security policy. When it is stateful, the state of
-            the network connects are tracked and a stateful packet inspection is
-            performed.
-            Layer3 security policies can be stateful or stateless. By default, they are stateful.
-            Layer2 security policies can only be stateless.
+            Whether this security policy enforces stateful or stateless packet inspection.
+            When stateful (true), network connection state is tracked and stateful packet
+            inspection is performed. Layer-3 security policies default to stateful.
+            Layer-2 (Ethernet category) security policies must be stateless.
+            Note: when stateful is true, the tcp_strict field also defaults to true unless
+            explicitly set to false. See the tcp_strict field for details.
           readOnly: false
           title: |-
-            Stateful nature of the entries within this security policy.
+            Stateful nature of this security policy
           type: boolean
         tcp_strict:
           description: |
-            Ensures that a 3 way TCP handshake is done before the data packets
-            are sent.
-            tcp_strict=true is supported only for stateful security policies.
-            If the tcp_strict flag is not specified and the security policy
-            is stateful, then tcp_strict will be set to true.
+            Enforces a 3-way TCP handshake before allowing data packets. Only applicable when
+            the security policy is stateful. If not specified, the server automatically sets
+            tcp_strict to true for stateful policies and false for stateless policies.
+            See also: stateful field.
           readOnly: false
           title: |-
-            Enforce strict tcp handshake before allowing data packets
+            Enforce strict TCP handshake before allowing data
           type: boolean
       type: object
       x-vmw-nsx-module: Policy
@@ -33070,8 +33275,8 @@ definitions:
         uniqueItems: true
     required:
     - datatype
-    - value
     - key
+    - value
     title: |-
       Policy Attributes data holder
     type: object
@@ -33512,12 +33717,13 @@ definitions:
       type: object
       x-vmw-nsx-module: PolicyContextProfile
     description: |
-      An entity that encapsulates attributes and sub-attributes of various
-      network services (eg. L7 services, domain name, encryption algorithm)
-      The entity will be consumed in firewall rules and can be added in new
-      tuple called profile in firewall rules. To get a list of supported
-      attributes and sub-attributes fire the following REST API
-      GET https://&lt;policy-mgr&gt;/policy/api/v1/infra/context-profiles/attributes
+      A Policy Context Profile defines a set of network attributes and optional
+      sub-attributes that characterise traffic or applications. Supported
+      attribute types include Layer 7 application IDs (APP_ID), domain names
+      (DOMAIN_NAME), URL categories (URL_CATEGORY), URL reputation scores
+      (URL_REPUTATION), and custom URLs (CUSTOM_URL). A context profile can be
+      referenced by firewall rules as an additional match criterion, enabling
+      fine-grained, application-aware policy enforcement.
     title: |-
       Policy Context Profile entity
     x-vmw-nsx-module: PolicyContextProfile
@@ -33608,8 +33814,8 @@ definitions:
           uniqueItems: true
       required:
       - datatype
-      - value
       - key
+      - value
       type: object
       x-vmw-nsx-module: PolicyContextProfile
     description: |-
@@ -33989,6 +34195,18 @@ definitions:
           title: |-
             Allocation rules for auto placement
           type: array
+        core_allocation_profile:
+          description: |
+            The Core Allocation Profile attribute defines the core allocation for edge transport nodes within a cluster,
+            and any new or redeployed edge will utilize this profile. It can be updated to another supported profile,
+            which subsequently updates the core profile on all edges in the cluster.
+            Note that a manual reboot is required for the new profile to be applied to the edge appliance.
+            To verify the current profile applied to cluster members, use the Edge Cluster State API.
+            <br>https://&lt;nsx-mgr&gt;/policy/api/v1/infra/sites/default/enforcement-points/&lt;enforcementpoint-id&gt;/edge-clusters/cluster/&lt;edge-cluster-id&gt/state</br>
+          enum:
+          - L4FORWARDING
+          - SECURITY
+          type: string
         deployment_type:
           description: |
             This field is a readonly field which shows the deployment_type of members.
@@ -34446,8 +34664,8 @@ definitions:
           Average Write Latency
         type: string
     required:
-    - status
     - policy_edge_node_path
+    - status
     type: object
     x-vmw-nsx-module: PolicyEdgeClusterStatistics
   PolicyEdgeClusterRemoteTunnelBgpSummary:
@@ -34774,8 +34992,8 @@ definitions:
           Resource name
         type: string
     required:
-    - fields
     - resource_name
+    - fields
     title: |-
       Contains the detail of resources with name and fields
     type: object
@@ -34793,8 +35011,8 @@ definitions:
       sub_type:
         $ref: '#/definitions/PolicyFineTuningResourceInfo'
     required:
-    - sub_type
     - field_name
+    - sub_type
     title: |-
       Contains the details resources with field type and name
     type: object
@@ -35270,17 +35488,17 @@ definitions:
             Connection timeout for destination
           type: integer
       required:
-      - icmp_error_reply
-      - udp_single
-      - udp_multiple
-      - icmp_first_packet
-      - tcp_first_packet
-      - tcp_closed
-      - udp_first_packet
       - tcp_established
+      - tcp_closed
       - tcp_finwait
+      - icmp_first_packet
+      - icmp_error_reply
       - tcp_opening
       - tcp_closing
+      - udp_single
+      - udp_multiple
+      - udp_first_packet
+      - tcp_first_packet
       type: object
       x-vmw-nsx-module: PolicyFirewallSessionTimerProfile
     description: |-
@@ -36674,8 +36892,8 @@ definitions:
           ids of transport nodes where this metadata proxy is running
         type: array
     required:
-    - transport_nodes
     - proxy_status
+    - transport_nodes
     type: object
     x-vmw-nsx-module: PolicyMetadataProxy
   PolicyMonitoringConfig:
@@ -37392,10 +37610,12 @@ definitions:
           type: array
         operational_status:
           description: |
-            Possible values could be UP, DOWN, UNKNOWN, FAILURE
-            This list is not exhaustive.
+            Runtime operational status of this realized resource as observed on the enforcement
+            point. Common values include UP (resource is operational), DOWN (resource is not
+            operational), FAILURE (an error occurred), and UNKNOWN (status cannot be determined).
+            Additional implementation-specific values may appear.
           title: |-
-            String representation of operational status
+            Operational status of this realized resource
           type: string
         operational_status_error:
           description: |
@@ -37405,10 +37625,12 @@ definitions:
           type: string
         publish_status:
           description: |
-            Possible values could be UP, DOWN, UNKNOWN, SUCCESS
-            This list is not exhaustive.
+            Publish (intent-to-datapath push) status of this realized resource. Common values
+            include UP (successfully published), DOWN (publish failed), SUCCESS (published without
+            errors), and UNKNOWN (status cannot be determined). Additional implementation-specific
+            values may appear.
           title: |-
-            String representation of publish status
+            Publish status of this realized resource
           type: string
         publish_status_error:
           description: |
@@ -37570,7 +37792,6 @@ definitions:
         origin_site_id:
           description: |
             This is a UUID generated by the system for knowing which site owns an object.
-            This is used in NSX+.
           readOnly: true
           title: |-
             A unique identifier assigned by the system for knowing which site owns an object
@@ -37578,7 +37799,6 @@ definitions:
         owner_id:
           description: |
             This is a UUID generated by the system for knowing who owns this object.
-            This is used in NSX+.
           readOnly: true
           title: |-
             A unique identifier assigned by the system for the ownership of an object
@@ -37650,7 +37870,6 @@ definitions:
         owner_id:
           description: |
             This is a UUID generated by the system for knowing who owns this resource.
-            This is used in NSX+.
           readOnly: true
           title: |-
             A unique identifier assigned by the system for the ownership of resource
@@ -37685,15 +37904,13 @@ definitions:
         origin_site_id:
           description: |
             This is a UUID generated by the system for knowing which site owns this group.
-            This is used in NSX+.
           readOnly: true
           title: |-
             A unique identifier assigned by the system for knowing which site owns a group
           type: string
         remote_path:
           description: |
-            This is the path of the object on the local managers when queried on the NSX+ service,
-            and path of the object on NSX+ service when queried from the local managers.
+            The path of the object on the remote end.
           readOnly: true
           title: |-
             Path of the object on the remote end.
@@ -38121,12 +38338,12 @@ definitions:
             Id of the storage
           type: string
       required:
-      - compute_id
       - deployment_spec_name
-      - attributes
       - storage_id
-      - deployment_template_name
+      - compute_id
       - primary_interface_mgmt_ip
+      - attributes
+      - deployment_template_name
       type: object
       x-vmw-nsx-module: PolicyServiceInsertion
     description: |
@@ -38237,8 +38454,8 @@ definitions:
         uniqueItems: true
     required:
     - datatype
-    - value
     - key
+    - value
     title: |-
       Policy Sub Attributes data holder
     type: object
@@ -38353,8 +38570,8 @@ definitions:
             The Transport Node TEP Group ID
           type: string
       required:
-      - tep_mac_address
       - tep_label
+      - tep_mac_address
       type: object
       x-vmw-nsx-module: PolicyConnectivityStatistics
     x-vmw-nsx-module: PolicyConnectivityStatistics
@@ -38441,8 +38658,8 @@ definitions:
           Start time of the interval
         type: string
     required:
-    - start_interval
     - end_interval
+    - start_interval
     title: |-
       Time interval on which firewall schedule will be applicable
     type: object
@@ -38872,6 +39089,14 @@ definitions:
             \ type which is being requested.\n"
           title: |-
             Flag to indicate if the transport zone is the default one
+          type: boolean
+        is_security:
+          description: |
+            This field is set to true if this is the system generated transport zone used for
+            security on vSphere Distributed Switch (vDS).
+          readOnly: true
+          title: |-
+            Flag to indicate if the transport zone is used for security on vDS
           type: boolean
         nested_nsx:
           default: false
@@ -39318,8 +39543,8 @@ definitions:
           TransportNode on which the attacher resides
         type: string
     required:
-    - host
     - entity
+    - host
     title: |-
       VM or vmknic entity attached to LogicalPort
     type: object
@@ -39361,8 +39586,11 @@ definitions:
           Context ID based on the type
         type: string
       context_type:
-        description: |-
-          Set to PARENT when type field is CHILD. Read only field.
+        description: |
+          Identifies the relationship context of this port attachment relative to its parent.
+          PARENT indicates that this port is the parent of a child port (i.e., the port with
+          type=CHILD is attached to this port). This field is system-assigned and read-only;
+          it is automatically set to PARENT when another port references this port as its parent.
         enum:
         - PARENT
         readOnly: true
@@ -40118,8 +40346,8 @@ definitions:
             List of project paths
           type: array
       required:
-      - projects_list
       - match_prefix_list
+      - projects_list
       type: object
       x-vmw-nsx-module: PolicyConnectivity
     description: |
@@ -40646,8 +40874,8 @@ definitions:
             Reaction Events
           type: array
       required:
-      - actions
       - events
+      - actions
       type: object
       x-vmw-nsx-module: PolicyReaction
     description: |
@@ -40667,8 +40895,8 @@ definitions:
         profinet:
           $ref: '#/definitions/Profinet'
       required:
-      - parallel_redundancy_prot
       - profinet
+      - parallel_redundancy_prot
       - latency_measurement
       type: object
       x-vmw-nsx-module: PolicyRealTimeEth
@@ -40717,10 +40945,10 @@ definitions:
           type: array
         host_id:
           description: |-
-            Id of the host on which the vm exists.
+            Unique ID of the host on which the VM exists.
           readOnly: true
           title: |-
-            Id of the host on which the vm exists.
+            Unique ID of the host on which the VM exists.
           type: string
         local_id_on_host:
           description: |-
@@ -41085,9 +41313,9 @@ definitions:
           Remote server hostname or IP address
         type: string
     required:
-    - directory_path
-    - protocol
     - server
+    - protocol
+    - directory_path
     title: |-
       Remote file server
     type: object
@@ -41120,8 +41348,8 @@ definitions:
           SSH fingerprint of server
         type: string
     required:
-    - ssh_fingerprint
     - server
+    - ssh_fingerprint
     title: |-
       Remote server
     type: object
@@ -41600,8 +41828,8 @@ definitions:
           Status of tag apply or remove operation
         type: string
     required:
-    - resource_id
     - tag_status
+    - resource_id
     title: |-
       Tag operation status for a resource
     type: object
@@ -42065,7 +42293,7 @@ definitions:
           description: |
             If true the default firewall rule Action is set to DROP, otherwise set to ALLOW.
             This field is deprecated and recommended to change Rule action field. Note that this
-            field is not synchornied with default rule field.
+            field is not synchronized with default rule field.
           title: |-
             Flag to add default whitelisting Gateway Policy rule for the VTI interface.
           type: boolean
@@ -42145,8 +42373,12 @@ definitions:
           default: ACTIVE_STANDBY
           description: |
             High-availability mode for route controller.
+            Starting from VCF 9.1.1 onwards, it is recommended
+            to use ACTIVE_ACTIVE High-availability mode.
+            Update of High-availability mode is not supported.
           enum:
           - ACTIVE_STANDBY
+          - ACTIVE_ACTIVE
           title: |-
             HA Mode
           type: string
@@ -42274,22 +42506,26 @@ definitions:
           type: array
         source_addresses:
           description: |
+            In case Route Controller is configured with ACTIVE_STANDBY mode,
+            source_address should be a valid floating_ip address from the Route Controller Interface.
+            In case Route Controller is configured with ACTIVE_ACTIVE mode,
+            source_address should be a valid interface_subnet IP from the Route Controller Interface.
             Source addresses should belong to external or loopback or VTI interface
             IP Addresses. BGP peering is formed from all these addresses.
-            This property is mandatory when maximum_hop_limit is greater than 1.
           items:
             description: |-
               IPv4 or IPv6 address
             format: ip
             type: string
           maxItems: 1
+          minItems: 1
           title: |-
-            A valid floating_ip from Route Controller interface.
+            Source IP address for BGP Peering.
           type: array
       required:
-      - source_addresses
-      - neighbor_address
       - remote_as_num
+      - neighbor_address
+      - source_addresses
       type: object
       x-vmw-nsx-module: PolicyRouteController
     description: |
@@ -42357,6 +42593,8 @@ definitions:
         floating_ip_subnets:
           description: |
             IP address and subnet specification for VIP floating IP address subnets.
+            This property is required only if the Route controller is configured with
+            high availability (HA) ACTIVE_STANDBY mode.
           items:
             $ref: '#/definitions/InterfaceSubnet'
           maxItems: 1
@@ -42368,6 +42606,12 @@ definitions:
             Route Controller Interface Address object parameters.
             Specify IP addresses, vlan and port_group details per
             virtual network appliance (VNA) for configuring Route Controller interface.
+            Maximum number of Interface Addresses is restricted to 2
+            in case Route Controller is configured with high availability (HA)
+            ACTIVE_STANDBY mode.
+            Maximum number of Interface Addresses is restricted to 1
+            in case Route Controller is configured with high availability (HA)
+            ACTIVE_ACTIVE mode.
           items:
             $ref: '#/definitions/RouteControllerInterfaceAddress'
           maxItems: 2
@@ -42378,7 +42622,10 @@ definitions:
         mtu:
           default: 1500
           description: |
-            MTU size.
+            Maximum transmission unit (MTU) specifies the size of the largest
+            packet that a network protocol can transmit.
+            The globally configured maximum physical uplink MTU value must be greater than
+            or equal to the maximum supported value of this MTU field.
           format: int32
           maximum: 9126
           minimum: 1500
@@ -42396,7 +42643,6 @@ definitions:
             URPF mode
           type: string
       required:
-      - floating_ip_subnets
       - interface_address
       type: object
       x-vmw-nsx-module: PolicyRouteController
@@ -42910,13 +43156,13 @@ definitions:
     - properties:
         action:
           description: |
-            The action to be applied to all the services
-            The JUMP_TO_APPLICATION action is only supported for rules created in the
-            Environment category. Once a match is hit then the rule processing
+            The action to be applied to all the services.
+            REJECT is not allowed for Layer-2 (Ethernet category) rules -- use DROP instead.
+            JUMP_TO_APPLICATION is only valid for DFW rules (not Gateway Firewall) created
+            in the Environment category. Once a match is hit then the rule processing
             will jump to the rules present in the Application category, skipping
             all further rules in the Environment category. If no rules match in
             the Application category then the default application rule will be hit.
-            This is applicable only for DFW.
           enum:
           - ALLOW
           - DROP
@@ -42977,7 +43223,7 @@ definitions:
           description: |
             Realized id of the rule on NSX MP. Policy Manager can create more than
             one rule per policy rule, in which case this identifier helps to
-            distinguish between the multple rules created.
+            distinguish between the multiple rules created.
           readOnly: true
           title: |-
             NSX internal rule id
@@ -43091,7 +43337,7 @@ definitions:
     x-vmw-nsx-module: Policy
   RuleStatisticsForEnforcementPoint:
     description: |-
-      Rule statistics for a specfic enforcement point.
+      Rule statistics for a specific enforcement point.
     properties:
       container_cluster_path:
         description: |-
@@ -43101,8 +43347,10 @@ definitions:
           Cluster container path
         type: string
       enforcement_point:
-        description: |-
-          Rule statistics for a single enforcement point
+        description: |
+          Path of the enforcement point for which statistics are reported.
+          On Global Manager, specifying an enforcement_point_path is mandatory.
+          On Local Manager, if omitted, statistics are aggregated across all enforcement points.
         readOnly: true
         title: |-
           Enforcement point path
@@ -43164,7 +43412,7 @@ definitions:
       destination_groups:
         description: |
           It defines the destination of the rule resulting from attaching a security strategy to a VPC.
-          As the security strategy is attached to a VPC, the source for the rule would be the VPC
+          As the security strategy is attached to a VPC, the destination for the rule would be the VPC
           default group. These values would be actually replaced by the system based on the VPC to
           which the security strategy is attached.
         items:
@@ -43187,6 +43435,8 @@ definitions:
         type: array
       services:
         description: |
+          Paths to Service objects (e.g., "/infra/services/HTTP") that define
+          the network services (protocols and ports) to which this rule applies.
           In order to specify all services, use the constant "ANY".
           This is case insensitive. If "ANY" is used, it should
           be the ONLY element in the services array. Error will be thrown
@@ -43195,7 +43445,7 @@ definitions:
           type: string
         maxItems: 128
         title: |-
-          Names of services
+          Service paths
         type: array
       source_groups:
         description: |
@@ -43209,8 +43459,8 @@ definitions:
           It defines the source of the rule
         type: array
     required:
-    - destination_groups
     - source_groups
+    - destination_groups
     - action
     title: |-
       Set of template rules defined for a given security strategy.
@@ -43248,7 +43498,7 @@ definitions:
             MALWAREPREVENTION - Malware Prevention
             GFW_MULTICAST - Multicast on GFW
             GEOIP_MONITORING - Geo IP Monitoring
-            Use any one of this to enable/disabe it.
+            Use any one of this to enable/disable it.
           enum:
           - MALWAREPREVENTION
           - IDFW
@@ -43443,6 +43693,13 @@ definitions:
           readOnly: true
           title: |-
             Licensed host core count used by ndr
+          type: string
+        licensed_host_core_count_nta:
+          description: |-
+            Licensed host core count used by nta
+          readOnly: true
+          title: |-
+            Licensed host core count used by nta
           type: string
         licensed_total_core_count_firewall_atp_edition:
           description: |-
@@ -43732,6 +43989,13 @@ definitions:
           title: |-
             Raw host core count used by ndr
           type: string
+        raw_host_core_count_nta:
+          description: |-
+            Raw host core count used by nta
+          readOnly: true
+          title: |-
+            Raw host core count used by nta
+          type: string
         recommendation_sessions_total:
           description: |-
             Telemetry info about the 'recommendation_sessions_total'
@@ -43878,7 +44142,7 @@ definitions:
           x-deprecated: true
         default_rule_id:
           description: |
-            Based on the value of the connectivity strategy, a default rule is
+            Based on the value of the connectivity_preference, a default rule is
             created for the security policy. The rule id is internally assigned
             by the system for this default rule.
           format: int64
@@ -43889,14 +44153,12 @@ definitions:
         logging_enabled:
           default: false
           description: |
-            This property is deprecated.
-            Flag to enable logging for all the rules in the security policy.
-            If the value is true then logging will be enabled for all the rules
-            in the security policy. If the value is false, then the rule level
-            logging value will be honored.
+            Deprecated. Flag to enable logging for all rules in this security policy.
+            If true, logging is enabled for all rules in the policy. If false, the individual
+            rule-level logging flag is honored. Use per-rule logging instead.
           readOnly: false
           title: |-
-            Enable logging flag
+            Enable logging flag (deprecated)
           type: boolean
           x-deprecated: true
         rules:
@@ -44025,8 +44287,10 @@ definitions:
           Cluster container path
         type: string
       enforcement_point:
-        description: |-
-          Enforcement point to fetch the statistics from.
+        description: |
+          Path of the enforcement point for which statistics are reported.
+          On Global Manager, specifying an enforcement_point_path is mandatory.
+          On Local Manager, if omitted, statistics are aggregated across all enforcement points.
         readOnly: true
         title: |-
           Enforcement point path
@@ -44075,8 +44339,8 @@ definitions:
             Security Profile attached to VPC
           type: string
       required:
-      - security_profile
       - attached_to
+      - security_profile
       type: object
       x-vmw-nsx-module: PolicyVpcSecurityProfile
     description: |
@@ -44215,7 +44479,7 @@ definitions:
             This property is deprecated. The property will continue to work as
             expected for existing segments. The segments that are newly created
             with ls_id will be ignored.
-            Sepcify pre-creted logical switch id for Segment.
+            Specify pre-created logical switch id for Segment.
           title: |-
             Pre-created logical switch id for Segment
           type: string
@@ -44236,10 +44500,10 @@ definitions:
           type: array
         overlay_id:
           description: |
-            Used for overlay connectivity of segments. The overlay_id
-            should be allocated from the pool as definied by enforcement-point.
-            If not provided, it is auto-allocated from the default pool on the
-            enforcement-point.
+            Optional. Overlay network identifier (VNI) for this segment. Must be allocated from
+            the pool defined by the enforcement point. If not specified, a VNI is automatically
+            allocated from the default pool on the enforcement point. Valid range: 0-2147483647.
+            Note: once set, changing the overlay_id on an existing segment is not supported.
           format: int32
           maximum: 2147483647
           minimum: 0
@@ -44290,12 +44554,14 @@ definitions:
           type: string
         vlan_ids:
           description: |
-            VLAN ids for a VLAN backed Segment.
-            Can be a VLAN id or a range of VLAN ids specified with '-' in between.
+            List of VLAN IDs or ranges for a VLAN-backed segment. Each element is either a
+            single VLAN ID (0-4094) or a contiguous range in the format 'start-end'
+            (e.g. '100-200'). Mixed arrays are supported (e.g. ['100', '200-300', '400']).
+            Required when creating a VLAN-backed segment; not applicable to overlay segments.
           items:
             type: string
           title: |-
-            VLAN ids for VLAN backed Segment
+            VLAN IDs for a VLAN-backed segment
           type: array
       type: object
       x-vmw-nsx-module: PolicyConnectivity
@@ -45025,8 +45291,8 @@ definitions:
           - LEARNED
           type: string
       required:
-      - mac_type
       - mac_address
+      - mac_type
       type: object
       x-vmw-nsx-module: PolicyConnectivityStatistics
     x-vmw-nsx-module: PolicyConnectivityStatistics
@@ -45046,8 +45312,8 @@ definitions:
         - LEARNED
         type: string
     required:
-    - mac_type
     - mac_address
+    - mac_type
     type: object
     x-vmw-nsx-module: PolicyConnectivityStatistics
   SegmentPortState:
@@ -45939,8 +46205,8 @@ definitions:
           User name
         type: string
     required:
-    - j_username
     - j_password
+    - j_username
     title: |-
       Credentials used to authenticate to NSX
     type: object
@@ -46080,8 +46346,8 @@ definitions:
           - SystemPlugin
           type: string
       required:
-      - plugin_path
       - enabled
+      - plugin_path
       - resource_type
       type: object
       x-vmw-nsx-module: PolicySha
@@ -46424,8 +46690,8 @@ definitions:
     properties:
       index:
         description: |
-          Unqiue edge cluster node index across sites based on stretch of the
-          Gateway. For example, if a Gateway is streched to sites S1 with one
+          Unique edge cluster node index across sites based on stretch of the
+          Gateway. For example, if a Gateway is stretched to sites S1 with one
           edge cluster of 3 nodes and site S2 with one edge cluster of 2 nodes,
           the in the Global Manager will allocate the index for 5 edge nodes
           and 2 cluster in the rage 0 to 7.
@@ -46701,10 +46967,10 @@ definitions:
           IP Tunnel interfaces
         type: array
     required:
-    - local_endpoint_path
+    - locale_service_path
     - peer_address
     - peer_id
-    - locale_service_path
+    - local_endpoint_path
     title: |-
       IPSecVpn Site Override Parameters
     type: object
@@ -46753,8 +47019,8 @@ definitions:
             Site path of ELS server site mapping
           type: string
       required:
-      - site_path
       - els_servers
+      - site_path
       type: object
       x-vmw-nsx-module: PolicyIdentitySiteMapping
     description: |
@@ -47106,7 +47372,7 @@ definitions:
       type: object
       x-vmw-nsx-module: PolicyFirewallConfiguration
     description: |
-      Idfw configuration for activate/deactivate idfw on standalone hosts.
+      Idfw configuration for activate/deactivate idfw on standalone host level.
     title: |-
       Standalone host idfw configuration
     x-vmw-nsx-module: PolicyFirewallConfiguration
@@ -47163,8 +47429,8 @@ definitions:
           format: mac-address
           type: string
       required:
-      - mac_address
       - ip_address
+      - mac_address
       type: object
       x-vmw-nsx-module: PolicyConnectivity
     description: |
@@ -47234,6 +47500,25 @@ definitions:
     allOf:
     - $ref: '#/definitions/PolicyConfigResource'
     - properties:
+        html_template:
+          description: |
+            The rendered HTML template for this block page, returned as a base64-encoded string.
+            Decode the value to obtain the raw HTML. This field is system-generated and read-only.
+            Example: original template &lt;p&gt;{0}&lt;/p&gt; encodes to PHA+ezB9PC9wPg==
+          readOnly: true
+          title: |-
+            HTML template (base64-encoded)
+          type: string
+        html_template_with_message:
+          description: |
+            The rendered HTML template with the configured text_message already substituted,
+            returned as a base64-encoded string. Decode the value to obtain the raw HTML.
+            This field is system-generated and read-only.
+            Example: &lt;p&gt;Not allowed&lt;/p&gt; encodes to PHA+Tm90IGFsbG93ZWQ8L3A+
+          readOnly: true
+          title: |-
+            HTML template with message embedded (base64-encoded)
+          type: string
         text_message:
           description: |-
             text message.
@@ -47376,8 +47661,8 @@ definitions:
             Next hop routes for network
           type: array
       required:
-      - next_hops
       - network
+      - next_hops
       type: object
       x-vmw-nsx-module: PolicyConnectivity
     description: |-
@@ -47536,6 +47821,21 @@ definitions:
         title: |-
           DNS names
         type: array
+      emails:
+        description: |-
+          A list of email addresses in subject alternative names
+        items:
+          description: |
+            Email address string as defined by RFC 5321, used as an rfc822Name
+            Subject Alternative Name entry.
+          format: san-entry-email
+          type: string
+        maxItems: 64
+        minItems: 1
+        readOnly: true
+        title: |-
+          Email addresses
+        type: array
       ip_addresses:
         description: |-
           A list of IP addresses in subject alternative names
@@ -47640,8 +47940,8 @@ definitions:
           format: int64
           type: integer
       required:
-      - vlan_traffic_tag
       - subnet_path
+      - vlan_traffic_tag
       type: object
       x-vmw-nsx-module: PolicyVpcSubnet
     description: |
@@ -48083,8 +48383,8 @@ definitions:
       tag:
         $ref: '#/definitions/Tag'
     required:
-    - path
     - status
+    - path
     - tag
     title: |-
       Status of tag bulk operation
@@ -48401,7 +48701,7 @@ definitions:
           type: array
         disable_firewall:
           description: |-
-            Disable or enable gateway fiewall.
+            Disable or enable gateway firewall.
           title: |-
             Disable gateway firewall
           type: boolean
@@ -48514,6 +48814,7 @@ definitions:
             Specify transit subnets that are used to assign addresses to logical links
             connecting tier-0 and tier-1s. Both IPv4 and IPv6 addresses are supported.
             When not specified, subnet 100.64.0.0/16 is configured by default.
+            Transit subnets must not overlap reserved internal subnets.
             When modifying, for stateful active-active Tier-0 number of IPs should be at least
             attached Tier-1s count * 16 and for other type of Tier-0 number of IPs should be at
             least attached Tier-1s count * 2.
@@ -49153,6 +49454,8 @@ definitions:
             GFW_MULTICAST - Multicast on GFW
             GEOIP_MONITORING - Geo IP Monitoring
             MALWAREPREVENTION - Malware Prevention
+            Use any one of this to enable/disable it.
+            TLS - Transport Layer Security Inspection
             Use any one of this to enable/disabe it.
           enum:
           - IDFW
@@ -49160,6 +49463,7 @@ definitions:
           - GFW_MULTICAST
           - GEOIP_MONITORING
           - MALWAREPREVENTION
+          - TLS
           type: string
       required:
       - feature
@@ -49378,7 +49682,7 @@ definitions:
           type: array
         disable_firewall:
           description: |-
-            Disable or enable gateway fiewall.
+            Disable or enable gateway firewall.
           title: |-
             Disable gateway firewall
           type: boolean
@@ -49412,7 +49716,7 @@ definitions:
           default: false
           description: |
             This field is deprecated and recommended to change Rule action field.
-            Note that this field is not synchornied with default rule field.
+            Note that this field is not synchronized with default rule field.
           title: |-
             Flag to add whitelisting FW rule during realization
           type: boolean
@@ -50020,6 +50324,9 @@ definitions:
             - TLS_RSA_WITH_AES_256_CBC_SHA256
             - TLS_RSA_WITH_AES_256_CBC_SHA
             - TLS_RSA_WITH_AES_128_CBC_SHA
+            - TLS_AES_256_GCM_SHA384
+            - TLS_AES_128_GCM_SHA256
+            - TLS_CHACHA20_POLY1305_SHA256
             type: string
           maxItems: 128
           title: |-
@@ -50028,20 +50335,22 @@ definitions:
         client_max_tls_version:
           default: TLS_V1_2
           description: |-
-            Client's maximum TLS version to enforce. Required if CryptoEnforcement is ENFORCE. Supported TLS versions are TLS1.1 and TLS1.2.
+            Client's maximum TLS version to enforce. Required if CryptoEnforcement is ENFORCE. Supported TLS versions are TLS1.1, TLS1.2 and TLS1.3.
           enum:
           - TLS_V1_2
           - TLS_V1_1
           - TLS_V1_0
+          - TLS_V1_3
           type: string
         client_min_tls_version:
           default: TLS_V1_1
           description: |-
-            Client's minimum TLS version to enforce. Required if CryptoEnforcement is ENFORCE. Supported TLS versions are TLS1.1 and TLS1.2.
+            Client's minimum TLS version to enforce. Required if CryptoEnforcement is ENFORCE. Supported TLS versions are TLS1.1, TLS1.2 and TLS1.3.
           enum:
           - TLS_V1_2
           - TLS_V1_1
           - TLS_V1_0
+          - TLS_V1_3
           type: string
         crypto_enforcement:
           default: ENFORCE
@@ -50119,6 +50428,9 @@ definitions:
             - TLS_RSA_WITH_AES_256_CBC_SHA256
             - TLS_RSA_WITH_AES_256_CBC_SHA
             - TLS_RSA_WITH_AES_128_CBC_SHA
+            - TLS_AES_256_GCM_SHA384
+            - TLS_AES_128_GCM_SHA256
+            - TLS_CHACHA20_POLY1305_SHA256
             type: string
           maxItems: 128
           title: |-
@@ -50127,20 +50439,22 @@ definitions:
         server_max_tls_version:
           default: TLS_V1_2
           description: |-
-            Server's maximum TLS version to enforce. Required if CryptoEnforcement is ENFORCE. Supported versions are TLS1.1 and TLS1.2.
+            Server's maximum TLS version to enforce. Required if CryptoEnforcement is ENFORCE. Supported versions are TLS1.1, TLS1.2 and TLS1.3.
           enum:
           - TLS_V1_2
           - TLS_V1_1
           - TLS_V1_0
+          - TLS_V1_3
           type: string
         server_min_tls_version:
           default: TLS_V1_1
           description: |-
-            Server's minimum TLS version to enforce. Required if CryptoEnforcement is ENFORCE. Supported versions are TLS1.1 and TLS1.2.
+            Server's minimum TLS version to enforce. Required if CryptoEnforcement is ENFORCE. Supported versions are TLS1.1, TLS1.2 and TLS1.3.
           enum:
           - TLS_V1_2
           - TLS_V1_1
           - TLS_V1_0
+          - TLS_V1_3
           type: string
         tls_config_setting:
           default: BALANCED
@@ -50204,6 +50518,9 @@ definitions:
             - TLS_RSA_WITH_AES_256_CBC_SHA256
             - TLS_RSA_WITH_AES_256_CBC_SHA
             - TLS_RSA_WITH_AES_128_CBC_SHA
+            - TLS_AES_256_GCM_SHA384
+            - TLS_AES_128_GCM_SHA256
+            - TLS_CHACHA20_POLY1305_SHA256
             type: string
           maxItems: 128
           title: |-
@@ -50212,20 +50529,22 @@ definitions:
         client_max_tls_version:
           default: TLS_V1_2
           description: |-
-            Client's maximum TLS version to enforce. Required if CryptoEnforcement is ENFORCE. Supported versions are TLS1.1 and TLS1.2.
+            Client's maximum TLS version to enforce. Required if CryptoEnforcement is ENFORCE. Supported versions are TLS1.1, TLS1.2 and TLS1.3.
           enum:
           - TLS_V1_2
           - TLS_V1_1
           - TLS_V1_0
+          - TLS_V1_3
           type: string
         client_min_tls_version:
           default: TLS_V1_1
           description: |-
-            Client's minimum TLS version to enforce. Required if CryptoEnforcement is ENFORCE. Supported versions are TLS1.1 and TLS1.2.
+            Client's minimum TLS version to enforce. Required if CryptoEnforcement is ENFORCE. Supported versions are TLS1.1, TLS1.2 and TLS1.3.
           enum:
           - TLS_V1_2
           - TLS_V1_1
           - TLS_V1_0
+          - TLS_V1_3
           type: string
         crypto_enforcement:
           default: ENFORCE
@@ -50297,6 +50616,9 @@ definitions:
             - TLS_RSA_WITH_AES_256_CBC_SHA256
             - TLS_RSA_WITH_AES_256_CBC_SHA
             - TLS_RSA_WITH_AES_128_CBC_SHA
+            - TLS_AES_256_GCM_SHA384
+            - TLS_AES_128_GCM_SHA256
+            - TLS_CHACHA20_POLY1305_SHA256
             type: string
           maxItems: 128
           title: |-
@@ -50305,20 +50627,22 @@ definitions:
         server_max_tls_version:
           default: TLS_V1_2
           description: |-
-            Server's maximum TLS version to enforce. Required if CryptoEnforcement is ENFORCE. Supported versions are TLS1.0, TLS1.1 and TLS1.2
+            Server's maximum TLS version to enforce. Required if CryptoEnforcement is ENFORCE. Supported versions are TLS1.0, TLS1.1, TLS1.2 and TLS1.3
           enum:
           - TLS_V1_2
           - TLS_V1_1
           - TLS_V1_0
+          - TLS_V1_3
           type: string
         server_min_tls_version:
           default: TLS_V1_1
           description: |-
-            Server's minimum TLS version to enforce. Required if CryptoEnforcement is ENFORCE. supported versions are TLS1.1 and TLS1.2.
+            Server's minimum TLS version to enforce. Required if CryptoEnforcement is ENFORCE. Supported versions are TLS1.1, TLS1.2 and TLS1.3.
           enum:
           - TLS_V1_2
           - TLS_V1_1
           - TLS_V1_0
+          - TLS_V1_3
           type: string
         tls_config_setting:
           default: BALANCED
@@ -50921,6 +51245,15 @@ definitions:
           title: |-
             The name of the logical port into which the traceflow packet was delivered
           type: string
+        reason:
+          description: |-
+            This field specifies the deliver reason of traceflow packet. INT_PKT_EXCEED_VDS_MTU - When the traceflow packet traverse from ESX to VNA, the added INT telemetry headers push the frame size beyond the VDS MTU.
+          enum:
+          - INT_PKT_EXCEED_VDS_MTU
+          readOnly: true
+          title: |-
+            The reason traceflow packet was delivered
+          type: string
         resolution_type:
           description: |-
             This field specifies the resolution type of ARP ARP_SUPPRESSION_PORT_CACHE - ARP request is suppressed by IP table. ARP_SUPPRESSION_TABLE - ARP request is suppressed by ARP table. ARP_SUPPRESSION_CP_QUERY - ARP request is suppressed by info derived from CP. ARP_VM - No suppression and the ARP request is resolved by VM. ARP_LRP - No suppression and the ARP request is resolved by logical router.
@@ -51133,7 +51466,7 @@ definitions:
           type: integer
         reason:
           description: |-
-            This field specifies the drop reason of traceflow packet. ARP_FAIL - ARP request fails for some reasons, please refer arp_fail_reason for detail BFD - BFD packet is dropped because traversed by non-operative interface or encountering internal error (e.g., memory insufficient) BROADCAST - Packet is dropped during traversing the interface (e.g., Edge uplink, Edge centralized service port) which disallow ethernet broadcast DHCP - DHCP packet is malformed DLB - The packet is disallowed by distributed load balancing FW_RULE - The packet matches a drop or reject rule of DFW or Edge firewall GENEVE - GENEVE packet is malformed GRE - GRE packet is malformed or traverses a non-operative interface IFACE - Packet traverses a non-operative interface IP - Packet is dropped because of IP related causes (e.g., ICMPv4/ICMPv6 packet is malformed, or DF flag is set but fragment must be performed for the packet) or corresponding interface is not found or inoperative IP_REASS - Packet is dropped during IP reassembly IPSEC - IPsec protocol related packet is dropped IPSEC_VTI - IPsec required SA is not found or traversing inoperative interface cause packet dropped L2VPN - VLAN id of GRE packet is invalid L4PORT - Layer 4 packet (e.g., BFD, DHCP) is dropped LB - Packet is dropped by load balancing rule LROUTER - Packet is dropped by logical router LSERVICE - Packet is malformed or traverses inoperative logical service interface LSWITCH - Packet is dropped by logical switch MANAGEMENT - Packet is dropped by Edge datapath MANAGEMENT service port MD_PROXY - Packet is dropped by metadata proxy NAT - Packet is dropped by NAT rule RTEP_TUNNEL - Unused drop reason ND_NS_FAIL - Neighbor Discovery packet fails NEIGH - ARP or Neighbor Discovery packet fails NO_EIP_FOUND - Destination IP is not an elastic IP NO_EIP_ASSOCIATION - Elastic IP is not associated with active edge VDR ENI NO_ENI_FOR_IP - There is no ENI found for the destination IP NO_ENI_FOR_LIF - Cannot find an ENI associated with uplink LIF NO_ROUTE - Cannot find route for destination IP NO_ROUTE_TABLE_FOUND - Cannot find associated route table NO_UNDERLAY_ROUTE_FOUND - Cannot find AWS route to destination NOT_VDR_DOWNLINK - Packet is not forwarded to VMC unmanaged VDR downlink NO_VDR_FOUND - VMC unmanaged VDR associated with Edge uplink is not found NO_VDR_ON_HOST - Cannot find VMC unmanaged VDR list on this host NOT_VDR_UPLINK - Packet is not forwarded to VDR uplink SERVICE_INSERT - Packet from guest VM to service VM or from service VM to guest VM is dropped by firewall rule SPOOFGUARD - Packet is blocked by SpoofGuard policy TTL_ZERO - The IPv4 time to live field of packet is zero. TUNNEL - Overlay tunnel management packet (VNI value of GENEVE header is 0, e.g., BFD) is dropped VLAN - VLAN id of packet is disallowed by the given port VXLAN - VXLAN packet is malformed or cannot find tunnel port for it VXSTT - Unused drop reason VMC_NO_RESPONSE - Failed to query VMC observations as no response from VMC app WRONG_UPLINK - Packet is not routed to the expected Edge uplink by VMC unmanaged VDR FW_STATE - Packet is dropped by stateful firewall NO_MAC - Drop by vswitch as no destination MAC hit MAC Table. FILTERED_UPLINK - Filtering applied at the corresponding UPLINK having no aggregation. IP_OUT_OF_SCOPE - An external IP is required if a packet from a non-public VPC subnet is trying to enter the external underlay network. DHCP_FORGED_MAC - The source MAC address of the DHCP packet sent to the DHCP server does not match the corresponding VIF MAC address of the source port. DHCP_IP_UNAVAILABLE - There is no DHCP client IP address available on the DHCP server. DHCP_IP_NOT_ALLOWED - The requested DHCP client IP address of the packet cannot be allocated from DHCP server. DHCP_INVALID_SERVER_IP_MAC - The DHCP packet is not destined to the DHCP server. NO_GATEWAY_CIDR_FOUND - There is no distributed connection for the source network of the packet to forward the packet to the physical gateway. CONNECTIVITY_POLICY - The packet is dropped due to violating communication rule of connectivity policy. HOP_LIMIT_ZERO - The IPv6 hop limit field of packet is zero. WRONG_SUBNET_GW_BLOCK - The packet is dropped by the gateway to enforce its confinement to the origin network of the VLAN extended subnet. The VLAN extended subnet is the terminology of both VPC overlay subnet and the extended VLAN network. ROUTE_DISTINGUISHER_MAC_RESOLUTION_FAILED - The MAC address of the route distinguisher fails to resolve. MAC_RPF_CHECK_FAILED - The packet is droped due to MAC-address-based reverse path forwarding check. This is to avoid the packet forwarding loops.
+            This field specifies the drop reason of traceflow packet. ARP_FAIL - ARP request fails for some reasons, please refer arp_fail_reason for detail BFD - BFD packet is dropped because traversed by non-operative interface or encountering internal error (e.g., memory insufficient) BROADCAST - Packet is dropped during traversing the interface (e.g., Edge uplink, Edge centralized service port) which disallow ethernet broadcast DHCP - DHCP packet is malformed DLB - The packet is disallowed by distributed load balancing FW_RULE - The packet matches a drop or reject rule of DFW or Edge firewall GENEVE - GENEVE packet is malformed GRE - GRE packet is malformed or traverses a non-operative interface IFACE - Packet traverses a non-operative interface IP - Packet is dropped because of IP related causes (e.g., ICMPv4/ICMPv6 packet is malformed, or DF flag is set but fragment must be performed for the packet) or corresponding interface is not found or inoperative IP_REASS - Packet is dropped during IP reassembly IPSEC - IPsec protocol related packet is dropped IPSEC_VTI - IPsec required SA is not found or traversing inoperative interface cause packet dropped L2VPN - VLAN id of GRE packet is invalid L4PORT - Layer 4 packet (e.g., BFD, DHCP) is dropped LB - Packet is dropped by load balancing rule LROUTER - Packet is dropped by logical router LSERVICE - Packet is malformed or traverses inoperative logical service interface LSWITCH - Packet is dropped by logical switch MANAGEMENT - Packet is dropped by Edge datapath MANAGEMENT service port MD_PROXY - Packet is dropped by metadata proxy NAT - Packet is dropped by NAT rule RTEP_TUNNEL - Unused drop reason ND_NS_FAIL - Neighbor Discovery packet fails NEIGH - ARP or Neighbor Discovery packet fails NO_EIP_FOUND - Destination IP is not an elastic IP NO_EIP_ASSOCIATION - Elastic IP is not associated with active edge VDR ENI NO_ENI_FOR_IP - There is no ENI found for the destination IP NO_ENI_FOR_LIF - Cannot find an ENI associated with uplink LIF NO_ROUTE - Cannot find route for destination IP NO_ROUTE_TABLE_FOUND - Cannot find associated route table NO_UNDERLAY_ROUTE_FOUND - Cannot find AWS route to destination NOT_VDR_DOWNLINK - Packet is not forwarded to VMC unmanaged VDR downlink NO_VDR_FOUND - VMC unmanaged VDR associated with Edge uplink is not found NO_VDR_ON_HOST - Cannot find VMC unmanaged VDR list on this host NOT_VDR_UPLINK - Packet is not forwarded to VDR uplink SERVICE_INSERT - Packet from guest VM to service VM or from service VM to guest VM is dropped by firewall rule SPOOFGUARD - Packet is blocked by SpoofGuard policy TTL_ZERO - The IPv4 time to live field of packet is zero. TUNNEL - Overlay tunnel management packet (VNI value of GENEVE header is 0, e.g., BFD) is dropped VLAN - VLAN id of packet is disallowed by the given port VXLAN - VXLAN packet is malformed or cannot find tunnel port for it VXSTT - Unused drop reason VMC_NO_RESPONSE - Failed to query VMC observations as no response from VMC app WRONG_UPLINK - Packet is not routed to the expected Edge uplink by VMC unmanaged VDR FW_STATE - Packet is dropped by stateful firewall NO_MAC - Drop by vswitch as no destination MAC hit MAC Table. FILTERED_UPLINK - Filtering applied at the corresponding UPLINK having no aggregation. IP_OUT_OF_SCOPE - An external IP is required if a packet from a non-public VPC subnet is trying to enter the external underlay network. DHCP_FORGED_MAC - The source MAC address of the DHCP packet sent to the DHCP server does not match the corresponding VIF MAC address of the source port. DHCP_IP_UNAVAILABLE - There is no DHCP client IP address available on the DHCP server. DHCP_IP_NOT_ALLOWED - The requested DHCP client IP address of the packet cannot be allocated from DHCP server. DHCP_INVALID_SERVER_IP_MAC - The DHCP packet is not destined to the DHCP server. NO_GATEWAY_CIDR_FOUND - There is no distributed connection for the source network of the packet to forward the packet to the physical gateway. CONNECTIVITY_POLICY - The packet is dropped due to violating communication rule of connectivity policy. HOP_LIMIT_ZERO - The IPv6 hop limit field of packet is zero. WRONG_SUBNET_GW_BLOCK - The packet is dropped by the gateway to enforce its confinement to the origin network of the VLAN extended subnet. The VLAN extended subnet is the terminology of both VPC overlay subnet and the extended VLAN network. ROUTE_DISTINGUISHER_MAC_RESOLUTION_FAILED - The MAC address of the route distinguisher fails to resolve. MAC_RPF_CHECK_FAILED - The packet is droped due to MAC-address-based reverse path forwarding check. This is to avoid the packet forwarding loops. ENCAP_PKT_EXCEED_VDS_MTU - The frame size of the encapsulated traceflow packet is larger than the VDS MTU. PKT_EXCEED_GW_MTU - The frame size of the traceflow packet is larger than the gateway interface MTU. ENCAP_PKT_EXCEED_RTEP_MTU - The frame size of the traceflow packet is larger than the remote tunnel endpoint MTU.
           enum:
           - ARP_FAIL
           - BFD
@@ -51195,6 +51528,9 @@ definitions:
           - WRONG_SUBNET_GW_BLOCK
           - ROUTE_DISTINGUISHER_MAC_RESOLUTION_FAILED
           - MAC_RPF_CHECK_FAILED
+          - ENCAP_PKT_EXCEED_VDS_MTU
+          - PKT_EXCEED_GW_MTU
+          - ENCAP_PKT_EXCEED_RTEP_MTU
           readOnly: true
           title: |-
             The reason traceflow packet was dropped
@@ -51207,6 +51543,12 @@ definitions:
           title: |-
             The ID of the connectivity policy that applies to the source of the packet
           type: integer
+        uplink_name:
+          description: |-
+            The uplink name where the traceflow packet is dropped
+          title: |-
+            The uplink name where the traceflow packet is dropped
+          type: string
       type: object
       x-vmw-nsx-module: Traceflow
     x-vmw-nsx-module: Traceflow
@@ -52529,8 +52871,8 @@ definitions:
           type: array
       required:
       - port_mirroring_profile_path
-      - filter_encapsulated_packets
       - source_pnics
+      - filter_encapsulated_packets
       type: object
       x-vmw-nsx-module: PolicyMonitoringProfileBinding
     description: |-
@@ -52652,8 +52994,8 @@ definitions:
           Interface Subnet object parameter
         type: array
     required:
-    - edge_path
     - source_address
+    - edge_path
     - tunnel_interface_subnet
     title: |-
       Tunnel Address request parameters
@@ -52800,8 +53142,8 @@ definitions:
           Operator
         type: string
     required:
-    - operator
     - operand
+    - operator
     title: |-
       Unary Operation
     type: object
@@ -52842,8 +53184,8 @@ definitions:
           Value
         type: string
     required:
-    - value
     - key
+    - value
     title: |-
       A key-value pair with no limitations on size
     type: object
@@ -53040,8 +53382,8 @@ definitions:
             Matching criteria used for associating VMs
           type: string
       required:
-      - recovery_sites
       - protected_site
+      - recovery_sites
       type: object
       x-vmw-nsx-module: VMTagReplicationPolicy
     description: |
@@ -53865,9 +54207,9 @@ definitions:
           type: string
         host_id:
           description: |-
-            Id of the host on which the vm exists.
+            Unique ID of the host where this VirtualNetworkInterface's VM resides.
           title: |-
-            Id of the host on which the vm exists.
+            Unique ID of the host where this VirtualNetworkInterface's VM resides.
           type: string
         ip_address_info:
           description: |-
@@ -53921,12 +54263,12 @@ definitions:
             Id of the vm unique within the host.
           type: string
       required:
-      - external_id
-      - host_id
       - owner_vm_id
-      - mac_address
       - vm_local_id_on_host
       - device_key
+      - external_id
+      - mac_address
+      - host_id
       type: object
       x-vmw-nsx-module: Inventory
     x-vmw-nsx-module: Inventory
@@ -54022,8 +54364,8 @@ definitions:
             Start value of VNI Pool range
           type: integer
       required:
-      - end
       - start
+      - end
       type: object
       x-vmw-nsx-module: PolicyConnectivity
     description: |-
@@ -54073,10 +54415,10 @@ definitions:
             FQDN of vIDB
           type: string
       required:
-      - client_id
-      - vidb_certificate
       - root_certificate
+      - vidb_certificate
       - vidb_fqdn
+      - client_id
       type: object
       x-vmw-nsx-module: Policy
     description: |
@@ -54377,6 +54719,7 @@ definitions:
             IPv4 or IPv6 address
           format: ip
           type: string
+        maxItems: 8
         type: array
     required:
     - server_addresses
@@ -55042,9 +55385,9 @@ definitions:
           Route targets
         type: array
     required:
-    - l2_vni
     - route_targets
     - route_distinguisher
+    - l2_vni
     type: object
     x-vmw-nsx-module: PolicyConnectivity
   VrfRouteTargets:
@@ -55660,10 +56003,10 @@ definitions:
             Vsphere compute identifier for identifying VC server
           type: string
       required:
-      - compute_id
       - hostname
       - storage_id
       - vc_id
+      - compute_id
       - management_network_id
       type: object
       x-vmw-nsx-module: ClusterNodeVMDeployment
@@ -56414,7 +56757,7 @@ host: nsxmanager.your.domain
 info:
   description: VMware NSX Global Policy REST API
   title: NSX Global Policy API
-  version: 9.1.0.0
+  version: 9.1.1.0
 parameters: {}
 paths:
   /aaa/features-with-properties:
@@ -59689,7 +60032,7 @@ paths:
                  "authentication_scheme":{
                     "scheme_name":"KEY",
                     "username":"admin",
-                    "identity_file":"-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAQCfJGCSdJx+qKxt\nE4vmwdLYbFjeuYMNqC3YfB+6sWcqkkZc708zlIyl7Z3F4PE3THDWBo6gCCa3vi6E\nL8HRHUcl8HM4iZxUt352MEJkUuUtkn5tMI5phm9r6bZS736w+AsyYawcOpI24253\nuqPWRXv1VzFJBwk+lgBlzEuarcH7krimBfC1pJdyG7KsfPhTiwtgXA7b2Hz6p9Ub\nuozZ9A1OigyR6QbFKJ/Fl0EsmUinRsPFkeiijF3uQuTUPl0lhty+UY99GmmRQ0+v\nH2wKUbyh6+T4vmhBhVrBTqhCfIJrD6ZJin20AYJUxiu9SSdLq7HzMR4LnEe78/0T \nlGG7yP0jAgMBAAECggEAG94+bRcvmnyGKVm9a4zwk8axb1tUKE2Vra3azpIna0yP\nNtIPcAxo7tuj/9Vq2FCyB8DBNCQJR67trWdBjRGP9oRbYQC0GB/D7QV5cuETUf4v\n1oYkwjTxCRg1veNDr9DYARwajBzzotoD68KK00h6sxVwQ4YQZ93Ttv/mE3GvIRMj\nQN1s6VbFe7jUpEzfJO6/Mg4aRKrFEIp/5q7NRT4jwY4UBJlEC0I9zhrs4rnyIjWR\nLpazAmugcMQ4Uj8xaIDg4rb/KfjdiitivW+6AhXd49RLm6GXncXv1hwN6wZ1Punb\nxV8+xwt9BS5gwBuNASokjwOTswj+bxYXTsaxHPfjvQKBgQDMhsssUOhLJrohcGdR\n3dF/jeJZ6a+GMydBhiVdWHAhx1prEcjH65o0jpWefpk3XiJVcTtdhHtU8Qamm0xV\nVxaVd8W9LJZBRmjJ0VAzghBWzq4je3pw6JAIhVYL3bWzR74xVa9NiFXu8ZqLsJjw\nNlEPQ9vZQZwIDUOs1p9as7PUFQKBgQDHMY+8x/YyyYRhLCsqgdynV3Lc2J5Hk9bN \nqo604uhEAJTbHTZ7WwRAT9QNbIBJwx7j5z1m4MEUq0RFe+MDyW+ACxz+oIGrgmMe\nVcNdvlzQHGywo3BC5CvygU1RrSnu1pqeLk9Vo5KXTz3rAr59Icw54rw7BC7b2RqY\nSnmQUCTCVwKBgBjJ0YAagjzxgaeh3vPeJZEHGkL5fquOMZjQcGDi4hxF9CB79FC+ \nrl7mVR3zjBBY2WJvqdlIwEXoPH0e316MgpE1BgNKjx90MCkdtFG51s8el553Tby3\ngxV1S5t+kJIdBOEn2GpWNswR/kAl9DNQ8fweplurhwS2ztf43zF4DDiNAoGARpo1\nhUcm53dv2XVrU2S2DgY76zVIXLx07W7fqBOpGblPCZ8AGZb4GcdxtNRZYEutnj/v \nDpDpPuc5iptPqp7yS2MlAsdnTqAne7AQUCDSCt2YVL+JYdw4C3tzKVkEPOiJ4zks\n24Dfy4vFuY++buHU3kuURiLEbR41g/cZwWH2tX8CgYAaXJvi9UkNlYfcIzsTqnkC\nmEJt1keFgoD6U0VK2SWL65EL24s5bC81cVtQo6cuVRiAbKKyvcI0/qwnDqIRa9/J\nuakA4piJcmbae9qSNRdloIYdYKT4k7DRHoh45eB7ZKdCu76gUUllOAdr8DGF6xBr\nzHPHeBNiX4ORwTewAEf+VA==\n-----END PRIVATE KEY-----"
+                    "identity_file":"-----BEGIN PRIVATE KEY-----\n<private key>\n-----END PRIVATE KEY-----"
                  }
               },
               "directory_path":"/nsx-backups"
@@ -59713,7 +60056,7 @@ paths:
                      "authentication_scheme":{
                         "scheme_name":"KEY",
                         "username":"admin",
-                        "identity_file":"-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAQCfJGCSdJx+qKxt\nE4vmwdLYbFjeuYMNqC3YfB+6sWcqkkZc708zlIyl7Z3F4PE3THDWBo6gCCa3vi6E\nL8HRHUcl8HM4iZxUt352MEJkUuUtkn5tMI5phm9r6bZS736w+AsyYawcOpI24253\nuqPWRXv1VzFJBwk+lgBlzEuarcH7krimBfC1pJdyG7KsfPhTiwtgXA7b2Hz6p9Ub\nuozZ9A1OigyR6QbFKJ/Fl0EsmUinRsPFkeiijF3uQuTUPl0lhty+UY99GmmRQ0+v\nH2wKUbyh6+T4vmhBhVrBTqhCfIJrD6ZJin20AYJUxiu9SSdLq7HzMR4LnEe78/0T \nlGG7yP0jAgMBAAECggEAG94+bRcvmnyGKVm9a4zwk8axb1tUKE2Vra3azpIna0yP\nNtIPcAxo7tuj/9Vq2FCyB8DBNCQJR67trWdBjRGP9oRbYQC0GB/D7QV5cuETUf4v\n1oYkwjTxCRg1veNDr9DYARwajBzzotoD68KK00h6sxVwQ4YQZ93Ttv/mE3GvIRMj\nQN1s6VbFe7jUpEzfJO6/Mg4aRKrFEIp/5q7NRT4jwY4UBJlEC0I9zhrs4rnyIjWR\nLpazAmugcMQ4Uj8xaIDg4rb/KfjdiitivW+6AhXd49RLm6GXncXv1hwN6wZ1Punb\nxV8+xwt9BS5gwBuNASokjwOTswj+bxYXTsaxHPfjvQKBgQDMhsssUOhLJrohcGdR\n3dF/jeJZ6a+GMydBhiVdWHAhx1prEcjH65o0jpWefpk3XiJVcTtdhHtU8Qamm0xV\nVxaVd8W9LJZBRmjJ0VAzghBWzq4je3pw6JAIhVYL3bWzR74xVa9NiFXu8ZqLsJjw\nNlEPQ9vZQZwIDUOs1p9as7PUFQKBgQDHMY+8x/YyyYRhLCsqgdynV3Lc2J5Hk9bN \nqo604uhEAJTbHTZ7WwRAT9QNbIBJwx7j5z1m4MEUq0RFe+MDyW+ACxz+oIGrgmMe\nVcNdvlzQHGywo3BC5CvygU1RrSnu1pqeLk9Vo5KXTz3rAr59Icw54rw7BC7b2RqY\nSnmQUCTCVwKBgBjJ0YAagjzxgaeh3vPeJZEHGkL5fquOMZjQcGDi4hxF9CB79FC+ \nrl7mVR3zjBBY2WJvqdlIwEXoPH0e316MgpE1BgNKjx90MCkdtFG51s8el553Tby3\ngxV1S5t+kJIdBOEn2GpWNswR/kAl9DNQ8fweplurhwS2ztf43zF4DDiNAoGARpo1\nhUcm53dv2XVrU2S2DgY76zVIXLx07W7fqBOpGblPCZ8AGZb4GcdxtNRZYEutnj/v \nDpDpPuc5iptPqp7yS2MlAsdnTqAne7AQUCDSCt2YVL+JYdw4C3tzKVkEPOiJ4zks\n24Dfy4vFuY++buHU3kuURiLEbR41g/cZwWH2tX8CgYAaXJvi9UkNlYfcIzsTqnkC\nmEJt1keFgoD6U0VK2SWL65EL24s5bC81cVtQo6cuVRiAbKKyvcI0/qwnDqIRa9/J\nuakA4piJcmbae9qSNRdloIYdYKT4k7DRHoh45eB7ZKdCu76gUUllOAdr8DGF6xBr\nzHPHeBNiX4ORwTewAEf+VA==\n-----END PRIVATE KEY-----"
+                        "identity_file":"-----BEGIN PRIVATE KEY-----\n<private key>\n-----END PRIVATE KEY-----"
                      }
                   },
                   "directory_path":"/nsx-backups"
@@ -65159,12 +65502,10 @@ paths:
       consumes:
       - application/json
       description: |
-        Returns supported attribute and sub-attributes for specified
-        attribute key with their supported values, if provided in query/request
-        parameter, else will fetch all supported attributes and sub-attributes for
-        all supported attribute keys.
-        Alternatively, to get a list of supported attributes and sub-attributes fire the following REST API
-        GET https://&lt;policy-mgr&gt;/policy/api/v1/infra/context-profiles/attributes
+        Returns supported attributes and sub-attributes along with their allowed
+        values. When an attribute_key query parameter is supplied, only the
+        matching attribute and its sub-attributes are returned. When omitted,
+        all supported attribute keys and their corresponding values are returned.
       operationId: GlobalInfraListProfileSupportedAttributes
       parameters:
       - description: 'It fetches attributes and subattributes for the given attribute
@@ -65783,17 +66124,15 @@ paths:
       consumes:
       - application/json
       description: |
-        Creates/Updates a PolicyContextProfile, which encapsulates attribute and
-        sub-attributes of network services.
-        Rules for using attributes and sub-attributes in single PolicyContextProfile
-        1. One type of attribute can't have multiple occurrences. ( Eg. -
-           Attribute type APP_ID can be used only once per PolicyContextProfile.)
-        2. For specifying multiple values for an attribute, provide them in an array.
-        3. If sub-attribtes are mentioned for an attribute, then only single
-           value is allowed for that attribute.
-        4. To get a list of supported attributes and sub-attributes fire the following REST API
-           GET https://&lt;policy-mgr&gt;/policy/api/v1/infra/context-profiles/attributes
-        5. Do not create context profile with "custom_attributes" id
+        Creates a new Policy Context Profile or selectively updates the fields
+        provided in the request body of an existing one.
+        Rules for using attributes and sub-attributes in a single PolicyContextProfile:
+        1. Each attribute key may appear only once per profile. (e.g. APP_ID
+           can be specified at most once.)
+        2. Multiple values for an attribute must be supplied as an array.
+        3. When sub-attributes are provided for an attribute, that attribute
+           must have exactly one value.
+        4. The reserved id "custom_attributes" must not be used as a profile id.
       operationId: GlobalInfraPatchCreateOrUpdatePolicyContextProfile
       parameters:
       - in: path
@@ -65853,7 +66192,7 @@ paths:
         '504':
           $ref: '#/responses/GatewayTimeout'
       summary: |-
-        Create PolicyContextProfile
+        Create or partially update a Policy Context Profile
       tags:
       - Inventory
       - Context Profiles
@@ -65902,17 +66241,16 @@ paths:
       consumes:
       - application/json
       description: |
-        Creates/Updates a PolicyContextProfile, which encapsulates attribute and
-        sub-attributes of network services.
-        Rules for using attributes and sub-attributes in single PolicyContextProfile
-        1. One type of attribute can't have multiple occurrences. ( Eg. -
-           Attribute type APP_ID can be used only once per PolicyContextProfile.)
-        2. For specifying multiple values for an attribute, provide them in an array.
-        3. If sub-attribtes are mentioned for an attribute, then only single
-           value is allowed for that attribute.
-        4. To get a list of supported attributes and sub-attributes fire the following REST API
-           GET https://&lt;policy-mgr&gt;/policy/api/v1/infra/context-profiles/attributes
-        5. Do not create context profile with "custom_attributes" id
+        Creates a new Policy Context Profile or fully replaces an existing one.
+        The entire profile is replaced with the contents of the request body;
+        any fields not included in the request will be reset to their defaults.
+        Rules for using attributes and sub-attributes in a single PolicyContextProfile:
+        1. Each attribute key may appear only once per profile. (e.g. APP_ID
+           can be specified at most once.)
+        2. Multiple values for an attribute must be supplied as an array.
+        3. When sub-attributes are provided for an attribute, that attribute
+           must have exactly one value.
+        4. The reserved id "custom_attributes" must not be used as a profile id.
       operationId: GlobalInfraPutCreateOrUpdatePolicyContextProfile
       parameters:
       - in: path
@@ -65976,7 +66314,7 @@ paths:
         '504':
           $ref: '#/responses/GatewayTimeout'
       summary: |-
-        Create PolicyContextProfile
+        Create or replace a Policy Context Profile
       tags:
       - Inventory
       - Context Profiles
@@ -69897,7 +70235,8 @@ paths:
       consumes:
       - application/json
       description: |
-        Read a domain.
+        Returns the configuration of a specific domain identified by the domain ID.
+        Domains are used to scope groups, security policies, and gateway policies.
       operationId: GlobalInfraReadDomainForInfra
       parameters:
       - description: |-
@@ -69928,7 +70267,7 @@ paths:
         '504':
           $ref: '#/responses/GatewayTimeout'
       summary: |-
-        Read domain
+        Read a domain by ID
       tags:
       - Policy
       - Domains
@@ -72039,8 +72378,10 @@ paths:
     get:
       consumes:
       - application/json
-      description: |-
-        Read group
+      description: |
+        Returns the configuration of a specific group within a domain, identified
+        by domain ID and group ID. Groups define membership criteria for workloads and are
+        used as sources, destinations, and scopes in security policies.
       operationId: GlobalInfraReadGroupForDomain
       parameters:
       - description: |-
@@ -72077,7 +72418,7 @@ paths:
         '504':
           $ref: '#/responses/GatewayTimeout'
       summary: |-
-        Read group
+        Read a group by ID
       tags:
       - Inventory
       - Groups
@@ -74431,10 +74772,10 @@ paths:
     get:
       consumes:
       - application/json
-      description: |
-        It retrieves member types for a given group. In case of nested groups, it calculates
-        member types of child groups as well. Considers member type for members added
-        via static members and dynamic membership criteria.
+      description: "It retrieves member types for a given group - based on the expression\
+        \ used in the group or the definition of the \ngroup via static and dynamic\
+        \ criteria. In case of nested groups, it calculates member types of child\
+        \ groups as well.\n"
       operationId: GlobalInfraGetMemberTypesForGroup
       parameters:
       - description: |-
@@ -74471,7 +74812,7 @@ paths:
         '504':
           $ref: '#/responses/GatewayTimeout'
       summary: |-
-        Get member types for a given Group
+        Get member types for a given Group based on the expressions used in the group.
       tags:
       - Inventory
       - Groups
@@ -76852,7 +77193,7 @@ paths:
       consumes:
       - application/json
       description: |
-        Update the IDS gateway policy for a domain.
+        Create or partially update a gateway intrusion detection policy for a domain.
       operationId: GlobalInfraPatchIdsGatewayPolicy
       parameters:
       - in: path
@@ -76886,7 +77227,7 @@ paths:
         '504':
           $ref: '#/responses/GatewayTimeout'
       summary: |-
-        Update IDS gateway policy
+        Patch a gateway IDS/IPS policy
       tags:
       - Security (North South)
       - Ips & Malware (Rules)
@@ -76927,7 +77268,7 @@ paths:
       consumes:
       - application/json
       description: |
-        Update the IDS gateway policy for a domain.
+        Create or update a gateway intrusion detection policy for a domain.
       operationId: GlobalInfraCreateOrReplaceIdsGatewayPolicy
       parameters:
       - in: path
@@ -76965,7 +77306,7 @@ paths:
         '504':
           $ref: '#/responses/GatewayTimeout'
       summary: |-
-        Update IDS gateway policy
+        Create or update a gateway IDS/IPS policy
       tags:
       - Security (North South)
       - Ips & Malware (Rules)
@@ -77228,8 +77569,10 @@ paths:
     get:
       consumes:
       - application/json
-      description: |-
-        Read IDS rule
+      description: |
+        Returns the configuration of a specific Intrusion Detection System (IDS) rule within
+        a gateway intrusion service policy. Gateway IDS rules inspect north-south traffic
+        passing through a Tier-1 or Tier-0 gateway for intrusion patterns.
       operationId: GlobalInfraReadIdsGatewayRule
       parameters:
       - in: path
@@ -77266,7 +77609,7 @@ paths:
         '504':
           $ref: '#/responses/GatewayTimeout'
       summary: |-
-        Read IDS rule
+        Read a gateway IDS/IPS intrusion detection rule by ID
       tags:
       - Security (North South)
       - Ips & Malware (Rules)
@@ -77896,7 +78239,7 @@ paths:
       x-vmw-nsx-example-response: |
         {
           "resource_type": "IdsGatewayPolicy",
-          "description": "comm map revised",
+          "description": "ids gateway policy revised",
           "id": "cgw-1",
           "display_name": "cgw-1",
           "path": "/infra/domains/vmc/intrusion-service-gateway-policies/cgw-1",
@@ -77905,7 +78248,7 @@ paths:
           "rules": [
               {
                   "resource_type": "Rule",
-                  "description": " comm entry",
+                  "description": " rule",
                   "id": "ce-1",
                   "display_name": "ce-1",
                   "path": "/infra/domains/vmc/intrusion-service-gateway-policies/cgw1/rules/ce-1",
@@ -78775,7 +79118,9 @@ paths:
       consumes:
       - application/json
       description: |
-        List intrusion detection rules.
+        Returns a paginated list of all Intrusion Detection System (IDS) rules within a
+        specific intrusion service policy. Rules are evaluated in sequence to detect and
+        prevent network intrusion attempts based on configured IDS profiles.
       operationId: GlobalInfraListIdsRules
       parameters:
       - description: |-
@@ -78850,7 +79195,7 @@ paths:
         '504':
           $ref: '#/responses/GatewayTimeout'
       summary: |-
-        List IDS rules
+        List IDS/IPS intrusion detection rules in a policy
       tags:
       - Security (East West)
       - Ips & Malware (Rules)
@@ -78948,7 +79293,7 @@ paths:
         '504':
           $ref: '#/responses/GatewayTimeout'
       summary: |-
-        Delete IDS rule
+        Delete a distributed IDS/IPS rule
       tags:
       - Security (East West)
       - Ips & Malware (Rules)
@@ -78962,7 +79307,8 @@ paths:
       consumes:
       - application/json
       description: |
-        Read intrusion detection rule
+        Returns the configuration of a specific distributed IDS/IPS rule within an intrusion
+        service policy, identified by domain ID, policy ID, and rule ID.
       operationId: GlobalInfraGetIdsRule
       parameters:
       - description: |-
@@ -79005,7 +79351,7 @@ paths:
         '504':
           $ref: '#/responses/GatewayTimeout'
       summary: |-
-        Get IDS rule.
+        Read a distributed IDS/IPS intrusion detection rule by ID
       tags:
       - Security (East West)
       - Ips & Malware (Rules)
@@ -79063,7 +79409,7 @@ paths:
       consumes:
       - application/json
       description: |-
-        Patch intrusion detection system rule.
+        Create or partially update a distributed IDS/IPS intrusion detection rule.
       operationId: GlobalInfraPatchIdsRule
       parameters:
       - description: |-
@@ -79107,7 +79453,7 @@ paths:
         '504':
           $ref: '#/responses/GatewayTimeout'
       summary: |-
-        Patch IDS rule
+        Patch a distributed IDS/IPS rule
       tags:
       - Security (East West)
       - Ips & Malware (Rules)
@@ -79134,7 +79480,7 @@ paths:
       consumes:
       - application/json
       description: |-
-        Update intrusion detection system rule.
+        Create or update a distributed IDS/IPS intrusion detection rule.
       operationId: GlobalInfraCreateOrUpdateIdsRule
       parameters:
       - description: |-
@@ -79182,7 +79528,7 @@ paths:
         '504':
           $ref: '#/responses/GatewayTimeout'
       summary: |-
-        create or update IDS rule
+        Create or update a distributed IDS/IPS rule
       tags:
       - Security (East West)
       - Ips & Malware (Rules)
@@ -79535,7 +79881,7 @@ paths:
       consumes:
       - application/json
       description: |
-        List all security policies for a domain.
+        List all distributed firewall (DFW) security policies for a domain.
       operationId: GlobalInfraListSecurityPoliciesForDomain
       parameters:
       - in: path
@@ -79613,7 +79959,7 @@ paths:
         '504':
           $ref: '#/responses/GatewayTimeout'
       summary: |-
-        List security policies
+        List distributed firewall security policies
       tags:
       - Security (East West)
       - Distributed Firewall (Rules)
@@ -79630,7 +79976,7 @@ paths:
           "results": [
               {
                   "resource_type": "SecurityPolicy",
-                  "description": "comm map",
+                  "description": "security policy",
                   "id": "application-section-1",
                   "display_name": "application-section-1",
                   "path": "/infra/domains/vmc/security-policies/application-section-1",
@@ -79672,7 +80018,7 @@ paths:
       consumes:
       - application/json
       description: |
-        Deletes the security policy along with all the rules
+        Delete a distributed firewall (DFW) security policy along with all its rules.
       operationId: GlobalInfraDeleteSecurityPolicyForDomain
       parameters:
       - in: path
@@ -79701,7 +80047,7 @@ paths:
         '504':
           $ref: '#/responses/GatewayTimeout'
       summary: |-
-        Deletes a security policy from this domain
+        Delete a distributed firewall security policy
       tags:
       - Security (East West)
       - Distributed Firewall (Rules)
@@ -79715,7 +80061,7 @@ paths:
       consumes:
       - application/json
       description: |
-        Read security policy for a domain.
+        Read a distributed firewall (DFW) security policy for a domain.
       operationId: GlobalInfraReadSecurityPolicyForDomain
       parameters:
       - in: path
@@ -79748,7 +80094,7 @@ paths:
         '504':
           $ref: '#/responses/GatewayTimeout'
       summary: |-
-        Read security policy
+        Read a distributed firewall security policy
       tags:
       - Security (East West)
       - Distributed Firewall (Rules)
@@ -79760,7 +80106,7 @@ paths:
       x-vmw-nsx-example-response: |
         {
           "resource_type": "SecurityPolicy",
-          "description": "comm map",
+          "description": "security policy",
           "id": "application-section-1",
           "display_name": "application-section-1",
           "path": "/infra/domains/vmc/security-policies/application-section-1",
@@ -79769,7 +80115,7 @@ paths:
           "rules": [
               {
                   "resource_type": "Rule",
-                  "description": " comm entry",
+                  "description": " rule",
                   "id": "ce-1",
                   "display_name": "ce-1",
                   "path": "/infra/domains/vmc/security-policies/application-section-1/rules/ce-1",
@@ -79791,6 +80137,7 @@ paths:
                       "/infra/services/HTTP",
                       "/infra/services/CIM-HTTP"
                   ],
+                  "rule_id": 1003,
                   "_create_user": "admin",
                   "_create_time": 1517317382942,
                   "_last_modified_user": "admin",
@@ -79815,9 +80162,9 @@ paths:
       consumes:
       - application/json
       description: |
-        Patch the security policy for a domain. If a security policy for the given
-        security-policy-id is not present, the object will get created and if it is
-        present it will be updated. This is a full replace.
+        Create or partially update a distributed firewall (DFW) security policy for a domain.
+        If a security policy for the given security-policy-id is not present, the object will
+        get created and if it is present it will be updated.
         Performance Note: If you want to edit several rules in a security policy
         use this API. It will perform better than several individual rule APIs.
         Just pass all the rules which you wish to edit as embedded rules to it.
@@ -79854,7 +80201,7 @@ paths:
         '504':
           $ref: '#/responses/GatewayTimeout'
       summary: |-
-        Patch security policy
+        Patch a distributed firewall security policy
       tags:
       - Security (East West)
       - Distributed Firewall (Rules)
@@ -79864,12 +80211,12 @@ paths:
       x-vmw-nsx-example-request: |
         PATCH https://&lt;policy-mgr&gt;/global-manager/api/v1/global-infra/domains/vmc/security-policies/application-section-1
         {
-            "description": "comm map patched",
+            "description": "security policy patched",
             "display_name": "application-section-1",
             "category": "Application",
             "rules": [
               {
-                "description": " comm entry",
+                "description": " rule",
                 "display_name": "ce-1",
                 "sequence_number": 1,
                 "source_groups": [
@@ -79892,7 +80239,7 @@ paths:
       consumes:
       - application/json
       description: |
-        Create or Update the security policy for a domain. This is a full replace.
+        Create or update a distributed firewall (DFW) security policy for a domain. This is a full replace.
         All the rules are replaced.
         Performance Note: If you want to edit several rules in a security policy,
         use this API. It will perform better than several individual rule APIs.
@@ -79934,7 +80281,7 @@ paths:
         '504':
           $ref: '#/responses/GatewayTimeout'
       summary: |-
-        Create or Update security policy
+        Create or update a distributed firewall security policy
       tags:
       - Security (East West)
       - Distributed Firewall (Rules)
@@ -79944,12 +80291,12 @@ paths:
       x-vmw-nsx-example-request: |
         PUT https://&lt;policy-mgr&gt;/global-manager/api/v1/global-infra/domains/vmc/security-policies/application-section-1
         {
-            "description": "comm map",
+            "description": "security policy",
             "display_name": "application-section-1",
             "category": "Application",
             "rules": [
               {
-                "description": " comm entry",
+                "description": " rule",
                 "display_name": "ce-1",
                 "sequence_number": 1,
                 "source_groups": [
@@ -79970,7 +80317,7 @@ paths:
       x-vmw-nsx-example-response: |
         {
           "resource_type": "SecurityPolicy",
-          "description": "comm map",
+          "description": "security policy",
           "id": "application-section-1",
           "display_name": "application-section-1",
           "path": "/infra/domains/vmc/security-policies/application-section-1",
@@ -79979,7 +80326,7 @@ paths:
           "rules": [
               {
                   "resource_type": "Rule",
-                  "description": " comm entry",
+                  "description": " rule",
                   "id": "ce-1",
                   "display_name": "ce-1",
                   "path": "/infra/domains/vmc/security-policies/application-section-1/rules/ce-1",
@@ -80001,6 +80348,7 @@ paths:
                       "/infra/services/HTTP",
                       "/infra/services/CIM-HTTP"
                   ],
+                  "rule_id": 1003,
                   "_create_user": "admin",
                   "_create_time": 1517317382942,
                   "_last_modified_user": "admin",
@@ -80026,8 +80374,9 @@ paths:
     get:
       consumes:
       - application/json
-      description: |-
-        List rules
+      description: |
+        Returns a list of all distributed firewall rules within a specific security
+        policy.
       operationId: GlobalInfraListSecurityRules
       parameters:
       - in: path
@@ -80098,7 +80447,7 @@ paths:
         '504':
           $ref: '#/responses/GatewayTimeout'
       summary: |-
-        List rules
+        List distributed firewall rules in a security policy
       tags:
       - Security (East West)
       - Distributed Firewall (Rules)
@@ -80115,7 +80464,7 @@ paths:
           "results": [
               {
                   "resource_type": "Rule",
-                  "description": " comm entry",
+                  "description": " rule",
                   "id": "ce-1",
                   "display_name": "ce-1",
                   "path": "/infra/domains/vmc/security-policies/application-section-1/rules/ce-1",
@@ -80137,6 +80486,7 @@ paths:
                       "/infra/services/HTTP",
                       "/infra/services/CIM-HTTP"
                   ],
+                  "rule_id": 1003,
                   "_create_user": "admin",
                   "_create_time": 1517317382942,
                   "_last_modified_user": "admin",
@@ -80153,7 +80503,7 @@ paths:
       consumes:
       - application/json
       description: |-
-        Delete rule
+        Delete a distributed firewall (DFW) rule from a security policy.
       operationId: GlobalInfraDeleteSecurityRule
       parameters:
       - in: path
@@ -80186,7 +80536,7 @@ paths:
         '504':
           $ref: '#/responses/GatewayTimeout'
       summary: |-
-        Delete rule
+        Delete a distributed firewall rule
       tags:
       - Security (East West)
       - Distributed Firewall (Rules)
@@ -80199,8 +80549,9 @@ paths:
     get:
       consumes:
       - application/json
-      description: |-
-        Read rule
+      description: |
+        Returns the configuration of a specific distributed firewall rule within a security
+        policy.
       operationId: GlobalInfraReadSecurityRule
       parameters:
       - in: path
@@ -80237,7 +80588,7 @@ paths:
         '504':
           $ref: '#/responses/GatewayTimeout'
       summary: |-
-        Read rule
+        Read a distributed firewall rule by ID
       tags:
       - Security (East West)
       - Distributed Firewall (Rules)
@@ -80249,7 +80600,7 @@ paths:
       x-vmw-nsx-example-response: |
         {
           "resource_type": "Rule",
-          "description": " comm entry",
+          "description": " rule",
           "id": "ce-1",
           "display_name": "ce-1",
           "path": "/infra/domains/vmc/security-policies/application-section-1/rules/ce-1",
@@ -80271,6 +80622,7 @@ paths:
               "/infra/services/HTTP",
               "/infra/services/CIM-HTTP"
           ],
+          "rule_id": 1002,
           "_create_user": "admin",
           "_create_time": 1517317382942,
           "_last_modified_user": "admin",
@@ -80284,9 +80636,9 @@ paths:
       consumes:
       - application/json
       description: |
-        Patch the rule. If Rule corresponding to the the given rule-id is
-        not present, the object will get created and if it is present it will be
-        updated. This is a full replace.
+        Create or partially update a distributed firewall (DFW) rule within a security policy.
+        If a rule with the given rule-id does not exist it will be created; otherwise only the
+        specified fields will be updated.
         Performance Note: If you want to edit several rules in a security policy,
         prefer below mentioned API for optimal performance.
         Pass all the rules which you wish to edit as embedded rules to it.
@@ -80329,7 +80681,7 @@ paths:
         '504':
           $ref: '#/responses/GatewayTimeout'
       summary: |-
-        Patch a rule
+        Patch a distributed firewall rule
       tags:
       - Security (East West)
       - Distributed Firewall (Rules)
@@ -80339,7 +80691,7 @@ paths:
       x-vmw-nsx-example-request: |
         PATCH https://&lt;policy-mgr&gt;/global-manager/api/v1/global-infra/domains/vmc/security-policies/application-section-1/rules/ce-1
         {
-          "description": " comm entry",
+          "description": " rule",
           "display_name": "ce-1",
           "sequence_number": 1,
           "source_groups": [
@@ -80362,8 +80714,9 @@ paths:
       consumes:
       - application/json
       description: |
-        Update the rule. Create new rule if a rule with the rule-id is not already
-        present.
+        Create or update a distributed firewall (DFW) rule within a security policy.
+        If a rule with the given rule-id does not exist it will be created; otherwise it will be
+        updated.
         Performance Note: If you wish to edit several rules in a security policy,
         prefer below mentioned API for optimal performance.
         Pass all the rules which you wish to edit as embedded rules to it.
@@ -80410,7 +80763,7 @@ paths:
         '504':
           $ref: '#/responses/GatewayTimeout'
       summary: |-
-        Create or update a rule
+        Create or update a distributed firewall rule
       tags:
       - Security (East West)
       - Distributed Firewall (Rules)
@@ -80420,7 +80773,7 @@ paths:
       x-vmw-nsx-example-request: |
         PUT https://&lt;policy-mgr&gt;/global-manager/api/v1/global-infra/domains/vmc/security-policies/application-section-1/rules/ce-1
         {
-          "description": "comm entry",
+          "description": "rule",
           "display_name": "ce-1",
           "sequence_number": 1,
           "source_groups": [
@@ -80442,7 +80795,7 @@ paths:
       x-vmw-nsx-example-response: |
         {
           "resource_type": "Rule",
-          "description": " comm entry",
+          "description": " rule",
           "id": "ce-1",
           "display_name": "ce-1",
           "path": "/infra/domains/vmc/security-policies/application-section-1/rules/ce-1",
@@ -80459,11 +80812,12 @@ paths:
           "scope": [
               "ANY"
           ],
-          "action": "ALLOW",
+          "action": "DROP",
           "services": [
               "/infra/services/HTTP",
               "/infra/services/CIM-HTTP"
           ],
+          "rule_id": 1001,
           "_create_user": "admin",
           "_create_time": 1517317382942,
           "_last_modified_user": "admin",
@@ -80573,7 +80927,8 @@ paths:
       consumes:
       - application/json
       description: |
-        This is used to re-order a rule within a security policy.
+        This is used to re-order a distributed firewall (DFW) rule within a security policy.
+        NOTE: Default rule sequence numbers cannot be modified.
       operationId: GlobalInfraReviseSecurityRule
       parameters:
       - in: path
@@ -80636,7 +80991,7 @@ paths:
         '504':
           $ref: '#/responses/GatewayTimeout'
       summary: |-
-        Revise the positioning of rule
+        Revise the positioning of a distributed firewall rule
       tags:
       - Security (East West)
       - Distributed Firewall (Rules)
@@ -80646,7 +81001,7 @@ paths:
       x-vmw-nsx-example-request: |
         POST https://&lt;policy-mgr&gt;/global-manager/api/v1/global-infra/domains/vmc/security-policies/emergency-section/rules/ce-1?action=revise&anchor_path=/global-infra/domains/vmc/security-policies/emergency-section/rules/ce-2&operation=insert_after
         {
-          "description": " comm entry",
+          "description": " rule",
           "display_name": "ce-1",
           "path": "/global-infra/domains/vmc_domain/security-policies/emergency-section/rules/ce-1",
           "parent_path": "/global-infra/domains/vmc_domain/security-policies/emergency-section",
@@ -80673,7 +81028,7 @@ paths:
       x-vmw-nsx-example-response: |
         {
           "resource_type": "Rule",
-          "description": " comm entry",
+          "description": " rule",
           "id": "ce-1",
           "display_name": "ce-1",
           "path": "/infra/domains/vmc/security-policies/application-section-1/rules/ce-1",
@@ -80809,7 +81164,7 @@ paths:
       consumes:
       - application/json
       description: |
-        This is used to set a precedence of a security policy w.r.t others.
+        This is used to set a precedence of a distributed firewall (DFW) security policy w.r.t others.
       operationId: GlobalInfraReviseSecurityPolicies
       parameters:
       - in: path
@@ -80868,7 +81223,7 @@ paths:
         '504':
           $ref: '#/responses/GatewayTimeout'
       summary: |-
-        Revise the positioning of security policies
+        Revise the positioning of a distributed firewall security policy
       tags:
       - Security (East West)
       - Distributed Firewall (Rules)
@@ -80878,12 +81233,12 @@ paths:
       x-vmw-nsx-example-request: |
         POST https://&lt;policy-mgr&gt;/global-manager/api/v1/global-infra/domains/vmc/security-policies/application-section-1?action=revise&anchor_path=/global-infra/domains/vmc/security-policies/emergency-section&operation=insert_before
         {
-            "description": "comm map revised",
+            "description": "security policy revised",
             "display_name": "application-section-1",
             "category":"Application",
             "rules": [
               {
-                "description": " comm entry",
+                "description": " rule",
                 "display_name": "ce-1",
                 "sequence_number": 1,
                 "source_groups": [
@@ -80904,7 +81259,7 @@ paths:
       x-vmw-nsx-example-response: |
         {
           "resource_type": "SecurityPolicy",
-          "description": "comm map",
+          "description": "security policy",
           "id": "application-section-1",
           "display_name": "application-section-1",
           "path": "/infra/domains/vmc/security-policies/application-section-1",
@@ -80913,7 +81268,7 @@ paths:
           "rules": [
               {
                   "resource_type": "Rule",
-                  "description": " comm entry",
+                  "description": " rule",
                   "id": "ce-1",
                   "display_name": "ce-1",
                   "path": "/infra/domains/vmc/security-policies/application-section-1/rules/ce-1",
@@ -80935,6 +81290,7 @@ paths:
                       "/infra/services/HTTP",
                       "/infra/services/CIM-HTTP"
                   ],
+                  "rule_id": 1003,
                   "_create_user": "admin",
                   "_create_time": 1517317382942,
                   "_last_modified_user": "admin",
@@ -80960,8 +81316,8 @@ paths:
     get:
       consumes:
       - application/json
-      description: |-
-        List policy drafts.
+      description: |
+        Returns a paginated list of all DFW drafts.
       operationId: GlobalInfraListDrafts
       parameters:
       - description: 'If set to true, then only auto drafts will be get fetched.
@@ -81034,7 +81390,7 @@ paths:
         '504':
           $ref: '#/responses/GatewayTimeout'
       summary: |-
-        List policy drafts
+        List all policy configuration drafts
       tags:
       - Security (East West)
       - Distributed Firewall (Drafts)
@@ -81135,7 +81491,9 @@ paths:
       consumes:
       - application/json
       description: |
-        Read a draft for a given draft identifier.
+        Returns the configuration of a specific NSX policy draft identified by the draft ID.
+        Drafts allow administrators to stage and review configuration changes before publishing
+        them to the live environment.
       operationId: GlobalInfraReadDraft
       parameters:
       - in: path
@@ -81164,7 +81522,7 @@ paths:
         '504':
           $ref: '#/responses/GatewayTimeout'
       summary: |-
-        Read draft
+        Read a policy configuration draft by ID
       tags:
       - Security (East West)
       - Distributed Firewall (Drafts)
@@ -81882,7 +82240,7 @@ paths:
       consumes:
       - application/json
       description: |
-        Read a draft and publish it by applying changes onto current configuration.
+        Publishes a draft by applying its staged configuration changes onto the live environment.
         If there are additional changes on top of draft configuration, pass it as a
         request body, in form of Infra object. Otherwise, if there are no additional
         changes, then pass empty Infra object as a request body.
@@ -81915,7 +82273,7 @@ paths:
         '504':
           $ref: '#/responses/GatewayTimeout'
       summary: |-
-        Publish a draft
+        Publish a policy draft and apply its changes
       tags:
       - Security (East West)
       - Distributed Firewall (Drafts)
@@ -83924,7 +84282,7 @@ paths:
       consumes:
       - application/json
       description: |
-        Get the list of rules of given parent path of policy/section, filtered
+        Get the list of firewall rules of a given parent policy path, filtered
         based on the given criteria.
         Parent path is mandatory.
       operationId: GlobalInfraGetFilteredRules
@@ -83997,7 +84355,7 @@ paths:
         '504':
           $ref: '#/responses/GatewayTimeout'
       summary: |-
-        Get rules filtered based on the given criteria
+        Get firewall rules filtered by criteria
       tags:
       - Security
       - Firewall
@@ -89426,8 +89784,13 @@ paths:
       - application/json
       description: |
         Delete IP Reputation site mapping from GM. On deletion of the site mapping for a given site,
-        site specific local default malicious security policies/rules will be enabled and the global ip
-        reputation default security policies will be removed from the site.
+        site-specific local default malicious security policies/rules will be enforced and the global
+        IP reputation default security policies will be removed from the site.
+
+        Site Mapping Deletion/Unmapping Behavior:
+        - Inbound IP reputation rules are enabled after site unmapping to provide protection against
+          malicious inbound traffic
+        - Outbound IP reputation rules remain disabled after site unmapping.
       operationId: GlobalInfraDeleteIPReputationSiteMapping
       parameters:
       - description: |-
@@ -89560,9 +89923,11 @@ paths:
       description: |
         Create IP reputation site mapping for a specific site. IP reputation site mapping provides
         a way for the user to control the management of IP reputation based security policies from GM.
-        Creation of site mapping for a site results in disabling IP reputation default security policies
-        on sites. Post creation of the site mapping the global default security policies from GM gets pushed
-        to the site.
+
+        Site Mapping Creation Behavior:
+        - Creating site mapping for a site results in disabling both inbound and outbound IP reputation
+          default security policies on the site
+        - Post creation of the site mapping, the global default security policies from GM get pushed to the site
 
         Execution Context:
         - Endpoint: PATCH https://<policy-mgr>/global-manager/api/v1/global-infra/ip-reputation-site-mappings/<mapping-id>
@@ -92550,15 +92915,78 @@ paths:
         The request is evaluated as follows:
         - &lt;intent_path&gt;: the request is evaluated on all enforcement points for the given intent without
         enforcement point specific details.
-        - &lt;intent_path, include_enforced_status&gt;: the request is evaluated on all enforcement points for
-        the given intent with enforcement point specific details.
+        - &lt;intent_path, include_enforced_status=true&gt;: the request is evaluated on all enforcement points
+        for the given intent with enforcement point specific details. This is only supported when intent_path
+        refers to an object of one of the following types:
+        SECURITY_POLICY,
+        GATEWAY_POLICY,
+        IDS_SECURITY_POLICY,
+        IDS_GATEWAY_POLICY,
+        IDS_COMPRESSED_SIGNATURE,
+        IDS_COMPRESSED_CUSTOM_SIGNATURE,
+        TLS_POLICY,
+        VPC_SECURITY_POLICY,
+        VPC_GATEWAY_POLICY,
+        PUBLIC_CLOUD_VPC_SECURITY_POLICY,
+        Passing the path of an unsupported type (e.g. a rule) with include_enforced_status=true
+        will result in an error. In such cases, pass the path of the parent policy object instead
+        (e.g., the SecurityPolicy or GatewayPolicy that contains the rule).
       operationId: GlobalInfraReadIntentStatus
       parameters:
       - default: false
-        description: 'Flag conveying whether to include detailed view of the enforcement
-          point specific
+        description: 'Flag conveying whether to include detailed per-transport-node
+          enforcement status
 
-          status or not.
+          in the response.
+
+          When set to true, each item in consolidated_status_per_enforcement_point
+          is returned
+
+          as ConsolidatedStatusNsxT (with the enforced_status field populated).
+
+          When set to false (default), each item is returned as ConsolidatedStatusPerEnforcementPoint
+
+          (enforced_status absent).
+
+          Use the resource_type field in each item to distinguish between the two
+          types.
+
+          This flag is only supported when intent_path refers to an object of one
+          of the
+
+          following types:
+
+          SECURITY_POLICY,
+
+          GATEWAY_POLICY,
+
+          IDS_SECURITY_POLICY,
+
+          IDS_GATEWAY_POLICY,
+
+          IDS_COMPRESSED_SIGNATURE,
+
+          IDS_COMPRESSED_CUSTOM_SIGNATURE,
+
+          TLS_POLICY,
+
+          VPC_SECURITY_POLICY,
+
+          VPC_GATEWAY_POLICY,
+
+          PUBLIC_CLOUD_VPC_SECURITY_POLICY,
+
+          COMMUNICATION_MAP (deprecated alias for SECURITY_POLICY),
+
+          EDGE_COMMUNICATION_MAP (deprecated alias for GATEWAY_POLICY).
+
+          Setting this flag for any other type (e.g. a rule path) will result in an
+          error.
+
+          In such cases, pass the path of the parent policy object instead (e.g.,
+          the
+
+          SecurityPolicy or GatewayPolicy that contains the rule).
 
           '
         in: query
@@ -92622,6 +93050,7 @@ paths:
           },
           "consolidated_status_per_enforcement_point": [
             {
+              "resource_type": "ConsolidatedStatusNsxT",
               "enforced_status": {
                 "enforced_status_info": {
                   "enforced_status": {
@@ -94096,14 +94525,17 @@ paths:
     get:
       consumes:
       - application/json
-      description: |
-        Read infra segment
-        Note:
-        Extended Segment: Please note that old vpn path deprecated. If user specify old l2vpn path in the
-        "l2_extension" object in the PATCH API payload, the path returned in the GET response payload may include the new path
-        instead of the deprecated l2vpn path. Both old and new l2vpn path refer to same resource. there is no functional impact.
-        Also note that l2vpn path included in the  error messages returned from validation may include the new VPN path
-        instead of the deprecated l2vpn path. Both new path and old vpn path refer to same resource.
+      description: "Returns the configuration of a specific NSX network segment (logical\
+        \ switch) identified\nby segment ID. Segments provide Layer 2 connectivity\
+        \ for workloads and are connected to\na Tier-0 or Tier-1 gateway for Layer\
+        \ 3 routing.\nNote: Extended Segment (L2VPN) \u2014 if an old vpn path was\
+        \ specified in the l2_extension\nobject in a previous PATCH request, the GET\
+        \ response may return the new canonicalized\npath instead of the original\
+        \ path that was submitted.\n instead of the deprecated l2vpn path. Both old\
+        \ and new l2vpn path refer to same resource. there is no functional impact.\n\
+        \ Also note that l2vpn path included in the  error messages returned from\
+        \ validation may include the new VPN path\n instead of the deprecated l2vpn\
+        \ path. Both new path and old vpn path refer to same resource.\n"
       operationId: GlobalInfraReadInfraSegment
       parameters:
       - description: |-
@@ -94134,7 +94566,7 @@ paths:
         '504':
           $ref: '#/responses/GatewayTimeout'
       summary: |-
-        Read infra segment
+        Read a network segment by ID
       tags:
       - Networking (Switching)
       - Segments
@@ -99156,7 +99588,7 @@ paths:
       consumes:
       - application/json
       description: |
-        Return list of Services.
+        Returns a paginated list of all services.
       operationId: GlobalInfraListServicesForTenant
       parameters:
       - description: Opaque cursor to be used for getting next page of records (supplied
@@ -99231,7 +99663,7 @@ paths:
         '504':
           $ref: '#/responses/GatewayTimeout'
       summary: |-
-        List Services
+        List all Services
       tags:
       - Inventory
       - Services
@@ -99330,8 +99762,8 @@ paths:
     get:
       consumes:
       - application/json
-      description: |-
-        Read a service
+      description: |
+        Returns the configuration of a specific service identified by service ID.
       operationId: GlobalInfraReadServiceForTenant
       parameters:
       - description: |-
@@ -99362,7 +99794,7 @@ paths:
         '504':
           $ref: '#/responses/GatewayTimeout'
       summary: |-
-        Read a service
+        Read a service by ID
       tags:
       - Inventory
       - Services
@@ -101749,7 +102181,7 @@ paths:
       consumes:
       - application/json
       description: |-
-        Get the current dfw firewall configurations.
+        Get the current Distributed Firewall (DFW) and Identity Firewall (IDFW) configurations.
       operationId: GlobalInfraGetDfwFirewallConfiguration
       produces:
       - application/json
@@ -101773,7 +102205,7 @@ paths:
         '504':
           $ref: '#/responses/GatewayTimeout'
       summary: |-
-        Get dfw firewall configuration
+        Get DFW and IDFW firewall configuration
       tags:
       - Security (East West)
       - Distributed Firewall (Settings)
@@ -101808,7 +102240,7 @@ paths:
       consumes:
       - application/json
       description: |
-        Update dfw firewall related configurations.
+        Update Distributed Firewall (DFW) and Identity Firewall (IDFW) related configurations.
         Turning off distributed services ("enable_firewall": false) will turn off Distributed Firewall, Identity Firewall,
         Distributed Intrusion Detection and Prevention Service, Distributed Load Balancer.
       operationId: GlobalInfraPatchDfwFirewallConfiguration
@@ -101836,7 +102268,7 @@ paths:
         '504':
           $ref: '#/responses/GatewayTimeout'
       summary: |-
-        Update dfw firewall configuration
+        Update DFW and IDFW firewall configuration
       tags:
       - Security (East West)
       - Distributed Firewall (Settings)
@@ -101854,7 +102286,7 @@ paths:
       consumes:
       - application/json
       description: |
-        Update dfw firewall related configurations.
+        Update Distributed Firewall (DFW) and Identity Firewall (IDFW) related configurations.
         Turning off distributed services ("enable_firewall": false) will turn off Distributed Firewall, Identity Firewall,
         Distributed Intrusion Detection and Prevention Service, Distributed Load Balancer.
       operationId: GlobalInfraPutDfwFirewallConfiguration
@@ -101886,7 +102318,7 @@ paths:
         '504':
           $ref: '#/responses/GatewayTimeout'
       summary: |-
-        Update dfw firewall configuration
+        Update DFW and IDFW firewall configuration
       tags:
       - Security (East West)
       - Distributed Firewall (Settings)
@@ -101973,7 +102405,7 @@ paths:
       consumes:
       - application/json
       description: |
-        Read exclude list for firewall
+        Read the exclude list for the distributed firewall (DFW). Members in this list are excluded from DFW enforcement.
       operationId: GlobalInfraGetFirewallExcludeList
       produces:
       - application/json
@@ -101997,7 +102429,7 @@ paths:
         '504':
           $ref: '#/responses/GatewayTimeout'
       summary: |-
-        Read security policy exclude list
+        Read the distributed firewall exclude list
       tags:
       - Security (East West)
       - Distributed Firewall (Exclusion List)
@@ -102253,7 +102685,7 @@ paths:
       consumes:
       - application/json
       description: |
-        Read security policy exclude list including system and user excluded members.
+        Read the distributed firewall (DFW) exclude list including both system-owned and user-defined excluded members.
       operationId: GlobalInfraGetInternalFirewallExcludeList
       produces:
       - application/json
@@ -102277,7 +102709,7 @@ paths:
         '504':
           $ref: '#/responses/GatewayTimeout'
       summary: |-
-        Read security policy exclude list including system and user excluded members
+        Read the distributed firewall exclude list including system and user excluded members
       tags:
       - Security (East West)
       - Distributed Firewall (Exclusion List)
@@ -105087,6 +105519,8 @@ paths:
       consumes:
       - application/json
       description: |
+        **Experimental:** This API is experimental and may change or be removed in future releases without notice.
+        <br>
         Trigger the process to collect all pcap files of all the pcap_ids mentioned in request payload.
       operationId: GlobalInfraExportIdsPcapFile
       parameters:
@@ -105130,6 +105564,7 @@ paths:
       - on-prem
       x-vmw-nsx-example-request: |
         POST https://&lt;policy-mgr&gt;/global-manager/api/v1/global-infra/settings/firewall/security/intrusion-services/pcaps/export
+      x-vmw-nsx-experimental: true
       x-vmw-nsx-module: PolicyIDS
   /global-infra/settings/firewall/security/intrusion-services/pcaps/{file-name}/download:
     get:
@@ -105788,6 +106223,29 @@ paths:
       x-vmw-nsx-deployment-modes:
       - vmc
       - on-prem
+      x-vmw-nsx-example-request: |
+        GET https://&lt;policy-mgr&gt;/global-manager/api/v1/global-infra/settings/firewall/security/intrusion-services/profiles/testProfile/effective-signatures
+      x-vmw-nsx-example-response: |
+        {
+        "signatures": [
+          {
+            "signature_id": "2059955",
+            "revision": 2,
+            "action": "ALERT"
+          },
+          {
+            "signature_id": "1064004",
+            "revision": 7056,
+            "action": "ALERT"
+          },
+          {
+            "signature_id": "1134186",
+            "revision": 0,
+            "action": "ALERT"
+          }
+        ],
+        "profile_path": "/infra/settings/firewall/security/intrusion-services/profiles/testProfile"
+        }
       x-vmw-nsx-module: PolicyIDS
   /global-infra/settings/firewall/security/intrusion-services/signature-versions:
     get:
@@ -110734,6 +111192,7 @@ paths:
             {
               "tz_type": "OVERLAY_BACKED",
               "is_default": true,
+              "is_security": false,
               "transport_zone_profile_paths": [
                 "/infra/transport-zone-profiles/tzp"
               ],
@@ -110817,6 +111276,7 @@ paths:
         {
           "tz_type": "OVERLAY_BACKED",
           "is_default": true,
+          "is_security": false,
           "nested_nsx": false,
           "authorized_vlans": [
           "5",
@@ -122472,6 +122932,10 @@ paths:
 
           MALWAREPREVENTION - Malware Prevention
 
+          Use any one of this to enable/disable it.
+
+          TLS - Transport Layer Security Inspection
+
           Use any one of this to enable/disabe it.
 
           '
@@ -122481,6 +122945,7 @@ paths:
         - GFW_MULTICAST
         - GEOIP_MONITORING
         - MALWAREPREVENTION
+        - TLS
         in: query
         name: feature
         required: false
@@ -122564,6 +123029,10 @@ paths:
 
           MALWAREPREVENTION - Malware Prevention
 
+          Use any one of this to enable/disable it.
+
+          TLS - Transport Layer Security Inspection
+
           Use any one of this to enable/disabe it.
 
           '
@@ -122573,6 +123042,7 @@ paths:
         - GFW_MULTICAST
         - GEOIP_MONITORING
         - MALWAREPREVENTION
+        - TLS
         in: query
         name: feature
         required: false
@@ -130841,7 +131311,7 @@ paths:
 
           GEOIP_MONITORING - Geo IP Monitoring
 
-          Use any one of this to enable/disabe it.
+          Use any one of this to enable/disable it.
 
           '
         enum:
@@ -141251,7 +141721,8 @@ paths:
               "GATEWAY_TLS": "0",
               "GATEWAY_IDPS": "16",
               "GATEWAY_MPS": "16",
-              "NETWORK_DETECTION_RESPONSE": "160"
+              "NETWORK_DETECTION_RESPONSE": "160",
+              "NETWORK_TRAFFIC_ANALYSIS": "0"
             },
             "licensed_core_count": {
               "DISTRIBUTED_FIREWALL": "2560",
@@ -141265,7 +141736,8 @@ paths:
               "GATEWAY_TLS": "0",
               "GATEWAY_IDPS": "64",
               "GATEWAY_MPS": "64",
-              "NETWORK_DETECTION_RESPONSE": "2560"
+              "NETWORK_DETECTION_RESPONSE": "2560",
+              "NETWORK_TRAFFIC_ANALYSIS": "0"
             }
           },
           "node_details" : [ {
@@ -141385,8 +141857,8 @@ paths:
       x-vmw-nsx-example-request: |
         GET https://&lt;nsx-mgr&gt;/api/v1/licenses/security-usage?format=csv
       x-vmw-nsx-example-response: |
-        "raw_host_core_count_distributed_firewall","raw_host_core_count_distributed_intelligence","raw_host_core_count_distributed_ipfix","raw_host_core_count_distributed_baremetal","raw_host_core_count_distributed_intelligence_baremetal","raw_host_core_count_distributed_ipfix_baremetal","raw_host_core_count_distributed_idps","raw_host_core_count_distributed_mps",raw_host_core_count_ndr,"raw_edge_core_count_gateway_firewall","raw_edge_core_count_gateway_tls","raw_edge_core_count_gateway_idps","raw_edge_core_count_gateway_mps","dpu_core_count_all_editions","licensed_host_core_count_distributed_firewall","licensed_host_core_count_distributed_intelligence","licensed_host_core_count_distributed_ipfix","licensed_host_core_count_distributed_baremetal","licensed_host_core_count_distributed_intelligence_baremetal","licensed_host_core_count_distributed_ipfix_baremetal","licensed_host_core_count_distributed_idps","licensed_host_core_count_distributed_mps","licensed_host_core_count_ndr","licensed_edge_core_count_gateway_firewall","licensed_edge_core_count_gateway_tls","licensed_edge_core_count_gateway_idps","licensed_edge_core_count_gateway_mps","licensed_total_core_count_firewall_edition","licensed_total_core_count_firewall_atp_edition","max_raw_core_count_per_host","max_raw_core_count_per_socket","max_socket_count_per_host",num_edge_small_factor,num_edge_medium_factor,num_edge_large_factor,num_edge_xlarge_factor,"num_edge_baremetal_at_recommended_cores","num_edge_baremetal_at_minimum_cores",number_of_nsgroups,number_of_prepared_hosts,"number_of_virtual_machines","number_of_tier_0_gateways","number_of_tier_1_gateways",number_of_dfw_rules,number_of_firewall_rules,intelligence_deployed,"recommendation_sessions_total",napp_appliance_version,"number_of_ids_gateway_rules","number_of_ids_security_policies","mps_total_number_of_profiles","mps_number_of_dfw_ids_rules_with_custom_mps_profiles","mps_number_of_gateway_ids_rules_with_custom_mps_profiles",nta_enabled,nsx_manager_version,nsx_deployment_id,nsx_site_id,license_edition_type,license_key,"total_firewall_ipfix_profiles","host_number_of_host_node_cpu_cores","edge_number_of_edge_node_cpu_cores",last_update_timestamp
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,,0,0,0,0,,0,0,0,0,0,,4,1,4,0,4,0,0,0,0,9,2,11,2,3,6,11,false,,,0,0,0,0,0,UNAVAILABLE,4.2.1.0.0.24181564,"f72e5056-17e3-43a1-87f6-b7e8f9ad31a1","d674048b-4dc5-48af-9932-3917c23b965a","[NSX Data Center Enterprise Plus|NSX for vSphere - Enterprise|NSX for vShield Endpoint]","[00000-00000-00000-00000-00000|1111-22222-33333-44444-55555]",,8,16,1723063385160
+        "raw_host_core_count_distributed_firewall","raw_host_core_count_distributed_intelligence","raw_host_core_count_distributed_ipfix","raw_host_core_count_distributed_baremetal","raw_host_core_count_distributed_intelligence_baremetal","raw_host_core_count_distributed_ipfix_baremetal","raw_host_core_count_distributed_idps","raw_host_core_count_distributed_mps","raw_host_core_count_ndr","raw_host_core_count_nta","raw_edge_core_count_gateway_firewall","raw_edge_core_count_gateway_tls","raw_edge_core_count_gateway_idps","raw_edge_core_count_gateway_mps","dpu_core_count_all_editions","licensed_host_core_count_distributed_firewall","licensed_host_core_count_distributed_intelligence","licensed_host_core_count_distributed_ipfix","licensed_host_core_count_distributed_baremetal","licensed_host_core_count_distributed_intelligence_baremetal","licensed_host_core_count_distributed_ipfix_baremetal","licensed_host_core_count_distributed_idps","licensed_host_core_count_distributed_mps","licensed_host_core_count_ndr","licensed_host_core_count_nta","licensed_edge_core_count_gateway_firewall","licensed_edge_core_count_gateway_tls","licensed_edge_core_count_gateway_idps","licensed_edge_core_count_gateway_mps","licensed_total_core_count_firewall_edition","licensed_total_core_count_firewall_atp_edition","max_raw_core_count_per_host","max_raw_core_count_per_socket","max_socket_count_per_host",num_edge_small_factor,num_edge_medium_factor,num_edge_large_factor,num_edge_xlarge_factor,"num_edge_baremetal_at_recommended_cores","num_edge_baremetal_at_minimum_cores",number_of_nsgroups,number_of_prepared_hosts,"number_of_virtual_machines","number_of_tier_0_gateways","number_of_tier_1_gateways",number_of_dfw_rules,number_of_firewall_rules,intelligence_deployed,"recommendation_sessions_total",napp_appliance_version,"number_of_ids_gateway_rules","number_of_ids_security_policies","mps_total_number_of_profiles","mps_number_of_dfw_ids_rules_with_custom_mps_profiles","mps_number_of_gateway_ids_rules_with_custom_mps_profiles",nta_enabled,nsx_manager_version,nsx_deployment_id,nsx_site_id,license_edition_type,license_key,"total_firewall_ipfix_profiles","host_number_of_host_node_cpu_cores","edge_number_of_edge_node_cpu_cores",last_update_timestamp
+        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,,0,0,0,0,0,,0,0,0,0,0,,4,1,4,0,4,0,0,0,0,9,2,11,2,3,6,11,false,,,0,0,0,0,0,UNAVAILABLE,4.2.1.0.0.24181564,"f72e5056-17e3-43a1-87f6-b7e8f9ad31a1","d674048b-4dc5-48af-9932-3917c23b965a","[NSX Data Center Enterprise Plus|NSX for vSphere - Enterprise|NSX for vShield Endpoint]","[00000-00000-00000-00000-00000|1111-22222-33333-44444-55555]",,8,16,1723063385160
       x-vmw-nsx-module: SecurityLicenseUsage
   /licenses/vcf-licenses:
     post:
@@ -142532,6 +143004,8 @@ paths:
       consumes:
       - application/json
       description: |-
+        **Experimental:** This API is experimental and may change or be removed in future releases without notice.
+        <br>
         DSL (Domain Specific Language) search API
       operationId: DslSearch
       parameters:
@@ -142643,6 +143117,7 @@ paths:
          "result_count": 1,
          "cursor": "1"
         }
+      x-vmw-nsx-experimental: true
       x-vmw-nsx-module: Search
   /search/query:
     get:
@@ -145147,187 +145622,187 @@ securityDefinitions:
     type: basic
 swagger: '2.0'
 tags:
-- name: Roles
-- name: Networking (Dns Forwarder)
-- name: NAT Rules (Tier-0S)
-- name: Edge Transport Nodes
-- name: Tier-0S (Routing)
-- name: Licenses
-- name: Geo IP
-- name: Tier-0S
-- name: Distributed Firewall (Ip Reputation)
-- name: Compliance
-- name: Csrs
-- name: Domains (Domain Deployment Maps)
-- name: Distributed Firewall (Identity Firewall)
-- name: Federation Configuration
-- name: Distributed Firewall (Group/Service Associations)
-- name: Sites
-- name: NSX Managers (Api Services)
-- name: User Authentication
-- name: DNS Security Profile Bindings
-- name: NAT Rules (Tier-1S)
-- name: Segments (States)
-- name: VIDM Configuration
-- name: Segments Profiles (Real Time Eth Profiles)
-- name: Tier-1S (Arp Proxies)
-- name: Sites (Security Settings)
-- name: Security
-- name: Networking (Vpn)
-- name: Segments Profiles (Security Profiles)
-- name: Transport Zone Profiles
-- name: Flood Protection Profiles
-- name: Advanced Threat Protection (Security Configuration)
-- name: Group Members
-- name: Troubleshooting
-- name: DNS Zones
-- name: Distributed Firewall (Drafts)
-- name: Gateway Firewall (Tier-1S)
-- name: Tier-0S (Dad States)
-- name: Metadata Proxies
-- name: Federation
-- name: Certificates
-- name: Gateway Firewall (Tier-0S)
-- name: Networking
-- name: Tier-0S (Forwarding Tables)
-- name: User Management
-- name: Tier-1S (Interface Groups)
-- name: Segments (Fixed)
-- name: Ips & Malware (Rules)
-- name: Tier-0S (Deployment Maps)
-- name: Tier-1S (Forwarding Tables)
-- name: Tier-0S (Interfaces)
-- name: Distributed IDS (Signatures)
-- name: Distributed Firewall (Tasks)
-- name: Connectivity
-- name: Distributed Firewall (Firewall Scheduler)
-- name: Segment Ports (States)
-- name: Tier-1S (Locale Services)
-- name: Configuration
-- name: Session Timer Profile Bindings
-- name: Domains
-- name: DHCP Leases
-- name: IPV6 DAD Profiles
-- name: Tier-1S (States)
-- name: Networking (Network Services)
-- name: Segments (Mac Tables)
-- name: Realized State
-- name: Tier-0S (Static Routes BFD Peers)
-- name: Ips & Malware (Statistics)
-- name: System (Settings)
-- name: Segments Profiles (Security Profile Bindings)
-- name: Networking (Nat)
-- name: Tier-0S (Bgp)
-- name: DNS Security Profiles
-- name: Edge Clusters
-- name: Inter-Sites (Legacy Management Plane)
-- name: EVPN Tenant Configuration
-- name: Gateway QOS Profiles
-- name: Networking (Switching)
-- name: Tier-0S (Arp Tables)
-- name: Search API
-- name: Observability
-- name: User Management (Ldap)
-- name: Distributed Firewall (Settings)
-- name: Finetuning
-- name: Distributed Firewall (Statistics)
-- name: NSX Managers (Watermark)
-- name: Global Configurations
-- name: Tags
-- name: Context Profiles
-- name: Constraints
-- name: Tier-0S (Community Lists)
-- name: System (Lifecycle Management)
-- name: Tier-0S (Statistics)
-- name: Multi-Tenancy
-- name: Tier-0S (Route Maps)
-- name: Firewall
-- name: Segments (Edge Bridge)
-- name: BFD Profiles
-- name: Ips & Malware (Dashboard)
-- name: Networking (Dhcp)
-- name: System (Fabric)
-- name: Tier-0S (Inter-Vrfs)
-- name: Session Timer Profiles
-- name: System (Administration)
-- name: Tier-1S (Statistics)
-- name: Ips & Malware (Intrusion Services)
-- name: Settings (Enablement)
-- name: Search
-- name: Networking (Routing)
-- name: Gateway Firewall (Settings)
-- name: Security (North South)
-- name: NAT Statistics
 - name: Labels
-- name: Global Gateway Configuration
-- name: DHCP Relay Configs
-- name: Full Synchronization
-- name: Users
-- name: IPV6 NDRA Profiles
-- name: Segments Profiles (Mac Discovery Profiles)
-- name: Ca Bundles
-- name: Tier-0S (Interface Groups)
-- name: System Administration
-- name: Tier-1S (Dad States)
-- name: Vm
-- name: Services
-- name: Enforcement Points
-- name: Segments
-- name: Tier-1S (Arp Tables)
-- name: Tier-0S (Prefix Lists)
-- name: Distributed Firewall (Rules)
-- name: Segments Profiles (Monitoring Profile Bindings)
-- name: Segments (Statistics)
-- name: Security (East West)
-- name: Edge Transport Nodes (Nat Statistics)
-- name: Tier-1S
-- name: DHCP Static Bindings (Fixed Segments)
-- name: Gateway Firewall (Rules)
-- name: Monitoring
-- name: Ips & Malware (Signatures)
-- name: Ips & Malware (Profiles)
-- name: Policy
-- name: Segments Profiles (Spoofguard Profiles)
-- name: Segment Ports
-- name: Segments Profiles (Ip Discovery Profiles)
-- name: Upgrade (Nodes)
-- name: Inventory
-- name: ' Configuration (Auto-Enable Gateway Firewall)'
-- name: Dashboard (Legacy Management Plane)
-- name: IPSEC (Statistics)
-- name: Tier-1S (Interfaces)
-- name: Segment Ports (Mac Tables)
-- name: Tier-1S (Static Routes)
-- name: NSX Managers (Cluster)
-- name: DHCP Static Bindings (Segments)
-- name: Edge Transport Node (Remote Tep)
-- name: Tier-0S (Locale Services)
-- name: Malware Prevention
-- name: Onboarding
-- name: Networking (Networking Profiles)
-- name: Access Token
-- name: Groups
-- name: Auto-Reject-Ip-Options-Gateway-Firewall
-- name: Tier-0S (States)
-- name: Security (Security Profiles)
-- name: Segments Profiles (Discovery Profiles)
-- name: Segments (Arp Proxies)
-- name: Hierarchical API
-- name: Transport Zones
-- name: Flood Protection Profile Bindings
-- name: ' Configuration (Partial Patch)'
-- name: Segments (Tep Tables)
-- name: Crls
 - name: Backup & Restore (Restore)
-- name: Tier-0S (Static Routes)
-- name: Cpu Memory Tresholds Profiles
+- name: Tier-0S (Locale Services)
+- name: Gateway QOS Profiles
+- name: Segments (States)
+- name: Segments Profiles (Real Time Eth Profiles)
+- name: Global Configurations
+- name: Segment Ports (States)
+- name: Csrs
+- name: Segments Profiles (Ip Discovery Profiles)
+- name: Dashboard (Legacy Management Plane)
+- name: Observability
+- name: Security (North South)
+- name: Settings (Enablement)
+- name: NAT Statistics
+- name: Gateway Firewall (Rules)
+- name: Session Timer Profiles
+- name: Tier-1S (Statistics)
+- name: Tier-0S (Interface Groups)
+- name: Users
+- name: Transport Zones
+- name: Networking (Network Services)
+- name: DHCP Relay Configs
+- name: Compliance
+- name: Advanced Threat Protection (Security Configuration)
+- name: Gateway Firewall (Settings)
+- name: Tier-0S (Deployment Maps)
+- name: Tier-0S
+- name: Tier-0S (Community Lists)
+- name: NAT Rules (Tier-1S)
+- name: Distributed Firewall (Ip Reputation)
+- name: Configuration
+- name: IPV6 NDRA Profiles
+- name: Segment Ports
+- name: Segments (Arp Proxies)
+- name: Ips & Malware (Rules)
+- name: Ips & Malware (Dashboard)
+- name: Ips & Malware (Statistics)
+- name: Traceflow
+- name: Networking (Dhcp)
+- name: EVPN Tenant Configuration
+- name: Domains
+- name: Geo IP
+- name: Gateway Firewall (Tier-1S)
+- name: DHCP Server Configs
+- name: DNS Security Profiles
+- name: DHCP Static Bindings (Segments)
+- name: Metadata Proxies
+- name: Enforcement Points
+- name: Ips & Malware (Signatures)
+- name: Segments (Fixed)
+- name: Segment Ports (Mac Tables)
+- name: Monitoring
+- name: Security (East West)
+- name: Tier-1S (Forwarding Tables)
+- name: Tier-1S (Arp Proxies)
+- name: NSX Managers (Api Services)
+- name: Certificates
+- name: ' Configuration (Partial Patch)'
+- name: Segments
+- name: Distributed Firewall (Statistics)
+- name: Crls
+- name: Global Gateway Configuration
+- name: Federation
+- name: Tier-0S (Static Routes BFD Peers)
+- name: System (Administration)
+- name: Tier-0S (Prefix Lists)
+- name: Access Token
+- name: Networking (Networking Profiles)
+- name: Multi-Tenancy
+- name: DHCP Static Bindings (Fixed Segments)
+- name: User Authentication
+- name: Licenses
+- name: NSX Managers (Cluster)
+- name: BFD Profiles
 - name: Tier-0S (Routing Tables)
+- name: Tier-1S
+- name: User Management
+- name: Domains (Domain Deployment Maps)
+- name: Tier-1S (Locale Services)
+- name: System Administration
+- name: Tier-0S (Route Maps)
+- name: Policy
+- name: Segments (Edge Bridge)
+- name: Upgrade (Nodes)
+- name: Cpu Memory Tresholds Profiles
+- name: Tier-0S (Statistics)
+- name: Tier-0S (Arp Proxies)
+- name: IPV6 DAD Profiles
+- name: Search API
+- name: Constraints
+- name: DNS Zones
+- name: Distributed Firewall (Tasks)
+- name: Transport Zone Profiles
+- name: Networking (Dns Forwarder)
+- name: Edge Transport Nodes
+- name: Security (Security Profiles)
+- name: Segments Profiles (Monitoring Profile Bindings)
+- name: Context Profiles
+- name: Segments Profiles (Mac Discovery Profiles)
+- name: Networking (Routing)
+- name: Inter-Sites (Legacy Management Plane)
+- name: Tier-0S (States)
+- name: Ips & Malware (Profiles)
+- name: Sites
+- name: Segments (Tep Tables)
+- name: Finetuning
+- name: Segments Profiles (Spoofguard Profiles)
+- name: Firewall
+- name: Malware Prevention
+- name: Gateway Firewall (Tier-0S)
+- name: System (Fabric)
+- name: Tier-1S (Dad States)
+- name: Ips & Malware (Intrusion Services)
+- name: Edge Transport Node (Remote Tep)
+- name: VIDM Configuration
+- name: Tags
+- name: Ca Bundles
+- name: Networking (Nat)
+- name: Tier-0S (Forwarding Tables)
+- name: Segments Profiles (Security Profiles)
+- name: Distributed Firewall (Group/Service Associations)
+- name: Security
+- name: Tier-0S (Static Routes)
+- name: API Services
+- name: Connectivity
+- name: Distributed Firewall (Rules)
+- name: Group Members
+- name: Auto-Reject-Ip-Options-Gateway-Firewall
+- name: Search
+- name: Tier-1S (Interfaces)
+- name: Tier-1S (Arp Tables)
+- name: Troubleshooting
+- name: Networking (Switching)
+- name: Federation Configuration
+- name: Edge Clusters
+- name: Networking (Vpn)
+- name: DHCP Leases
+- name: Tier-1S (States)
+- name: Segments (Statistics)
+- name: Groups
+- name: Segments Profiles (Qos Profiles)
+- name: Distributed Firewall (Firewall Scheduler)
+- name: DNS Security Profile Bindings
+- name: Realized State
+- name: Flood Protection Profiles
+- name: Tier-0S (Dad States)
+- name: User Management (Ldap)
+- name: Services
+- name: Flood Protection Profile Bindings
+- name: Edge Transport Nodes (Nat Statistics)
+- name: Networking
+- name: Sites (Security Settings)
+- name: Onboarding
+- name: Tier-0S (Bgp)
 - name: Global Managers
 - name: Distributed Firewall (Exclusion List)
+- name: Full Synchronization
+- name: Tier-0S (Routing)
+- name: Segments Profiles (Discovery Profiles)
+- name: Hierarchical API
+- name: Distributed Firewall (Drafts)
+- name: System (Settings)
+- name: Tier-1S (Static Routes)
+- name: Distributed Firewall (Settings)
+- name: Tier-1S (Interface Groups)
+- name: Tier-0S (Arp Tables)
+- name: IPSEC (Statistics)
+- name: Session Timer Profile Bindings
+- name: Distributed IDS (Signatures)
+- name: Roles
+- name: Tier-0S (Inter-Vrfs)
+- name: Distributed Firewall (Identity Firewall)
 - name: Tier-1S (Routing)
-- name: API Services
+- name: Segments (Mac Tables)
+- name: NAT Rules (Tier-0S)
+- name: System (Lifecycle Management)
 - name: Ips & Malware (Settings)
-- name: Traceflow
-- name: DHCP Server Configs
-- name: Segments Profiles (Qos Profiles)
-- name: Tier-0S (Arp Proxies)
+- name: Inventory
+- name: ' Configuration (Auto-Enable Gateway Firewall)'
+- name: NSX Managers (Watermark)
+- name: Segments Profiles (Security Profile Bindings)
+- name: Vm
+- name: Tier-0S (Interfaces)
