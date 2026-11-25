@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: 'Virtual Infrastructure JSON API'
-  version: 9.1.1.0
+  version: 9.1.2.0
 
 servers:
   - url: https://{vcenter-host}/sdk/vim25/{release}
@@ -9,9 +9,10 @@ servers:
       vcenter-host:
         default: localhost
       release:
-        default: 9.1.1.0
-        description: The vSphere release schema. The current specification covers vSphere 9.1.1.0 APIs.
+        default: 9.1.2.0
+        description: The vSphere release schema. The current specification covers vSphere 9.1.2.0 APIs.
         enum:
+          - 9.1.2.0
           - 9.1.1.0
           - 9.1.0.0
           - 9.0.0.0
@@ -22723,7 +22724,7 @@ paths:
       description: |2
         Powers-off virtual machines according to the current AutoStart configuration.
         
-        See the description of the (@link vim.host.AutoStartManager.AutoPowerInfo)
+        See the description of the *AutoStartPowerInfo*
         data object type for more information on Auto power-off behavior.
         
         ***Required privileges:*** Host.Config.AutoStart
@@ -22745,7 +22746,7 @@ paths:
       description: |2
         Powers-on virtual machines according to the current AutoStart configuration.
         
-        See the description of the (@link vim.host.AutoStartManager.AutoPowerInfo)
+        See the description of the *AutoStartPowerInfo*
         data object type for more information on Auto power-on behavior.
         
         ***Required privileges:*** Host.Config.AutoStart
@@ -37765,6 +37766,54 @@ paths:
             
             ***InvalidDatastore***: If the operation cannot be performed on the
             datastore.
+            
+            ***InvalidState***: If the operation cannot be performed on the disk.
+            
+            ***NotFound***: If specified virtual storage object cannot be found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VimFault'
+
+  /HostVStorageObjectManager/{moId}/VStorageObjectDeleteAllSnapshots_Task:
+    post:
+      tags: [HostVStorageObjectManager]
+      summary: |2
+        Delete all snapshots of a VStorageObject.
+      operationId: HostVStorageObjectManager_VStorageObjectDeleteAllSnapshots_Task
+      description: |2
+        Delete all snapshots of a VStorageObject.
+        
+        Requires Datastore.FileManagement privilege.
+        
+        ***Since:*** vSphere API Release 9.1.2.0
+        
+        ***Required privileges:*** System.View
+      parameters:
+        - $ref: '#/components/parameters/moId'
+      security:
+        - Session: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VStorageObjectDeleteAllSnapshotsRequestType'
+      responses:
+        '200':
+          description: |2
+            Refers instance of *Task*.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagedObjectReference'
+        '500':
+          description: |2
+            ***FileFault***: If an error occurs while deleting any snapshot of the
+            virtual storage object.
+            
+            ***InvalidDatastore***: If the operation cannot be performed on the
+            specified datastore.
             
             ***InvalidState***: If the operation cannot be performed on the disk.
             
@@ -56439,6 +56488,54 @@ paths:
               schema:
                 $ref: '#/components/schemas/VimFault'
 
+  /VStorageObjectManagerBase/{moId}/VStorageObjectDeleteAllSnapshots_Task:
+    post:
+      tags: [VStorageObjectManagerBase]
+      summary: |2
+        Delete all snapshots of a VStorageObject.
+      operationId: VStorageObjectManagerBase_VStorageObjectDeleteAllSnapshots_Task
+      description: |2
+        Delete all snapshots of a VStorageObject.
+        
+        Requires Datastore.FileManagement privilege.
+        
+        ***Since:*** vSphere API Release 9.1.2.0
+        
+        ***Required privileges:*** System.View
+      parameters:
+        - $ref: '#/components/parameters/moId'
+      security:
+        - Session: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VStorageObjectDeleteAllSnapshotsRequestType'
+      responses:
+        '200':
+          description: |2
+            Refers instance of *Task*.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagedObjectReference'
+        '500':
+          description: |2
+            ***FileFault***: If an error occurs while deleting any snapshot of the
+            virtual storage object.
+            
+            ***InvalidDatastore***: If the operation cannot be performed on the
+            specified datastore.
+            
+            ***InvalidState***: If the operation cannot be performed on the disk.
+            
+            ***NotFound***: If specified virtual storage object cannot be found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VimFault'
+
   /VStorageObjectManagerBase/{moId}/VStorageObjectDeleteSnapshotEx_Task:
     post:
       tags: [VStorageObjectManagerBase]
@@ -57174,6 +57271,54 @@ paths:
             
             ***InvalidDatastore***: If the operation cannot be performed on the
             datastore.
+            
+            ***InvalidState***: If the operation cannot be performed on the disk.
+            
+            ***NotFound***: If specified virtual storage object cannot be found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VimFault'
+
+  /VcenterVStorageObjectManager/{moId}/VStorageObjectDeleteAllSnapshots_Task:
+    post:
+      tags: [VcenterVStorageObjectManager]
+      summary: |2
+        Delete all snapshots of a VStorageObject.
+      operationId: VcenterVStorageObjectManager_VStorageObjectDeleteAllSnapshots_Task
+      description: |2
+        Delete all snapshots of a VStorageObject.
+        
+        Requires Datastore.FileManagement privilege.
+        
+        ***Since:*** vSphere API Release 9.1.2.0
+        
+        ***Required privileges:*** System.View
+      parameters:
+        - $ref: '#/components/parameters/moId'
+      security:
+        - Session: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VStorageObjectDeleteAllSnapshotsRequestType'
+      responses:
+        '200':
+          description: |2
+            Refers instance of *Task*.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagedObjectReference'
+        '500':
+          description: |2
+            ***FileFault***: If an error occurs while deleting any snapshot of the
+            virtual storage object.
+            
+            ***InvalidDatastore***: If the operation cannot be performed on the
+            specified datastore.
             
             ***InvalidState***: If the operation cannot be performed on the disk.
             
@@ -61064,7 +61209,7 @@ paths:
         
         The virtual machines (or sub vApps) will be started in the order
         specified in the vApp configuration. If the vApp is suspended
-        (@see vim.VirtualApp.Summary#suspended), all suspended virtual machines
+        *VirtualAppSummary.suspended*, all suspended virtual machines
         will be powered-on based on the defined start-up order.
         
         While a vApp is starting, all power operations performed on sub entities are
@@ -83234,6 +83379,56 @@ paths:
               schema:
                 $ref: '#/components/schemas/MethodFault'
 
+  /vsan/CnsVolumeManager/{moId}/CnsDeleteAllSnapshots:
+    post:
+      tags: [CnsVolumeManager]
+      summary: |2
+        This api allows user to delete all snapshots of a particular block volume.
+      operationId: CnsVolumeManager_CnsDeleteAllSnapshots
+      description: |2
+        This api allows user to delete all snapshots of a particular block volume.
+        
+        It returns a task
+        whose result type is *CnsSnapshotDeleteAllResult*
+      parameters:
+        - $ref: '#/components/parameters/moId'
+      security:
+        - Session: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CnsDeleteAllSnapshotsRequestType'
+      responses:
+        '200':
+          description: |2
+            *Task* to track the progress and overall state of this
+            operation.
+            
+            Refers instance of *Task*.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagedObjectReference'
+        '500':
+          description: |2
+            ***InvalidArgument***: if:
+            - The volume ID in the input spec is empty or malformed
+            - The volume specified is not a block volume.
+              
+            ***NotFound***: if the volume specified does not exist on the system.
+            
+            ***CnsFault***: for all other failure scenarios.
+              
+            Following privileges will be required on specified entities, to perform
+            this operation:
+            - Datastore.FileManagement on the volume's datastore
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MethodFault'
+
   /vsan/CnsVolumeManager/{moId}/CnsDeleteSnapshots:
     post:
       tags: [CnsVolumeManager]
@@ -94900,6 +95095,7 @@ components:
             against, otherwise each connected host in the cluster that is
             not in maintenance mode represented by the target pool is tested
             as a target host.
+            Note that `spec.skipExtensionCompatibilityChecks` is ignored.
           allOf:
             - $ref: '#/components/schemas/VirtualMachineRelocateSpec'
         testType:
@@ -94921,6 +95117,7 @@ components:
         spec:
           description: |2
             The specification of the virtual machine to create.
+            Note that `spec.skipExtensionCompatibilityChecks` is ignored.
           allOf:
             - $ref: '#/components/schemas/VirtualMachineConfigSpec'
         vm:
@@ -95237,6 +95434,21 @@ components:
             $ref: '#/components/schemas/CnsVolumeCreateSpec'
       required:
         - createSpecs
+
+    CnsDeleteAllSnapshotsRequestType:
+      type: object
+      description: |2
+        The parameters of *CnsVolumeManager.CnsDeleteAllSnapshots*.
+        
+        This structure may be used only with operations rendered under `/vsan`.
+      properties:
+        volumeId:
+          description: |2
+            target volume where user wants to delete all its snapshots.
+          allOf:
+            - $ref: '#/components/schemas/CnsVolumeId'
+      required:
+        - volumeId
 
     CnsDeleteSnapshotsRequestType:
       type: object
@@ -102033,7 +102245,7 @@ components:
             - $ref: '#/components/schemas/ManagedObjectReference'
         priority:
           description: |2
-            The task priority (@see vim.VirtualMachine.MovePriority).
+            The task priority *VirtualMachineMovePriority_enum*.
           allOf:
             - $ref: '#/components/schemas/VirtualMachineMovePriority_enum'
         state:
@@ -112098,6 +112310,37 @@ components:
         - id
         - datastore
         - description
+
+    VStorageObjectDeleteAllSnapshotsRequestType:
+      type: object
+      description: |2
+        The parameters of *VStorageObjectManagerBase.VStorageObjectDeleteAllSnapshots_Task*.
+        
+        ***Since:*** vSphere API Release 9.1.2.0
+      properties:
+        id:
+          description: |2
+            The ID of the virtual storage object.
+          allOf:
+            - $ref: '#/components/schemas/ID'
+        datastore:
+          description: |2
+            The datastore where the virtual storage object is
+            located.
+            
+            ***Required privileges:*** Datastore.FileManagement
+            
+            Refers instance of *Datastore*.
+          allOf:
+            - $ref: '#/components/schemas/ManagedObjectReference'
+        deleteOnlyVanillaDisks:
+          description: |2
+            If set to true, then deleteAllSnapshots task will
+            try to consolidate only vanilla disk chain.
+          type: boolean
+      required:
+        - id
+        - datastore
 
     VStorageObjectDeleteSnapshotEx2RequestType:
       type: object
@@ -142946,7 +143189,7 @@ components:
             server is listening on. A trailing colon ':' without a port number
             is a valid expression.
             Host can either be an IPv4 address in dotted quad
-            format or a resolvable DNS name &leq;254 characters. See RFC 3696.
+            format or a resolvable DNS name up to 254 characters. See RFC 3696.
           type: string
       required:
         - licenseServer
@@ -144333,7 +144576,7 @@ components:
             directly from source. This flag only applies to vCenter as ESXi
             can only pull directly if *OvfManager.DeployVm_Task* is invoked
             on ESX itself.
-            See (@link vim.HttpNfcLease#pullFromUrls) for more on Pull mode.
+            See *HttpNfcLease.HttpNfcLeasePullFromUrls_Task* for more on Pull mode.
             The default/Default: false
           type: boolean
         signatureRequired:
@@ -155279,13 +155522,13 @@ components:
           description: |2
             If all hosts in the cluster support the reaction of VM Component Protection
             to storage All Paths Down timeout
-            (@link vim.host.MountInfo.InaccessibleReason#AllPathsDown\_Timeout}
+            *AllPathsDown_Timeout*
           type: boolean
         storagePDLSupported:
           description: |2
             If all hosts in the cluster support the reaction of VM Component Protection
             to storage Permanent Device Loss
-            (@link vim.host.MountInfo.InaccessibleReason#PermanentDeviceLoss}
+            *PermanentDeviceLoss*
           type: boolean
       required:
         - storageAPDSupported
@@ -156235,7 +156478,7 @@ components:
             specified rating.
             
             Ratings vary from 1 to 5. This setting applies
-            to both manual and automated (@link DpmBehavior) DPM clusters.
+            to both manual and automated *DpmBehavior_enum* DPM clusters.
           type: integer
           format: int32
         option:
@@ -159791,7 +160034,7 @@ components:
             *clusterDefault* for per-VM setting.
             
             When an APD condition happens and the host begins timing out I/Os
-            (@link vim.host.MountInfo.InaccessibleReason#AllPathsDown\_Timeout}, VM Component
+            *AllPathsDown_Timeout*, VM Component
             Protection service will react based on the specific value of this property:
             - ***disabled***, no reaction, i.e., no
               VM failover and no event reporting for the failures.
@@ -166733,7 +166976,7 @@ components:
           description: |2
             Verbose mode By default, performance service run with verbose mode disabled.
             
-            It only collects the statistics in the 'alway collect' categories. Users can
+            It only collects the statistics in the 'always collect' categories. Users can
             configure performance via API or vSphere Web Client to enable/disable
             verbose mode.
             In verbose mode, performance service collects extra stats for support cases.
@@ -169601,6 +169844,21 @@ components:
             This will be one of the health status exposed by SPBM.
             See *PbmEntityHealthStatus.healthStatus*.
           type: string
+        relocationStatus:
+          description: |2
+            Relocation status of the volume.
+            
+              
+            See *CnsVolumeRelocationStatus_enum* for supported values.
+          type: string
+        attachmentStatus:
+          description: |2
+            Attachment status of the volume, indicating whether it is currently
+            attached to a VM.
+            
+              
+            See *CnsVolumeAttachmentStatus_enum* for supported values.
+          type: string
       allOf:
         - $ref: '#/components/schemas/DataObject'
 
@@ -170104,6 +170362,21 @@ components:
               
             This will be one of the health status exposed by SPBM.
             See *PbmEntityHealthStatus.healthStatus*.
+          type: string
+        relocationStatus:
+          description: |2
+            Relocation status of the volume.
+            
+              
+            See *CnsVolumeRelocationStatus_enum* for supported values.
+          type: string
+        attachmentStatus:
+          description: |2
+            Attachment status of the volume, indicating whether it is currently
+            attached to a VM.
+            
+              
+            See *CnsVolumeAttachmentStatus_enum* for supported values.
           type: string
       required:
         - volumeId
@@ -170891,6 +171164,52 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CnsVolumePolicyReconfigSpec'
+      required:
+        - _value
+      allOf:
+        - $ref: '#/components/schemas/Any'
+
+    CnsVolumeRelocateResult:
+      type: object
+      description: |2
+        Data object for returning result of relocate operation.
+        
+        This structure may be used only with operations rendered under `/vsan`.
+      properties:
+        profile:
+          description: |2
+            Storage policy associated with the volume after relocation.
+            
+              
+            ProfileSpec size is limited to 1. See *VirtualMachineProfileSpec* and its child-classes.
+            ProfileSpec is a generic vSphere SPBM construct that allows multiple
+            solution-specific profiles to be attached to a single entity; CNS only
+            integrates with the storage policy solution, so only one element is
+            ever meaningful here.
+              
+            This is set only if the volume's storage policy changed as a result of
+            the relocation, for example when *CnsVolumeRelocateSpec.profile*
+            was unset and the destination datastore's default policy was applied
+            instead of the volume's current policy.
+            This field will be set only in case of a successful relocate operation.
+            When fault field is set, this value will not be set and should be ignored.
+          type: array
+          items:
+            $ref: '#/components/schemas/VirtualMachineProfileSpec'
+      allOf:
+        - $ref: '#/components/schemas/CnsVolumeOperationResult'
+
+    ArrayOfCnsVolumeRelocateResult:
+      type: object
+      description: |2
+        A boxed array of *CnsVolumeRelocateResult*. To be used in *Any* placeholders.
+        
+        This structure may be used only with operations rendered under `/vsan`.
+      properties:
+        _value:
+          type: array
+          items:
+            $ref: '#/components/schemas/CnsVolumeRelocateResult'
       required:
         - _value
       allOf:
@@ -180386,10 +180705,7 @@ components:
         the specified host are now licensed.
         
         After this event is entered into
-        the event log, we expect to see that the (@link
-        vim.event.Event.UnlicensedVirtualMachinesEvent
-        UnlicensedVirtualMachinesEvent) (@link vim.ManagedEntity.configIssue
-        configIssue) is removed from the host.
+        the event log, we expect to see that the *UnlicensedVirtualMachinesEvent* *configIssue* is removed from the host.
       allOf:
         - $ref: '#/components/schemas/LicenseEvent'
 
@@ -189289,8 +189605,7 @@ components:
         This event records that we have unlicensed virtual machines on the
         specified host.
         
-        This can be both a (@link vim.ManagedEntity.configIssue
-        configIssue) and an entry in the event log.
+        This can be both a *configIssue* and an entry in the event log.
       properties:
         unlicensed:
           type: integer
@@ -189325,10 +189640,7 @@ components:
         the specified host.
         
         After this event is entered into the event log, we
-        expect to see a corresponding (@link
-        vim.event.Event.UnlicensedVirtualMachinesEvent
-        UnlicensedVirtualMachinesEvent) (@link vim.ManagedEntity.configIssue
-        configIssue) on the host.
+        expect to see a corresponding *UnlicensedVirtualMachinesEvent* *configIssue* on the host.
       properties:
         available:
           type: integer
@@ -209375,7 +209687,7 @@ components:
         could slow down considerably or timeout. This is an issue only for migration of
         powered-on virtual machines from an ESX host with version greater
         than 2.0.x to an ESX host with version 2.0.x. It will be an error if the
-        number of such disks is great enough to cause timeout ( &ge; 3 ), or a warning
+        number of such disks is great enough to cause timeout (3 or more), or a warning
         otherwise.
       properties:
         roDiskCount:
@@ -216156,7 +216468,7 @@ components:
         useFeatureReqsForOldHWv:
           description: |2
             Indicates whether this host uses vmFeatures for compatibility checking
-            of old (&leq;8) virtual hardware version VMs.
+            of old (8 or lower) virtual hardware version VMs.
           type: boolean
         markPerenniallyReservedSupported:
           description: |2
@@ -231436,6 +231748,21 @@ components:
         cmdOption:
           description: |2
             Possible command line options when calling esxupdate.
+            
+            Only the following options are accepted (tokens separated by ", "):
+            \--timeout=N or --timeout N
+            Timeout in seconds to wait for a remote download to complete.
+            N must be a non-negative decimal integer.
+            \--retry=N or --retry N
+            Number of times to retry a failed download before giving up.
+            N must be a non-negative decimal integer.
+            \--cachesize=N or --cachesize N
+            Maximum size of the local VIB cache in bytes.
+            N must be a non-negative decimal integer.
+            \--cleancache
+            Purge the local VIB cache before the operation begins.
+            Any other token causes the operation to be rejected with
+            *InvalidArgument*.
           type: string
       allOf:
         - $ref: '#/components/schemas/DataObject'
@@ -233090,8 +233417,7 @@ components:
             Use this property to correlate this path object to other
             path objects.
             
-            The state of the Path can be retrieved from the data object (@link
-            vim.host.MultipathStateInfo.Path} on the *HostMultipathStateInfo* data object.
+            The state of the Path can be retrieved from the data object *HostMultipathStateInfoPath* on the *HostMultipathStateInfo* data object.
             
             Use this name to configure LogicalUnit multipathing policy using *HostStorageSystem.EnableMultipathPath* and *HostStorageSystem.DisableMultipathPath*.
           type: string
@@ -258310,6 +258636,22 @@ components:
             
             ***Since:*** vSphere API Release 9.1.0.0
           type: string
+        extensionCompatibilityConstraint:
+          description: |2
+            The full set of extension compatibility constraints registered on this
+            virtual machine by its managing extension.
+            
+            See
+            *VirtualMachineExtensionCompatibilityConstraint* and
+            *VirtualMachineConfigSpec.extensionCompatibilityConstraint* for how
+            constraints are registered and what they mean.
+            
+            When unset, no extension compatibility constraints are registered on the
+            virtual machine.
+            
+            ***Since:*** vSphere API Release 9.1.2.0
+          allOf:
+            - $ref: '#/components/schemas/VirtualMachineExtensionCompatibilityConstraintSet'
       required:
         - changeVersion
         - modified
@@ -259189,6 +259531,54 @@ components:
             Reconfigure privilege: VirtualMachine.Config.ManagedBy
           allOf:
             - $ref: '#/components/schemas/ManagedByInfo'
+        extensionCompatibilityConstraint:
+          description: |2
+            The full set of extension compatibility constraints for this virtual
+            machine, declared by its managing extension (see *VirtualMachineConfigSpec.managedBy*) so
+            that vCenter can protect the VM's properties during operations that would
+            change them.
+            
+            See *VirtualMachineExtensionCompatibilityConstraint* for the
+            meaning of an individual constraint.
+            
+            When present, *VirtualMachineExtensionCompatibilityConstraintSet.constraint* is the
+            full desired constraint set and is persisted by the same operation that
+            creates or reconfigures the VM:
+            - At create time, constraints are persisted atomically with the VM.
+            - At reconfigure time, the set fully replaces the existing set,
+              including clearing it entirely if
+              *VirtualMachineExtensionCompatibilityConstraintSet.constraint* is an empty
+              array. Omitting this field (leaving it unset) leaves the existing
+              set unchanged.
+              
+            The constraints in the set are evaluated independently; an operation is
+            compatible only if it satisfies every constraint in the set (they are
+            logically ANDed). Order is not significant.
+            
+            Reconfigure privilege: VirtualMachine.Config.ExtensionCompatibility (also
+            required at create time, where it is evaluated against the target folder
+            rather than the VM).
+            
+            ***Since:*** vSphere API Release 9.1.2.0
+          allOf:
+            - $ref: '#/components/schemas/VirtualMachineExtensionCompatibilityConstraintSet'
+        skipExtensionCompatibilityChecks:
+          description: |2
+            Whether to skip enforcement of the *extension compatibility constraints* registered on this virtual machine for
+            this reconfigure operation.
+            
+            Intended for a managing extension's service accounts, so they can
+            reconfigure the VMs they manage without being blocked by the constraints
+            they registered. Honored only when the caller holds the
+            VirtualMachine.ExtensionCompatibility.Bypass privilege on the virtual machine;
+            otherwise the operation is rejected. Built-in compatibility checks (host
+            compatibility, SPBM, and so on) are still enforced.
+            
+            When unset, the value is treated as false and the registered constraints
+            are enforced.
+            
+            ***Since:*** vSphere API Release 9.1.2.0
+          type: boolean
         memoryReservationLockedToMax:
           description: |2
             If set true, memory resource reservation for this virtual machine will always be
@@ -260742,6 +261132,138 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/VirtualMachineEmptyProfileSpec'
+      required:
+        - _value
+      allOf:
+        - $ref: '#/components/schemas/Any'
+
+    VirtualMachineExtensionCompatibilityConstraint:
+      type: object
+      description: |2
+        A compatibility constraint declared by a managing extension on a virtual
+        machine it manages.
+        
+        Constraints let a managing extension (identified by
+        *managedBy*) tell vCenter which properties of a
+        managed virtual machine must be protected during operations that would change
+        them (for example, relocate or reconfigure). vCenter enforces the constraints
+        in the compatibility-check pipeline so that operations which would break the
+        extension's assumptions are rejected.
+        
+        Enforcement is a vCenter mechanism. Operations invoked directly against an
+        ESXi host bypass vCenter's compatibility-check pipeline, so these constraints
+        are not evaluated on that path.
+        
+        A constraint has two orthogonal dimensions:
+        - *VirtualMachineExtensionCompatibilityConstraint.constraintType* identifies _what property_ is constrained
+          (for example, the resource pool or the storage policy).
+        - *VirtualMachineExtensionCompatibilityConstraint.constraintKind* identifies _how_ the constraint is
+          evaluated (for example, the property must not change).
+          
+        The same property can therefore be constrained in different ways without
+        changing this type.
+        
+        Within a single virtual machine, a constraint's identity is the combination
+        of its *VirtualMachineExtensionCompatibilityConstraint.constraintType* and *VirtualMachineExtensionCompatibilityConstraint.constraintKind*; that pair is what
+        vCenter evaluates against. A virtual machine may carry at most one constraint
+        per (constraintType, constraintKind): supplying more than one with the same
+        pair is rejected as invalid input rather than silently collapsed.
+        *VirtualMachineExtensionCompatibilityConstraint.constraintName* plays no part in this identity.
+        
+        ***Since:*** vSphere API Release 9.1.2.0
+      properties:
+        constraintName:
+          description: |2
+            An optional descriptive label for the constraint, chosen by the managing
+            extension (for example, "pool-invariant"), used for identification and
+            diagnostics such as constraint reads and violation messages.
+            
+            The name is descriptive only. It is not required to be unique (extensions
+            typically reuse the same names across all the virtual machines they
+            manage) and it is not used to evaluate or identify the constraint; the
+            constraint's identity is its *VirtualMachineExtensionCompatibilityConstraint.constraintType* and
+            *VirtualMachineExtensionCompatibilityConstraint.constraintKind*.
+          type: string
+        constraintType:
+          description: |2
+            The property that this constraint protects.
+            
+            The values defined today are
+            enumerated by *VirtualMachineExtensionCompatibilityConstraintType_enum* (for example,
+            *POOL*). An unrecognized value causes the create or
+            reconfigure operation that registers the constraint to fail.
+          type: string
+        constraintKind:
+          description: |2
+            How the constraint is evaluated.
+            
+            The only kind defined today is
+            *INVARIANT*, which asserts that the
+            *property* must not change from the virtual
+            machine's current value. This field is required and must be set
+            explicitly so that a constraint's (constraintType, constraintKind)
+            identity is always unambiguous. An unrecognized value causes the create
+            or reconfigure operation that registers the constraint to fail.
+          type: string
+      required:
+        - constraintType
+        - constraintKind
+      allOf:
+        - $ref: '#/components/schemas/DataObject'
+
+    ArrayOfVirtualMachineExtensionCompatibilityConstraint:
+      type: object
+      description: |2
+        A boxed array of *VirtualMachineExtensionCompatibilityConstraint*. To be used in *Any* placeholders.
+        
+        ***Since:*** vSphere API Release 9.1.2.0
+      properties:
+        _value:
+          type: array
+          items:
+            $ref: '#/components/schemas/VirtualMachineExtensionCompatibilityConstraint'
+      required:
+        - _value
+      allOf:
+        - $ref: '#/components/schemas/Any'
+
+    VirtualMachineExtensionCompatibilityConstraintSet:
+      type: object
+      description: |2
+        Represents the set of *VirtualMachineExtensionCompatibilityConstraint* objects
+        declared on a virtual machine.
+        
+        An empty *VirtualMachineExtensionCompatibilityConstraintSet.constraint* array means no
+        constraints are declared. See the field using this type (for example
+        *VirtualMachineConfigSpec.extensionCompatibilityConstraint*) for how this
+        type is used during create and reconfigure.
+        
+        ***Since:*** vSphere API Release 9.1.2.0
+      properties:
+        constraint:
+          description: |2
+            The extension compatibility constraints in this set.
+            
+            See
+            *VirtualMachineExtensionCompatibilityConstraint* for the meaning of an
+            individual constraint.
+          type: array
+          items:
+            $ref: '#/components/schemas/VirtualMachineExtensionCompatibilityConstraint'
+      allOf:
+        - $ref: '#/components/schemas/DataObject'
+
+    ArrayOfVirtualMachineExtensionCompatibilityConstraintSet:
+      type: object
+      description: |2
+        A boxed array of *VirtualMachineExtensionCompatibilityConstraintSet*. To be used in *Any* placeholders.
+        
+        ***Since:*** vSphere API Release 9.1.2.0
+      properties:
+        _value:
+          type: array
+          items:
+            $ref: '#/components/schemas/VirtualMachineExtensionCompatibilityConstraintSet'
       required:
         - _value
       allOf:
@@ -264231,6 +264753,20 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/VmPlacementPolicy'
+        skipExtensionCompatibilityChecks:
+          description: |2
+            Whether to skip enforcement of the *extension compatibility constraints* registered on the virtual machine for
+            this relocate operation.
+            
+            Intended for a managing extension's service accounts, so they can relocate
+            the VMs they manage without being blocked by the constraints they
+            registered. Honored only when the caller holds the
+            VirtualMachine.ExtensionCompatibility.Bypass privilege on the virtual machine;
+            otherwise the operation is rejected. Built-in compatibility checks (host
+            compatibility, SPBM, and so on) are still enforced.
+            
+            ***Since:*** vSphere API Release 9.1.2.0
+          type: boolean
       allOf:
         - $ref: '#/components/schemas/DataObject'
 
@@ -264383,9 +264919,8 @@ components:
         parts: 1) a set of virtual machine-wide replication properties; 2)
         a set of properties per replicated virtual disk. ReplicationSetting
         is passed as an argument for initial replication configuration
-        (@see vim.HbrManager#enableReplication) as well as for
-        re-configuration of a replicated VM's properties (@see
-        vim.HbrManager#reconfigureReplication).
+        *HbrManager.HbrEnableReplication_Task* as well as for
+        re-configuration of a replicated VM's properties *HbrManager.HbrReconfigureReplication_Task*.
       properties:
         generation:
           description: |2
@@ -276930,9 +277465,9 @@ components:
         The following syntax description uses <code>telnet</code>; you can also
         specify authentication parameters for secure telnet (<code>telnets</code>).
         
-        <code>telnet://&lt;host&gt;:&lt;port&gt;&num;key\[=value\]\[&amp;key\[=value\] ...\]</code>
+        <code>telnet://&lt;host&gt;:&lt;port&gt;&#35;key\[=value\]\[&amp;key\[=value\] ...\]</code>
         
-        The first parameter must have a number sign (&num;) prefix. Additional parameters
+        The first parameter must have a number sign (&#35;) prefix. Additional parameters
         must have an ampersand (&amp;) prefix. The following list shows the valid parameters.
         - <code>certificate=value</code> - Specifies a certificate in PEM format
           against which the peer certificate is compared.
@@ -297109,6 +297644,50 @@ components:
       allOf:
         - $ref: '#/components/schemas/Any'
 
+    VStorageObjectDeleteAllSnapshotsResult:
+      type: object
+      description: |2
+        This data object type defines the result of
+        *VStorageObjectManagerBase.VStorageObjectDeleteAllSnapshots_Task* task.
+        
+        ***Since:*** vSphere API Release 9.1.2.0
+      properties:
+        vstorageObject:
+          description: |2
+            Source VStorageObject object whose snapshots deletion are done.
+          allOf:
+            - $ref: '#/components/schemas/VStorageObject'
+        usedCapacity:
+          description: |2
+            Storage space utilization of snapshots in MB excluding the running point
+          type: integer
+          format: int64
+        isConsolidated:
+          description: |2
+            This flag will be set to true in case we have consolidated
+            the whole snapshot disk chain.
+          type: boolean
+      required:
+        - vstorageObject
+      allOf:
+        - $ref: '#/components/schemas/DataObject'
+
+    ArrayOfVStorageObjectDeleteAllSnapshotsResult:
+      type: object
+      description: |2
+        A boxed array of *VStorageObjectDeleteAllSnapshotsResult*. To be used in *Any* placeholders.
+        
+        ***Since:*** vSphere API Release 9.1.2.0
+      properties:
+        _value:
+          type: array
+          items:
+            $ref: '#/components/schemas/VStorageObjectDeleteAllSnapshotsResult'
+      required:
+        - _value
+      allOf:
+        - $ref: '#/components/schemas/Any'
+
     DiskCryptoSpec:
       type: object
       description: |2
@@ -306517,6 +307096,8 @@ components:
         - `vsan2compressionconfig`
         - `fileservicefds`
         - `vsancyberrecovery`
+        - `cnsDeleteAllSnapshots`
+        - `cnsbatchrelocate`
       enum:
         - 'vsanhcimeshdit'
         - 'vsanhcimeshmixmode'
@@ -306534,6 +307115,8 @@ components:
         - 'vsan2compressionconfig'
         - 'fileservicefds'
         - 'vsancyberrecovery'
+        - 'cnsDeleteAllSnapshots'
+        - 'cnsbatchrelocate'
 
     VsanClusterHealthActionIdEnum_enum:
       type: string
@@ -307213,6 +307796,8 @@ components:
         - `COMPLIANCE_STATUS`: Select *CnsVolume.complianceStatus*
         - `DATASTORE_ACCESSIBILITY_STATUS`: Select *CnsVolume.datastoreAccessibilityStatus*
         - `HEALTH_STATUS`
+        - `RELOCATION_STATUS`
+        - `ATTACHMENT_STATUS`
         - `QuerySelectionNameType_Unknown`: represent the value when the lower version client cannot recognize the enum value
       enum:
         - 'VOLUME_METADATA'
@@ -307224,6 +307809,8 @@ components:
         - 'COMPLIANCE_STATUS'
         - 'DATASTORE_ACCESSIBILITY_STATUS'
         - 'HEALTH_STATUS'
+        - 'RELOCATION_STATUS'
+        - 'ATTACHMENT_STATUS'
         - 'QuerySelectionNameType_Unknown'
 
     CnsSyncVolumeMode_enum:
@@ -307283,6 +307870,20 @@ components:
         - 'FCD'
         - 'LEGACY_DISK'
 
+    CnsVolumeAttachmentStatus_enum:
+      type: string
+      description: |2
+        Enumerates whether a container volume is attached to a VM.
+        
+        Possible values:
+        - `ATTACHED`: The volume is attached to a VM.
+        - `DETACHED`: The volume is not attached to any VM.
+        - `VolumeAttachmentStatus_Unknown`: represent the value when the older version client cannot recognize the enum value.
+      enum:
+        - 'ATTACHED'
+        - 'DETACHED'
+        - 'VolumeAttachmentStatus_Unknown'
+
     CnsVolumeBackingType_enum:
       type: string
       description: |2
@@ -307322,6 +307923,22 @@ components:
         - 'RawDiskMappingVer1BackingInfo'
         - 'SeSparseBackingInfo'
         - 'LocalPMemBackingInfo'
+
+    CnsVolumeRelocationStatus_enum:
+      type: string
+      description: |2
+        Enumerates relocation status for a container volume.
+        
+        Possible values:
+        - `NONE`: The volume is not undergoing relocation.
+        - `IN_RELOCATION`: The volume is currently being relocated.
+        - `PENDING_RELOCATION`: The volume is queued in the batch relocation pipeline and will be relocated later.
+        - `VolumeRelocationStatus_Unknown`: represent the value when the older version client cannot recognize the enum value.
+      enum:
+        - 'NONE'
+        - 'IN_RELOCATION'
+        - 'PENDING_RELOCATION'
+        - 'VolumeRelocationStatus_Unknown'
 
     CnsVolumeType_enum:
       type: string
@@ -312823,9 +313440,11 @@ components:
           
           The virtual machine clone
           will not have access to the original virtual machine's TPM secrets.
-          If the virtual TPM operates in read-only mode (
-          VirtualTPM#readOnly}), the clone virtual machine will be configured
-          with a regularly operating (non read-only) virtual TPM.
+          
+          If the virtual TPM operates in read-only mode
+          (*vim.vm.device.VirtualTPM#readOnly*), the clone virtual machine
+          will be configured with a regularly operating (non read-only) virtual
+          TPM.
         
         ***Since:*** vSphere API Release 8.0.0.1
       enum:
@@ -313110,6 +313729,41 @@ components:
         - 'vmNptRuntimeError'
         - 'vmNptOutOfIntrVector'
         - 'vmNptVMCIActive'
+
+    VirtualMachineExtensionCompatibilityConstraintKind_enum:
+      type: string
+      description: |2
+        The set of *VirtualMachineExtensionCompatibilityConstraint.constraintKind* values defined in this release.
+        
+        Possible values:
+        - `INVARIANT`: The constrained property must not change from the virtual machine's
+          current value.
+          
+        ***Since:*** vSphere API Release 9.1.2.0
+      enum:
+        - 'INVARIANT'
+
+    VirtualMachineExtensionCompatibilityConstraintType_enum:
+      type: string
+      description: |2
+        The set of *VirtualMachineExtensionCompatibilityConstraint.constraintType* values defined in this release.
+        
+        Possible values:
+        - `SERVICE`: The virtual machine's vCenter service (cross-vCenter move).
+        - `FOLDER`: The virtual machine's folder.
+        - `POOL`: The virtual machine's resource pool.
+        - `VM_STORAGE_POLICY`: The virtual machine-level storage policy.
+        - `DISK_STORAGE_POLICY`: Per-disk storage policies.
+        - `DEVICE`: Virtual device configuration (for example, device backings).
+          
+        ***Since:*** vSphere API Release 9.1.2.0
+      enum:
+        - 'SERVICE'
+        - 'FOLDER'
+        - 'POOL'
+        - 'VM_STORAGE_POLICY'
+        - 'DISK_STORAGE_POLICY'
+        - 'DEVICE'
 
     VirtualMachineFileLayoutExFileType_enum:
       type: string
@@ -314697,6 +315351,21 @@ components:
         The types of tests which can requested by any of the methods in either
         *VirtualMachineCompatibilityChecker* or *VirtualMachineProvisioningChecker*.
         
+        Only *extensionTests* evaluates extension-registered compatibility
+        constraints, even if a constraint conceptually belongs to another test type. For
+        example, a constraint whose *VirtualMachineExtensionCompatibilityConstraintType_enum*
+        is `POOL` is not evaluated as part of *resourcePoolTests*; it is only
+        evaluated when *extensionTests* is included.
+        
+        *extensionTests*, in turn, is not scoped to a single domain: requesting it
+        evaluates every constraint registered on the virtual machine, regardless of
+        *VirtualMachineExtensionCompatibilityConstraintType_enum*. So there is no way
+        to request "the complete, resource-pool-only picture" for a virtual machine with
+        both a `POOL` constraint and, say, a `DEVICE` constraint: requesting
+        only *resourcePoolTests* omits the `POOL` constraint, while adding
+        *extensionTests* to also cover it pulls in the unrelated `DEVICE`
+        constraint as well. The same applies to any other test type.
+        
         Possible values:
         - `sourceTests`: Tests that examine only the configuration
           of the virtual machine and its current host; the destination
@@ -314722,12 +315391,18 @@ components:
         - `networkTests`: Tests that check that the
           destination host or cluster can see the networks that the virtual
           machine's virtual nic devices are going to be connected.
+        - `extensionTests`: Tests that evaluate extension-registered compatibility constraints
+          (see *VirtualMachineExtensionCompatibilityConstraint*) on virtual
+          machines managed by an extension.
+          
+          ***Since:*** vSphere API Release 9.1.2.0
       enum:
         - 'sourceTests'
         - 'hostTests'
         - 'resourcePoolTests'
         - 'datastoreTests'
         - 'networkTests'
+        - 'extensionTests'
 
     CustomizationNetBIOSMode_enum:
       type: string

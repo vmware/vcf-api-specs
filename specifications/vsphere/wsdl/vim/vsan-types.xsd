@@ -443,6 +443,8 @@
          <enumeration value="vsan2compressionconfig" />
          <enumeration value="fileservicefds" />
          <enumeration value="vsancyberrecovery" />
+         <enumeration value="cnsDeleteAllSnapshots" />
+         <enumeration value="cnsbatchrelocate" />
       </restriction>
    </simpleType>
    <complexType name="VsanClientServerHciMeshDitEncryptionHealthSummary">
@@ -1648,6 +1650,8 @@
                <element name="datastoreAccessibilityStatus" type="xsd:string" minOccurs="0" />
                <element name="cursor" type="vsan:CnsCursor" minOccurs="0" />
                <element name="healthStatus" type="xsd:string" minOccurs="0" />
+               <element name="relocationStatus" type="xsd:string" minOccurs="0" />
+               <element name="attachmentStatus" type="xsd:string" minOccurs="0" />
             </sequence>
          </extension>
       </complexContent>
@@ -1682,6 +1686,8 @@
          <enumeration value="COMPLIANCE_STATUS" />
          <enumeration value="DATASTORE_ACCESSIBILITY_STATUS" />
          <enumeration value="HEALTH_STATUS" />
+         <enumeration value="RELOCATION_STATUS" />
+         <enumeration value="ATTACHMENT_STATUS" />
          <enumeration value="QuerySelectionNameType_Unknown" />
       </restriction>
    </simpleType>
@@ -1802,6 +1808,8 @@
                <element name="complianceStatus" type="xsd:string" minOccurs="0" />
                <element name="datastoreAccessibilityStatus" type="xsd:string" minOccurs="0" />
                <element name="healthStatus" type="xsd:string" minOccurs="0" />
+               <element name="relocationStatus" type="xsd:string" minOccurs="0" />
+               <element name="attachmentStatus" type="xsd:string" minOccurs="0" />
             </sequence>
          </extension>
       </complexContent>
@@ -1856,6 +1864,13 @@
          </extension>
       </complexContent>
    </complexType>
+   <simpleType name="CnsVolumeAttachmentStatus">
+      <restriction base="xsd:string">
+         <enumeration value="ATTACHED" />
+         <enumeration value="DETACHED" />
+         <enumeration value="VolumeAttachmentStatus_Unknown" />
+      </restriction>
+   </simpleType>
    <simpleType name="CnsVolumeBackingType">
       <restriction base="xsd:string">
          <enumeration value="FlatVer1BackingInfo" />
@@ -2010,6 +2025,15 @@
          <element name="CnsVolumePolicyReconfigSpec" type="vsan:CnsVolumePolicyReconfigSpec" minOccurs="0" maxOccurs="unbounded" />
       </sequence>
    </complexType>
+   <complexType name="CnsVolumeRelocateResult">
+      <complexContent>
+         <extension base="vsan:CnsVolumeOperationResult">
+            <sequence>
+               <element name="profile" type="vim25:VirtualMachineProfileSpec" minOccurs="0" maxOccurs="unbounded" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
    <complexType name="CnsVolumeRelocateSpec">
       <complexContent>
          <extension base="vim25:DynamicData">
@@ -2026,6 +2050,14 @@
          <element name="CnsVolumeRelocateSpec" type="vsan:CnsVolumeRelocateSpec" minOccurs="0" maxOccurs="unbounded" />
       </sequence>
    </complexType>
+   <simpleType name="CnsVolumeRelocationStatus">
+      <restriction base="xsd:string">
+         <enumeration value="NONE" />
+         <enumeration value="IN_RELOCATION" />
+         <enumeration value="PENDING_RELOCATION" />
+         <enumeration value="VolumeRelocationStatus_Unknown" />
+      </restriction>
+   </simpleType>
    <complexType name="CnsVolumeSource">
       <complexContent>
          <extension base="vim25:DynamicData">

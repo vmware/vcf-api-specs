@@ -34064,6 +34064,7 @@
                <element name="tdxEnabled" type="xsd:boolean" minOccurs="0" />
                <element name="sevSnpEnabled" type="xsd:boolean" minOccurs="0" />
                <element name="guestArchitecture" type="xsd:string" minOccurs="0" />
+               <element name="extensionCompatibilityConstraint" type="vim25:VirtualMachineExtensionCompatibilityConstraintSet" minOccurs="0" />
             </sequence>
          </extension>
       </complexContent>
@@ -34205,6 +34206,8 @@
                <element name="maxMksConnections" type="xsd:int" minOccurs="0" />
                <element name="guestAutoLockEnabled" type="xsd:boolean" minOccurs="0" />
                <element name="managedBy" type="vim25:ManagedByInfo" minOccurs="0" />
+               <element name="extensionCompatibilityConstraint" type="vim25:VirtualMachineExtensionCompatibilityConstraintSet" minOccurs="0" />
+               <element name="skipExtensionCompatibilityChecks" type="xsd:boolean" minOccurs="0" />
                <element name="memoryReservationLockedToMax" type="xsd:boolean" minOccurs="0" />
                <element name="nestedHVEnabled" type="xsd:boolean" minOccurs="0" />
                <element name="vPMCEnabled" type="xsd:boolean" minOccurs="0" />
@@ -34566,6 +34569,46 @@
       <complexContent>
          <extension base="vim25:VirtualMachineProfileSpec">
             <sequence>
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="VirtualMachineExtensionCompatibilityConstraint">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="constraintName" type="xsd:string" minOccurs="0" />
+               <element name="constraintType" type="xsd:string" />
+               <element name="constraintKind" type="xsd:string" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfVirtualMachineExtensionCompatibilityConstraint">
+      <sequence>
+         <element name="VirtualMachineExtensionCompatibilityConstraint" type="vim25:VirtualMachineExtensionCompatibilityConstraint" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <simpleType name="VirtualMachineExtensionCompatibilityConstraintType">
+      <restriction base="xsd:string">
+         <enumeration value="SERVICE" />
+         <enumeration value="FOLDER" />
+         <enumeration value="POOL" />
+         <enumeration value="VM_STORAGE_POLICY" />
+         <enumeration value="DISK_STORAGE_POLICY" />
+         <enumeration value="DEVICE" />
+      </restriction>
+   </simpleType>
+   <simpleType name="VirtualMachineExtensionCompatibilityConstraintKind">
+      <restriction base="xsd:string">
+         <enumeration value="INVARIANT" />
+      </restriction>
+   </simpleType>
+   <complexType name="VirtualMachineExtensionCompatibilityConstraintSet">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="constraint" type="vim25:VirtualMachineExtensionCompatibilityConstraint" minOccurs="0" maxOccurs="unbounded" />
             </sequence>
          </extension>
       </complexContent>
@@ -35835,6 +35878,7 @@
                <element name="cryptoSpec" type="vim25:CryptoSpec" minOccurs="0" />
                <element name="tagSpecs" type="vim25:TagSpec" minOccurs="0" maxOccurs="unbounded" />
                <element name="vmPlacementPolicies" type="vim25:VmPlacementPolicy" minOccurs="0" maxOccurs="unbounded" />
+               <element name="skipExtensionCompatibilityChecks" type="xsd:boolean" minOccurs="0" />
             </sequence>
          </extension>
       </complexContent>
@@ -36921,6 +36965,7 @@
          <enumeration value="resourcePoolTests" />
          <enumeration value="datastoreTests" />
          <enumeration value="networkTests" />
+         <enumeration value="extensionTests" />
       </restriction>
    </simpleType>
    <complexType name="CustomizationIPSettings">
@@ -40553,6 +40598,17 @@
             <sequence>
                <element name="lunUuid" type="xsd:string" />
                <element name="compatibilityMode" type="xsd:string" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="VStorageObjectDeleteAllSnapshotsResult">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="vstorageObject" type="vim25:VStorageObject" />
+               <element name="usedCapacity" type="xsd:long" minOccurs="0" />
+               <element name="isConsolidated" type="xsd:boolean" minOccurs="0" />
             </sequence>
          </extension>
       </complexContent>

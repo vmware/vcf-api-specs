@@ -1614,6 +1614,14 @@
                </sequence>
             </complexType>
          </element>
+         <element name="CnsDeleteAllSnapshots"  type="vsan:CnsDeleteAllSnapshotsRequestType" />
+         <element name="CnsDeleteAllSnapshotsResponse">
+            <complexType>
+               <sequence>
+                  <element name="returnval" type="vim25:ManagedObjectReference" />
+               </sequence>
+            </complexType>
+         </element>
          <element name="CnsAlreadyRegisteredFaultFault" type="vsan:CnsAlreadyRegisteredFault"/>
          <element name="CnsFaultFault" type="vsan:CnsFault"/>
          <element name="CnsInCompatibleFaultFault" type="vsan:CnsInCompatibleFault"/>
@@ -4344,6 +4352,12 @@
    </message>
    <message name="CnsSyncVolumeResponseMsg">
       <part name="parameters" element="vsan:CnsSyncVolumeResponse" />
+   </message>
+   <message name="CnsDeleteAllSnapshotsRequestMsg">
+      <part name="parameters" element="vsan:CnsDeleteAllSnapshots" />
+   </message>
+   <message name="CnsDeleteAllSnapshotsResponseMsg">
+      <part name="parameters" element="vsan:CnsDeleteAllSnapshotsResponse" />
    </message>
    <message name="CnsAlreadyRegisteredFaultFaultMsg">
       <part name="fault" element="vsan:CnsAlreadyRegisteredFaultFault" />
@@ -8491,6 +8505,14 @@
          <fault name="InvalidArgumentFault" message="vsan:InvalidArgumentFaultMsg"/>
          <fault name="RuntimeFault" message="vsan:RuntimeFaultFaultMsg"/>
       </operation>
+      <operation name="CnsDeleteAllSnapshots">
+         <input message="vsan:CnsDeleteAllSnapshotsRequestMsg" />
+         <output message="vsan:CnsDeleteAllSnapshotsResponseMsg" />
+         <fault name="CnsFaultFault" message="vsan:CnsFaultFaultMsg"/>
+         <fault name="NotFoundFault" message="vsan:NotFoundFaultMsg"/>
+         <fault name="InvalidArgumentFault" message="vsan:InvalidArgumentFaultMsg"/>
+         <fault name="RuntimeFault" message="vsan:RuntimeFaultFaultMsg"/>
+      </operation>
       <operation name="VsanHostQueryVerifyNetworkSettings">
          <input message="vsan:VsanHostQueryVerifyNetworkSettingsRequestMsg" />
          <output message="vsan:VsanHostQueryVerifyNetworkSettingsResponseMsg" />
@@ -9080,7 +9102,7 @@
    <binding name="VsanhealthBinding" type="vsan:VsanhealthPortType">
       <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
       <operation name="VsanRetrieveProperties">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9107,7 +9129,7 @@
          </fault>
       </operation>
       <operation name="VsanPerformOnlineHealthCheck">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9128,7 +9150,7 @@
          </fault>
       </operation>
       <operation name="QueryVsanCloudHealthStatus">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9149,7 +9171,7 @@
          </fault>
       </operation>
       <operation name="VsanQueryObjectSnapshotsInfo">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9170,7 +9192,7 @@
          </fault>
       </operation>
       <operation name="VsanQueryNvmeCriticalWarningStats">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9194,7 +9216,7 @@
          </fault>
       </operation>
       <operation name="VsanQueryZdomScrubberData">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9218,7 +9240,7 @@
          </fault>
       </operation>
       <operation name="VsanQueryLSOMwbsize">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9242,7 +9264,7 @@
          </fault>
       </operation>
       <operation name="PerformVsanUpgradeEx">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9257,7 +9279,7 @@
          </fault>
       </operation>
       <operation name="PerformVsanUpgradePreflightAsyncCheck_Task">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9272,7 +9294,7 @@
          </fault>
       </operation>
       <operation name="PerformVsanUpgradePreflightCheckEx">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9284,7 +9306,7 @@
          </fault>
       </operation>
       <operation name="RetrieveSupportedVsanFormatVersion">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9296,7 +9318,7 @@
          </fault>
       </operation>
       <operation name="VsanQueryUpgradeStatusEx">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9308,7 +9330,7 @@
          </fault>
       </operation>
       <operation name="VsanGetCapabilities">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9323,7 +9345,7 @@
          </fault>
       </operation>
       <operation name="VsanQueryVerifyClusterNetworkSettings">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9338,7 +9360,7 @@
          </fault>
       </operation>
       <operation name="VsanQueryClusterCheckLimits">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9353,7 +9375,7 @@
          </fault>
       </operation>
       <operation name="VsanQueryClusterPhysicalDiskHealthSummary">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9368,7 +9390,7 @@
          </fault>
       </operation>
       <operation name="VsanQueryClusterAdvCfgSync">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9383,7 +9405,7 @@
          </fault>
       </operation>
       <operation name="VsanQueryClusterCreateVmHealthTest">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9398,7 +9420,7 @@
          </fault>
       </operation>
       <operation name="VsanQueryClusterNetworkPerfTest">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9413,7 +9435,7 @@
          </fault>
       </operation>
       <operation name="VsanQueryClusterCaptureVsanPcap">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9428,7 +9450,7 @@
          </fault>
       </operation>
       <operation name="VsanQueryClusterHealthSystemVersions">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9443,7 +9465,7 @@
          </fault>
       </operation>
       <operation name="VsanCheckClusterClomdLiveness">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9458,7 +9480,7 @@
          </fault>
       </operation>
       <operation name="VsanRepairClusterImmediateObjects">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9473,7 +9495,7 @@
          </fault>
       </operation>
       <operation name="VsanClusterGetHclInfo">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9488,7 +9510,7 @@
          </fault>
       </operation>
       <operation name="VsanRemediateVsanCluster">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9503,7 +9525,7 @@
          </fault>
       </operation>
       <operation name="VsanRemediateVsanHost">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9518,7 +9540,7 @@
          </fault>
       </operation>
       <operation name="PerformClusterPowerAction">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9536,7 +9558,7 @@
          </fault>
       </operation>
       <operation name="QueryClusterPowerContext">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9548,7 +9570,7 @@
          </fault>
       </operation>
       <operation name="UpdateClusterPowerStatus">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9563,7 +9585,7 @@
          </fault>
       </operation>
       <operation name="VsanQueryNetworkDiagnostics">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9578,7 +9600,7 @@
          </fault>
       </operation>
       <operation name="VsanGetThresholds">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9593,7 +9615,7 @@
          </fault>
       </operation>
       <operation name="VsanSetThresholds">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9611,7 +9633,7 @@
          </fault>
       </operation>
       <operation name="StartIODiagnosticsTask">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9632,7 +9654,7 @@
          </fault>
       </operation>
       <operation name="QueryIODiagnosticsInstances">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9650,7 +9672,7 @@
          </fault>
       </operation>
       <operation name="QueryIODiagnosticsStats">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9668,7 +9690,7 @@
          </fault>
       </operation>
       <operation name="CreateIOTripAnalyzerRecurrences">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9689,7 +9711,7 @@
          </fault>
       </operation>
       <operation name="GetIOTripAnalyzerSchedulerConfig">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9704,7 +9726,7 @@
          </fault>
       </operation>
       <operation name="EditIOTripAnalyzerRecurrences">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9725,7 +9747,7 @@
          </fault>
       </operation>
       <operation name="RemoveIOTripAnalyzerRecurrences">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9743,7 +9765,7 @@
          </fault>
       </operation>
       <operation name="VsanSetTraceObjectPolicy">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9758,7 +9780,7 @@
          </fault>
       </operation>
       <operation name="StartIoInsight">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9782,7 +9804,7 @@
          </fault>
       </operation>
       <operation name="StopIoInsight">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9806,7 +9828,7 @@
          </fault>
       </operation>
       <operation name="QueryIoInsightInstances">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9830,7 +9852,7 @@
          </fault>
       </operation>
       <operation name="DeleteIoInsightInstance">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9854,7 +9876,7 @@
          </fault>
       </operation>
       <operation name="RenameIoInsightInstance">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9878,7 +9900,7 @@
          </fault>
       </operation>
       <operation name="VsanVitQueryIscsiTargetServiceVersion">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9893,7 +9915,7 @@
          </fault>
       </operation>
       <operation name="VsanVitGetHomeObject">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9908,7 +9930,7 @@
          </fault>
       </operation>
       <operation name="VsanVitGetIscsiTargets">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9923,7 +9945,7 @@
          </fault>
       </operation>
       <operation name="VsanVitGetIscsiTarget">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9938,7 +9960,7 @@
          </fault>
       </operation>
       <operation name="VsanVitAddIscsiTarget">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9953,7 +9975,7 @@
          </fault>
       </operation>
       <operation name="VsanVitEditIscsiTarget">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9968,7 +9990,7 @@
          </fault>
       </operation>
       <operation name="VsanVitRemoveIscsiTarget">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9983,7 +10005,7 @@
          </fault>
       </operation>
       <operation name="VsanVitGetIscsiLUNs">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -9998,7 +10020,7 @@
          </fault>
       </operation>
       <operation name="VsanVitGetIscsiLUN">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10013,7 +10035,7 @@
          </fault>
       </operation>
       <operation name="VsanVitAddIscsiLUN">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10028,7 +10050,7 @@
          </fault>
       </operation>
       <operation name="VsanVitEditIscsiLUN">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10043,7 +10065,7 @@
          </fault>
       </operation>
       <operation name="VsanVitRemoveIscsiLUN">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10058,7 +10080,7 @@
          </fault>
       </operation>
       <operation name="VsanVitAddIscsiInitiatorsToTarget">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10073,7 +10095,7 @@
          </fault>
       </operation>
       <operation name="VsanVitRemoveIscsiInitiatorsFromTarget">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10088,7 +10110,7 @@
          </fault>
       </operation>
       <operation name="VsanVitGetIscsiInitiatorGroups">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10103,7 +10125,7 @@
          </fault>
       </operation>
       <operation name="VsanVitGetIscsiInitiatorGroup">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10118,7 +10140,7 @@
          </fault>
       </operation>
       <operation name="VsanVitAddIscsiInitiatorGroup">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10133,7 +10155,7 @@
          </fault>
       </operation>
       <operation name="VsanVitRemoveIscsiInitiatorGroup">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10148,7 +10170,7 @@
          </fault>
       </operation>
       <operation name="VsanVitAddIscsiInitiatorsToGroup">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10163,7 +10185,7 @@
          </fault>
       </operation>
       <operation name="VsanVitRemoveIscsiInitiatorsFromGroup">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10178,7 +10200,7 @@
          </fault>
       </operation>
       <operation name="VsanVitAddIscsiTargetToGroup">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10193,7 +10215,7 @@
          </fault>
       </operation>
       <operation name="VsanVitRemoveIscsiTargetFromGroup">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10208,7 +10230,7 @@
          </fault>
       </operation>
       <operation name="VsanRemediateIscsiLunsRuntimeStatus">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10223,7 +10245,7 @@
          </fault>
       </operation>
       <operation name="VosSetVsanObjectPolicy">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10247,7 +10269,7 @@
          </fault>
       </operation>
       <operation name="VosQueryVsanObjectInformation">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10271,7 +10293,7 @@
          </fault>
       </operation>
       <operation name="VsanQueryObjectIdentities">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10289,7 +10311,7 @@
          </fault>
       </operation>
       <operation name="VsanDeleteObjects_Task">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10307,7 +10329,7 @@
          </fault>
       </operation>
       <operation name="VsanQueryInaccessibleVmSwapObjects">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10322,7 +10344,7 @@
          </fault>
       </operation>
       <operation name="QuerySyncingVsanObjectsSummary">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10337,7 +10359,7 @@
          </fault>
       </operation>
       <operation name="RelayoutObjects">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10352,7 +10374,7 @@
          </fault>
       </operation>
       <operation name="VsanQueryPhysicalPlacements">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10370,7 +10392,7 @@
          </fault>
       </operation>
       <operation name="QueryVsanPerfTopEntities">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10388,7 +10410,7 @@
          </fault>
       </operation>
       <operation name="QueryVsanPerfHotspotEntities">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10415,7 +10437,7 @@
          </fault>
       </operation>
       <operation name="VsanPerfDiagnose">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10442,7 +10464,7 @@
          </fault>
       </operation>
       <operation name="VsanPerfDiagnoseTask">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10469,7 +10491,7 @@
          </fault>
       </operation>
       <operation name="GetVsanPerfDiagnosisResult">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10490,7 +10512,7 @@
          </fault>
       </operation>
       <operation name="VsanPerfQueryPerf">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10517,7 +10539,7 @@
          </fault>
       </operation>
       <operation name="VsanPerfQueryNodeInformation">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10532,7 +10554,7 @@
          </fault>
       </operation>
       <operation name="VsanPerfCreateStatsObject">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10559,7 +10581,7 @@
          </fault>
       </operation>
       <operation name="VsanPerfCreateStatsObjectTask">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10577,7 +10599,7 @@
          </fault>
       </operation>
       <operation name="VsanPerfDeleteStatsObject">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10607,7 +10629,7 @@
          </fault>
       </operation>
       <operation name="VsanPerfDeleteStatsObjectTask">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10625,7 +10647,7 @@
          </fault>
       </operation>
       <operation name="VsanPerfSetStatsObjectPolicy">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10655,7 +10677,7 @@
          </fault>
       </operation>
       <operation name="VsanPerfQueryStatsObjectInformation">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10679,7 +10701,7 @@
          </fault>
       </operation>
       <operation name="VsanPerfQueryClusterHealth">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10694,7 +10716,7 @@
          </fault>
       </operation>
       <operation name="VsanPerfQueryTimeRanges">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10721,7 +10743,7 @@
          </fault>
       </operation>
       <operation name="VsanPerfSaveTimeRanges">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10748,7 +10770,7 @@
          </fault>
       </operation>
       <operation name="VsanPerfDeleteTimeRange">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10775,7 +10797,7 @@
          </fault>
       </operation>
       <operation name="VsanPerfToggleVerboseMode">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10802,7 +10824,7 @@
          </fault>
       </operation>
       <operation name="VsanPerfGetSupportedEntityTypes">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10814,7 +10836,7 @@
          </fault>
       </operation>
       <operation name="VsanPerfGetSupportedHotspotEntityTypes">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10826,7 +10848,7 @@
          </fault>
       </operation>
       <operation name="VsanPerfGetSupportedDiagnosticExceptions">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10838,7 +10860,7 @@
          </fault>
       </operation>
       <operation name="VsanPerfGetAggregatedEntityTypes">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10853,7 +10875,7 @@
          </fault>
       </operation>
       <operation name="QueryRemoteServerClusters">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10871,7 +10893,7 @@
          </fault>
       </operation>
       <operation name="MountPrecheck">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10883,7 +10905,7 @@
          </fault>
       </operation>
       <operation name="RemoteVcMountPrecheck">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10898,7 +10920,7 @@
          </fault>
       </operation>
       <operation name="VsanQueryDatastoreSource">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10913,7 +10935,7 @@
          </fault>
       </operation>
       <operation name="VsanPrecheckDatastoreSource">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10931,7 +10953,7 @@
          </fault>
       </operation>
       <operation name="VsanCreateDatastoreSource">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10952,7 +10974,7 @@
          </fault>
       </operation>
       <operation name="VsanUpdateDatastoreSource">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10970,7 +10992,7 @@
          </fault>
       </operation>
       <operation name="VsanDestroyDatastoreSource">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -10991,7 +11013,7 @@
          </fault>
       </operation>
       <operation name="VsanQueryHciMeshDatastores">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11006,7 +11028,7 @@
          </fault>
       </operation>
       <operation name="VsanQuerySpaceUsage">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11024,7 +11046,7 @@
          </fault>
       </operation>
       <operation name="QueryVsanManagedStorageSpaceUsage">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11039,7 +11061,7 @@
          </fault>
       </operation>
       <operation name="VsanQueryEntitySpaceUsage">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11060,7 +11082,7 @@
          </fault>
       </operation>
       <operation name="VsanClusterReconfig">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11078,7 +11100,7 @@
          </fault>
       </operation>
       <operation name="VsanClusterGetConfig">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11096,7 +11118,7 @@
          </fault>
       </operation>
       <operation name="VsanEncryptedClusterRekey_Task">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11114,7 +11136,7 @@
          </fault>
       </operation>
       <operation name="VsanClusterGetRuntimeStats">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11126,7 +11148,7 @@
          </fault>
       </operation>
       <operation name="VsanQueryClusterDrsStats">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11138,7 +11160,7 @@
          </fault>
       </operation>
       <operation name="VsanValidateConfigSpec">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11150,7 +11172,7 @@
          </fault>
       </operation>
       <operation name="RunLifecycleCheck">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11165,7 +11187,7 @@
          </fault>
       </operation>
       <operation name="VsanClusterGetClaimedCapacity">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11183,7 +11205,7 @@
          </fault>
       </operation>
       <operation name="VsanGetConfigurationLimits">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11195,7 +11217,7 @@
          </fault>
       </operation>
       <operation name="VsanGetClusterRAIDInfo">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11207,7 +11229,7 @@
          </fault>
       </operation>
       <operation name="VsanVcClusterQueryVerifyHealthSystemVersions">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11222,7 +11244,7 @@
          </fault>
       </operation>
       <operation name="VsanClusterQueryFileServiceHealthSummary">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11237,7 +11259,7 @@
          </fault>
       </operation>
       <operation name="VsanQueryVcClusterCreateVmHealthTest">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11258,7 +11280,7 @@
          </fault>
       </operation>
       <operation name="VsanQueryVcClusterHealthSummary">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11276,7 +11298,7 @@
          </fault>
       </operation>
       <operation name="VsanQueryVcClusterHealthSummaryTask">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11291,7 +11313,7 @@
          </fault>
       </operation>
       <operation name="VsanQueryVcClusterObjExtAttrs">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11306,7 +11328,7 @@
          </fault>
       </operation>
       <operation name="VsanQueryAllSupportedHealthChecks">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11324,7 +11346,7 @@
          </fault>
       </operation>
       <operation name="VsanQueryVcClusterNetworkPerfTest">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11342,7 +11364,7 @@
          </fault>
       </operation>
       <operation name="VsanQueryVcClusterNetworkPerfTask">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11360,7 +11382,7 @@
          </fault>
       </operation>
       <operation name="VsanVcClusterRunVmdkLoadTest">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11375,7 +11397,7 @@
          </fault>
       </operation>
       <operation name="VsanHealthQueryVsanClusterHealthConfig">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11387,7 +11409,7 @@
          </fault>
       </operation>
       <operation name="VsanHealthQueryVsanClusterHealthCheckInterval">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11402,7 +11424,7 @@
          </fault>
       </operation>
       <operation name="VsanHealthSetVsanClusterHealthCheckInterval">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11423,7 +11445,7 @@
          </fault>
       </operation>
       <operation name="VsanHealthGetVsanClusterSilentChecks">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11444,7 +11466,7 @@
          </fault>
       </operation>
       <operation name="VsanHealthSetVsanClusterSilentChecks">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11465,7 +11487,7 @@
          </fault>
       </operation>
       <operation name="VsanHealthSetVsanClusterTelemetryConfig">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11477,7 +11499,7 @@
          </fault>
       </operation>
       <operation name="VsanHealthTestVsanClusterTelemetryProxy">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11495,7 +11517,7 @@
          </fault>
       </operation>
       <operation name="VsanHealthSendVsanTelemetry">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11516,7 +11538,7 @@
          </fault>
       </operation>
       <operation name="VsanHealthRepairClusterObjectsImmediate">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11534,7 +11556,7 @@
          </fault>
       </operation>
       <operation name="VsanHealthUpdateDefaultDSPolicyRecommendation">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11552,7 +11574,7 @@
          </fault>
       </operation>
       <operation name="VsanQueryVcClusterCreateVmHealthHistoryTest">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11567,7 +11589,7 @@
          </fault>
       </operation>
       <operation name="VsanQueryVcClusterNetworkPerfHistoryTest">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11582,7 +11604,7 @@
          </fault>
       </operation>
       <operation name="VsanQueryVcClusterVmdkLoadHistoryTest">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11600,7 +11622,7 @@
          </fault>
       </operation>
       <operation name="VsanQueryVcClusterVmdkWorkloadTypes">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11618,7 +11640,7 @@
          </fault>
       </operation>
       <operation name="VsanQueryAttachToSrHistory">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11633,7 +11655,7 @@
          </fault>
       </operation>
       <operation name="VsanAttachVsanSupportBundleToSr">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11654,7 +11676,7 @@
          </fault>
       </operation>
       <operation name="VsanVcClusterGetHclInfo">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11672,7 +11694,7 @@
          </fault>
       </operation>
       <operation name="VsanGetHclInfoForEligibleDisks">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11693,7 +11715,7 @@
          </fault>
       </operation>
       <operation name="VsanDownloadHclFile_Task">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11714,7 +11736,7 @@
          </fault>
       </operation>
       <operation name="VsanGetHclConstraints">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11735,7 +11757,7 @@
          </fault>
       </operation>
       <operation name="VsanGetDiskHclConstraints">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11756,7 +11778,7 @@
          </fault>
       </operation>
       <operation name="VsanGetReleaseRecommendation">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11777,7 +11799,7 @@
          </fault>
       </operation>
       <operation name="VsanPurgeHclFiles">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11798,7 +11820,7 @@
          </fault>
       </operation>
       <operation name="VsanDownloadAndInstallVendorTool_Task">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11819,7 +11841,7 @@
          </fault>
       </operation>
       <operation name="VsanVcUploadHclDb">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11837,7 +11859,7 @@
          </fault>
       </operation>
       <operation name="VsanVcUpdateHclDbFromWeb">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11858,7 +11880,7 @@
          </fault>
       </operation>
       <operation name="VsanRebalanceCluster">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11876,7 +11898,7 @@
          </fault>
       </operation>
       <operation name="VsanStopRebalanceCluster">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11894,7 +11916,7 @@
          </fault>
       </operation>
       <operation name="VsanHealthIsRebalanceRunning">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11909,7 +11931,7 @@
          </fault>
       </operation>
       <operation name="VsanHealthSetLogLevel">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11927,7 +11949,7 @@
          </fault>
       </operation>
       <operation name="VsanQueryVcClusterSmartStatsSummary">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11942,7 +11964,7 @@
          </fault>
       </operation>
       <operation name="VsanHealthQueryVsanProxyConfig">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11954,7 +11976,7 @@
          </fault>
       </operation>
       <operation name="VsanQueryClusterHistoricalHealth">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11975,7 +11997,7 @@
          </fault>
       </operation>
       <operation name="SetVsanVcgMappingForHwDevices">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -11990,7 +12012,7 @@
          </fault>
       </operation>
       <operation name="RetrieveAllFlashCapabilities">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12005,7 +12027,7 @@
          </fault>
       </operation>
       <operation name="InitializeDiskMappings">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12020,7 +12042,7 @@
          </fault>
       </operation>
       <operation name="QueryDiskMappings">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12035,7 +12057,7 @@
          </fault>
       </operation>
       <operation name="QueryVsanManagedDisks">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12050,7 +12072,7 @@
          </fault>
       </operation>
       <operation name="QueryClusterDataEfficiencyCapacityState">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12065,7 +12087,7 @@
          </fault>
       </operation>
       <operation name="RebuildDiskMapping">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12080,7 +12102,7 @@
          </fault>
       </operation>
       <operation name="UnmountDiskMappingEx">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12095,7 +12117,7 @@
          </fault>
       </operation>
       <operation name="RemoveDiskMappingEx">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12110,7 +12132,7 @@
          </fault>
       </operation>
       <operation name="RemoveDiskEx">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12125,7 +12147,7 @@
          </fault>
       </operation>
       <operation name="VsanAddStoragePoolDisk">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12140,7 +12162,7 @@
          </fault>
       </operation>
       <operation name="VsanDeleteStoragePoolDisk">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12155,7 +12177,7 @@
          </fault>
       </operation>
       <operation name="VsanUnmountStoragePoolDisks">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12170,7 +12192,7 @@
          </fault>
       </operation>
       <operation name="VSANVcAddWitnessHost">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12194,7 +12216,7 @@
          </fault>
       </operation>
       <operation name="VSANVcRemoveWitnessHost">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12215,7 +12237,7 @@
          </fault>
       </operation>
       <operation name="VSANVcConvertToStretchedCluster">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12236,7 +12258,7 @@
          </fault>
       </operation>
       <operation name="VSANVcSetPreferredFaultDomain">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12254,7 +12276,7 @@
          </fault>
       </operation>
       <operation name="VSANVcGetPreferredFaultDomain">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12272,7 +12294,7 @@
          </fault>
       </operation>
       <operation name="VSANVcIsWitnessHost">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12287,7 +12309,7 @@
          </fault>
       </operation>
       <operation name="VSANVcGetWitnessHosts">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12305,7 +12327,7 @@
          </fault>
       </operation>
       <operation name="VSANVcRetrieveStretchedClusterVcCapability">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12323,7 +12345,7 @@
          </fault>
       </operation>
       <operation name="VSANIsWitnessVirtualAppliance">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12338,7 +12360,7 @@
          </fault>
       </operation>
       <operation name="QuerySharedWitnessCompatibility">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12356,7 +12378,7 @@
          </fault>
       </operation>
       <operation name="QuerySharedWitnessClusterInfo">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12374,7 +12396,7 @@
          </fault>
       </operation>
       <operation name="VsanVcReplaceWitnessHostForClusters">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12398,7 +12420,7 @@
          </fault>
       </operation>
       <operation name="VsanVcAddWitnessHostForClusters">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12422,7 +12444,7 @@
          </fault>
       </operation>
       <operation name="GetVsanVumConfig">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12434,7 +12456,7 @@
          </fault>
       </operation>
       <operation name="FetchIsoDepotCookie">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12449,7 +12471,7 @@
          </fault>
       </operation>
       <operation name="VsanHostUpdateFirmware">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12467,7 +12489,7 @@
          </fault>
       </operation>
       <operation name="VsanVcUploadReleaseDb">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12488,7 +12510,7 @@
          </fault>
       </operation>
       <operation name="CnsCreateVolume">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12509,7 +12531,7 @@
          </fault>
       </operation>
       <operation name="CnsUpdateVolumeMetadata">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12530,7 +12552,7 @@
          </fault>
       </operation>
       <operation name="CnsDeleteVolume">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12554,7 +12576,7 @@
          </fault>
       </operation>
       <operation name="CnsAttachVolume">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12581,7 +12603,7 @@
          </fault>
       </operation>
       <operation name="CnsDetachVolume">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12605,7 +12627,7 @@
          </fault>
       </operation>
       <operation name="CnsQueryAsync">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12623,7 +12645,7 @@
          </fault>
       </operation>
       <operation name="CnsQueryVolume">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12641,7 +12663,7 @@
          </fault>
       </operation>
       <operation name="CnsConfigureVolumeACLs">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12662,7 +12684,7 @@
          </fault>
       </operation>
       <operation name="CnsExtendVolume">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12683,7 +12705,7 @@
          </fault>
       </operation>
       <operation name="CnsCreateSnapshots">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12704,7 +12726,7 @@
          </fault>
       </operation>
       <operation name="CnsDeleteSnapshots">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12722,7 +12744,7 @@
          </fault>
       </operation>
       <operation name="CnsRelocateVolume">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12746,7 +12768,7 @@
          </fault>
       </operation>
       <operation name="CnsReconfigVolumePolicy">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12767,7 +12789,7 @@
          </fault>
       </operation>
       <operation name="CnsUpdateVolumeCrypto">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12791,7 +12813,7 @@
          </fault>
       </operation>
       <operation name="CnsUnregisterVolume">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12821,7 +12843,28 @@
          </fault>
       </operation>
       <operation name="CnsSyncVolume">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
+         <input>
+            <soap:body use="literal" />
+         </input>
+         <output>
+            <soap:body use="literal" />
+         </output>
+         <fault name="CnsFaultFault">
+            <soap:fault name="CnsFaultFault" use="literal" />
+         </fault>
+         <fault name="NotFoundFault">
+            <soap:fault name="NotFoundFault" use="literal" />
+         </fault>
+         <fault name="InvalidArgumentFault">
+            <soap:fault name="InvalidArgumentFault" use="literal" />
+         </fault>
+         <fault name="RuntimeFault">
+            <soap:fault name="RuntimeFault" use="literal" />
+         </fault>
+      </operation>
+      <operation name="CnsDeleteAllSnapshots">
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12842,7 +12885,7 @@
          </fault>
       </operation>
       <operation name="VsanHostQueryVerifyNetworkSettings">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12857,7 +12900,7 @@
          </fault>
       </operation>
       <operation name="VsanHostQueryCheckLimits">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12872,7 +12915,7 @@
          </fault>
       </operation>
       <operation name="VsanHostQueryHostInfoByUuids">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12887,7 +12930,7 @@
          </fault>
       </operation>
       <operation name="VsanHostQueryAdvCfg">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12902,7 +12945,7 @@
          </fault>
       </operation>
       <operation name="VsanHostQueryRunIperfServer">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12920,7 +12963,7 @@
          </fault>
       </operation>
       <operation name="VsanHostQueryRunIperfClient">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12938,7 +12981,7 @@
          </fault>
       </operation>
       <operation name="VsanHostQueryObjectHealthSummary">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12953,7 +12996,7 @@
          </fault>
       </operation>
       <operation name="VsanHostQueryPhysicalDiskHealthSummary">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12968,7 +13011,7 @@
          </fault>
       </operation>
       <operation name="VsanHostQueryEncryptionHealthSummary">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12983,7 +13026,7 @@
          </fault>
       </operation>
       <operation name="VsanHostQueryFileServiceHealthSummary">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -12998,7 +13041,7 @@
          </fault>
       </operation>
       <operation name="VsanHostPrepareVmdkLoadTest">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13025,7 +13068,7 @@
          </fault>
       </operation>
       <operation name="VsanHostRunVmdkLoadTest">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13043,7 +13086,7 @@
          </fault>
       </operation>
       <operation name="VsanHostCleanupVmdkLoadTest">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13061,7 +13104,7 @@
          </fault>
       </operation>
       <operation name="VsanHostQueryHealthSystemVersion">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13076,7 +13119,7 @@
          </fault>
       </operation>
       <operation name="VsanHostClomdLiveness">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13091,7 +13134,7 @@
          </fault>
       </operation>
       <operation name="VsanHostRepairImmediateObjects">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13106,7 +13149,7 @@
          </fault>
       </operation>
       <operation name="VsanGetHclInfo">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13121,7 +13164,7 @@
          </fault>
       </operation>
       <operation name="VsanStartProactiveRebalance">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13136,7 +13179,7 @@
          </fault>
       </operation>
       <operation name="VsanStopProactiveRebalance">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13151,7 +13194,7 @@
          </fault>
       </operation>
       <operation name="VsanGetProactiveRebalanceInfo">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13166,7 +13209,7 @@
          </fault>
       </operation>
       <operation name="VsanWaitForVsanHealthGenerationIdChange">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13181,7 +13224,7 @@
          </fault>
       </operation>
       <operation name="VsanFlashScsiControllerFirmware_Task">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13202,7 +13245,7 @@
          </fault>
       </operation>
       <operation name="VsanHostCreateVmHealthTest">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13217,7 +13260,7 @@
          </fault>
       </operation>
       <operation name="VsanHostQuerySmartStats">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13232,7 +13275,7 @@
          </fault>
       </operation>
       <operation name="VsanQueryHostEMMState">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13247,7 +13290,7 @@
          </fault>
       </operation>
       <operation name="VsanGetNetworkDiagnosticsHealthInfo">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13262,7 +13305,7 @@
          </fault>
       </operation>
       <operation name="VsanQueryWhatIfEvacuationResult">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13280,7 +13323,7 @@
          </fault>
       </operation>
       <operation name="VsanHostGetRuntimeStats">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13292,7 +13335,7 @@
          </fault>
       </operation>
       <operation name="VsanGetAboutInfoEx">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13304,7 +13347,7 @@
          </fault>
       </operation>
       <operation name="VsanQuerySyncingVsanObjects">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13316,7 +13359,7 @@
          </fault>
       </operation>
       <operation name="VsanQueryHostDrsStats">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13328,7 +13371,7 @@
          </fault>
       </operation>
       <operation name="VsanUnmountDiskMappingEx">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13343,7 +13386,7 @@
          </fault>
       </operation>
       <operation name="VsanQueryHostStatusEx">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13355,7 +13398,7 @@
          </fault>
       </operation>
       <operation name="VsanHostWipeDisk">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13370,7 +13413,7 @@
          </fault>
       </operation>
       <operation name="VsanHostQueryWipeDisk">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13385,7 +13428,7 @@
          </fault>
       </operation>
       <operation name="VsanHostAbortWipeDisk">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13397,7 +13440,7 @@
          </fault>
       </operation>
       <operation name="VsanVibScan">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13415,7 +13458,7 @@
          </fault>
       </operation>
       <operation name="VsanVibInstall_Task">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13436,7 +13479,7 @@
          </fault>
       </operation>
       <operation name="VsanVibInstallPreflightCheck">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13454,7 +13497,7 @@
          </fault>
       </operation>
       <operation name="VsanPrepareVsanForVcsa">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13472,7 +13515,7 @@
          </fault>
       </operation>
       <operation name="VsanPostConfigForVcsa">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13490,7 +13533,7 @@
          </fault>
       </operation>
       <operation name="VsanVcsaGetBootstrapProgress">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13508,7 +13551,7 @@
          </fault>
       </operation>
       <operation name="VsanQueryHealthSummary">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13526,7 +13569,7 @@
          </fault>
       </operation>
       <operation name="VsanQueryHistoricalHealth">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13547,7 +13590,7 @@
          </fault>
       </operation>
       <operation name="VsanGetDpClusterSilentChecks">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13568,7 +13611,7 @@
          </fault>
       </operation>
       <operation name="VsanSetDpClusterSilentChecks">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13589,7 +13632,7 @@
          </fault>
       </operation>
       <operation name="VsanDownloadFileServiceOvf">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13604,7 +13647,7 @@
          </fault>
       </operation>
       <operation name="VsanQueryFileServiceOvfs">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13616,7 +13659,7 @@
          </fault>
       </operation>
       <operation name="VsanFindOvfDownloadUrl">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13628,7 +13671,7 @@
          </fault>
       </operation>
       <operation name="VsanPerformFileServiceEnablePreflightCheck">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13640,7 +13683,7 @@
          </fault>
       </operation>
       <operation name="VsanClusterCreateFsDomain">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13658,7 +13701,7 @@
          </fault>
       </operation>
       <operation name="VsanClusterReconfigureFsDomain">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13676,7 +13719,7 @@
          </fault>
       </operation>
       <operation name="VsanClusterRemoveFsDomain">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13694,7 +13737,7 @@
          </fault>
       </operation>
       <operation name="VsanClusterQueryFsDomains">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13709,7 +13752,7 @@
          </fault>
       </operation>
       <operation name="VsanCreateFileShare">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13727,7 +13770,7 @@
          </fault>
       </operation>
       <operation name="VsanReconfigureFileShare">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13745,7 +13788,7 @@
          </fault>
       </operation>
       <operation name="VsanClusterRemoveShare">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13763,7 +13806,7 @@
          </fault>
       </operation>
       <operation name="VsanClusterQueryFileShares">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13781,7 +13824,7 @@
          </fault>
       </operation>
       <operation name="VsanUpgradeFsvm">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13796,7 +13839,7 @@
          </fault>
       </operation>
       <operation name="VsanRebalanceFileService">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13808,7 +13851,7 @@
          </fault>
       </operation>
       <operation name="VsanClusterCreateShareSnapshot">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13826,7 +13869,7 @@
          </fault>
       </operation>
       <operation name="VsanClusterRemoveShareSnapshot">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13844,7 +13887,7 @@
          </fault>
       </operation>
       <operation name="VsanClusterQueryShareSnapshots">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13862,7 +13905,7 @@
          </fault>
       </operation>
       <operation name="VsanMigrateVmsToVds">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13880,7 +13923,7 @@
          </fault>
       </operation>
       <operation name="VsanCompleteMigrateVmsToVds">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13898,7 +13941,7 @@
          </fault>
       </operation>
       <operation name="VsanPerformResourceCheck">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13925,7 +13968,7 @@
          </fault>
       </operation>
       <operation name="VsanGetResourceCheckStatus">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13943,7 +13986,7 @@
          </fault>
       </operation>
       <operation name="VsanHostPerformResourceCheck">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13958,7 +14001,7 @@
          </fault>
       </operation>
       <operation name="VsanHostCancelResourceCheck">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13970,7 +14013,7 @@
          </fault>
       </operation>
       <operation name="VsanEnterSiteMaintenanceMode">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -13985,7 +14028,7 @@
          </fault>
       </operation>
       <operation name="VsanExitSiteMaintenanceMode">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -14000,7 +14043,7 @@
          </fault>
       </operation>
       <operation name="VsanPerformSiteMaintenancePrecheck">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -14021,7 +14064,7 @@
          </fault>
       </operation>
       <operation name="VsanGetSiteMaintenancePrecheckStatus">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -14042,7 +14085,7 @@
          </fault>
       </operation>
       <operation name="VsanQueryClusterSiteMaintenanceState">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -14057,7 +14100,7 @@
          </fault>
       </operation>
       <operation name="VsanVdsGetMigrationPlan">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -14078,7 +14121,7 @@
          </fault>
       </operation>
       <operation name="VsanVdsMigrateVss">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -14099,7 +14142,7 @@
          </fault>
       </operation>
       <operation name="VsanVssMigrateVds">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -14117,7 +14160,7 @@
          </fault>
       </operation>
       <operation name="VsanRollbackVdsToVss">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -14135,7 +14178,7 @@
          </fault>
       </operation>
       <operation name="PerformVsanUpgradePreflightCheck">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -14150,7 +14193,7 @@
          </fault>
       </operation>
       <operation name="QueryVsanUpgradeStatus">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -14165,7 +14208,7 @@
          </fault>
       </operation>
       <operation name="PerformVsanUpgrade_Task">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -14180,7 +14223,7 @@
          </fault>
       </operation>
       <operation name="QueryDisksForVsan">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -14192,7 +14235,7 @@
          </fault>
       </operation>
       <operation name="AddDisks_Task">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -14204,7 +14247,7 @@
          </fault>
       </operation>
       <operation name="InitializeDisks_Task">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -14216,7 +14259,7 @@
          </fault>
       </operation>
       <operation name="RemoveDisk_Task">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -14228,7 +14271,7 @@
          </fault>
       </operation>
       <operation name="RemoveDiskMapping_Task">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -14240,7 +14283,7 @@
          </fault>
       </operation>
       <operation name="UnmountDiskMapping_Task">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -14258,7 +14301,7 @@
          </fault>
       </operation>
       <operation name="UpdateVsan_Task">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -14270,7 +14313,7 @@
          </fault>
       </operation>
       <operation name="QueryHostStatus">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -14282,7 +14325,7 @@
          </fault>
       </operation>
       <operation name="EvacuateVsanNode_Task">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>
@@ -14306,7 +14349,7 @@
          </fault>
       </operation>
       <operation name="RecommissionVsanNode_Task">
-         <soap:operation soapAction="urn:vsan/9.1.1.0" style="document" />
+         <soap:operation soapAction="urn:vsan/9.1.2.0" style="document" />
          <input>
             <soap:body use="literal" />
          </input>

@@ -715,6 +715,71 @@ paths:
           description: Internal server error
       tags:
       - Components
+  /v1/components/{componentId}/legacy-credentials:
+    patch:
+      deprecated: true
+      description: Update stored credentials for a component when the actual password
+        has changed. Only applies to components still using an admin credential rather
+        than a dedicated service account; this API will be removed once all supported
+        components have moved to service-account-based credential management.
+      operationId: manageComponentCredentials
+      parameters:
+      - description: Correlation ID for tracing the request across services
+        explode: true
+        in: header
+        name: X-Correlation-Id
+        required: false
+        schema:
+          type: string
+        style: simple
+      - description: Component Identifier.
+        explode: true
+        in: path
+        name: componentId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LegacyCredentialSpec'
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+          description: Accepted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request. Invalid input specification.
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      tags:
+      - LegacyCredentials
   /v1/components/{componentId}/nodes:
     get:
       description: List a Component's nodes.
@@ -975,6 +1040,53 @@ paths:
           description: Internal server error
       tags:
       - SupportBundles
+  /v1/tasks/support-bundles:
+    post:
+      description: Generates support bundles for all components using the provided
+        native task IDs to resolve target components within this SDDC LCM instance.
+      operationId: generateTaskSupportBundle
+      parameters:
+      - description: Correlation ID for tracing the request across services
+        explode: true
+        in: header
+        name: X-Correlation-Id
+        required: false
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskSupportBundleSpec'
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+          description: Accepted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request. Invalid input specification.
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      tags:
+      - SupportBundles
   /v1/nodes:
     post:
       description: Install new standalone node.
@@ -1171,6 +1283,14 @@ paths:
         schema:
           default: false
           type: boolean
+      - description: |
+          Filter tasks by the associatedTask stored in additionalDetails (e.g. ?associatedTask=<uuid>).
+        in: query
+        name: associatedTask
+        required: false
+        schema:
+          format: uuid
+          type: string
       - description: Page Number.
         explode: true
         in: query
@@ -1585,6 +1705,15 @@ components:
       schema:
         default: false
         type: boolean
+    associatedTaskQueryParam:
+      description: |
+        Filter tasks by the associatedTask stored in additionalDetails (e.g. ?associatedTask=<uuid>).
+      in: query
+      name: associatedTask
+      required: false
+      schema:
+        format: uuid
+        type: string
     taskIdPathParam:
       description: Task Id
       in: path
@@ -1892,6 +2021,7 @@ components:
         sddcManager:
           fqdn: fqdn
           certificate: certificate
+          version: version
         vspClusters:
         - fqdn: fqdn
           certificate: certificate
@@ -1942,11 +2072,16 @@ components:
       example:
         fqdn: fqdn
         certificate: certificate
+        version: version
       properties:
         fqdn:
           type: string
         certificate:
           description: PEM encoded certificate (chain).
+          type: string
+        version:
+          description: Version of the SDDC Manager appliance. Absent when it could
+            not be determined  or in a deployment that has no SDDC Manager.
           type: string
       type: object
     FleetLcm:
@@ -1968,31 +2103,115 @@ components:
         lookBackWindow:
           type: integer
       type: object
-    SupportBundle:
+    TaskSupportBundleSpec:
+      description: Support bundle Specification for task.
       example:
-        size: 0
-        createdTimestamp: 2000-01-23T04:56:07.000+00:00
-        name: name
-        id: id
-        url: https://openapi-generator.tech
+        targetWorkflowTraceId: targetWorkflowTraceId
+        sddcTaskIds:
+        - sddcTaskIds
+        - sddcTaskIds
+        startTime: 2000-01-23T04:56:07.000+00:00
+        endTime: 2000-01-23T04:56:07.000+00:00
       properties:
-        id:
-          type: string
-        createdTimestamp:
-          description: Time when the operation is started.
+        sddcTaskIds:
+          description: SDDC LCM task IDs whose associated components should be included
+            in the generated support bundle.
+          items:
+            type: string
+          nullable: true
+          type: array
+        startTime:
+          description: Start of the time range the generated support bundles should
+            cover.
           format: date-time
           type: string
+        endTime:
+          description: End of the time range the generated support bundles should
+            cover.
+          format: date-time
+          type: string
+        targetWorkflowTraceId:
+          description: Trace id to filter the logs in generated support bundles.
+          nullable: true
+          type: string
+      required:
+      - endTime
+      - startTime
+      type: object
+    SupportBundle:
+      description: |
+        Represents a collected support bundle. Used both for per-cluster bundle entries in a task-scoped collection and for standalone component support bundles. Fields source, status, and expirationTimestamp are only populated for task-scoped bundles; they are absent in component-level bundle responses.
+      example:
+        size: 5242880
+        createdTimestamp: 2000-01-23T04:56:07.000+00:00
+        name: task-log.tar
+        errorMessage:
+          args:
+            cloudProxyFqdn: cloudProxy1.vsphere.local
+          localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+          defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+          id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+        expirationTimestamp: 2000-01-23T04:56:07.000+00:00
+        errorMessageId: errorMessageId
+        id: woszbxj3jred7il7gkg3nzgu2y
+        source: sddc-manager.example.com
+        url: https://sddc-manager.example.com/api/v1/task-logs/download?token=abc123
+        status: SUCCEEDED
+        errorArguments:
+          key: errorArguments
+      properties:
+        id:
+          description: Unique identifier of the support bundle.
+          example: woszbxj3jred7il7gkg3nzgu2y
+          type: string
+        name:
+          description: Filename of the support bundle archive.
+          example: task-log.tar
+          type: string
         size:
-          description: Size of support bundle in bytes
+          description: Size of the bundle archive in bytes.
+          example: 5242880
           format: int64
           type: integer
-        name:
-          description: File name of the support bundle
-          type: string
         url:
-          description: Download URL of the support bundle from VMSP
+          description: Pre-signed URL to download the bundle.
+          example: https://sddc-manager.example.com/api/v1/task-logs/download?token=abc123
           format: uri
           type: string
+        createdTimestamp:
+          description: ISO-8601 timestamp when the bundle collection was started.
+          format: date-time
+          type: string
+        source:
+          description: |
+            FQDN of the cluster from which this bundle was collected. Populated only for task-scoped bundles; absent for component bundles.
+          example: sddc-manager.example.com
+          type: string
+        status:
+          description: |
+            Collection status for this bundle. Populated only for task-scoped bundles; absent for component bundles.
+          enum:
+          - SUCCEEDED
+          - FAILED
+          example: SUCCEEDED
+          type: string
+        expirationTimestamp:
+          description: |
+            ISO-8601 timestamp when the presigned download URL expires. Populated only for task-scoped bundles; absent for component bundles.
+          format: date-time
+          type: string
+        errorMessageId:
+          description: Error message identifier.
+          type: string
+        errorArguments:
+          additionalProperties:
+            type: string
+          description: Arguments for the error message.
+          type: object
+        errorMessage:
+          $ref: '#/components/schemas/LocalizableMessage'
+      required:
+      - id
       type: object
     ComponentSpecs:
       example:
@@ -2184,6 +2403,8 @@ components:
         name:
           type: string
         networkMoId:
+          type: string
+        datastoreMoId:
           type: string
         gatewayCidrIpv4:
           type: string
@@ -2952,6 +3173,26 @@ components:
       - $ref: '#/components/schemas/VspComponentConfigSpec'
       - $ref: '#/components/schemas/VspClusterConfigSpec'
       type: object
+    LegacyCredentialSpec:
+      description: Specification for updating stored credentials of a component.
+      example:
+        skipValidation: false
+        password: password
+      properties:
+        password:
+          description: The new password to store. Must match the password currently
+            configured on the component.
+          type: string
+        skipValidation:
+          default: false
+          description: "When true, writes the new password to the secret without first\
+            \ verifying it against the live component. Only use this when validation\
+            \ itself is known to be unreliable for this component -- an incorrect\
+            \ password will not be detected."
+          type: boolean
+      required:
+      - password
+      type: object
     VcenterPlacement:
       example:
         cluster: cluster
@@ -3193,6 +3434,10 @@ components:
         ceip:
           description: CEIP status
           type: boolean
+        clusterApiEnabled:
+          description: Configures whether the Kubernetes API server is reachable from
+            outside the cluster nodes
+          type: boolean
       required:
       - type
       title: VSP Cluster config spec
@@ -3213,12 +3458,30 @@ components:
           prefix:
             description: Global address pool network prefix (IPv4)
             type: string
+          ipv4ExcludedAddresses:
+            description: "list of individual IPv4 addresses excluded from the ipv4Pool.\
+              \ Applies to range and CIDR pool entries. These addresses are reserved\
+              \ and are never assigned to cluster nodes, so they remain available\
+              \ for use."
+            items:
+              format: ipv4
+              type: string
+            type: array
           ipv6Gateway:
             description: Global address pool network gateway (IPv6)
             type: string
           ipv6Prefix:
             description: Global address pool network prefix (IPv6)
             type: string
+          ipv6ExcludedAddresses:
+            description: "list of individual IPv6 addresses excluded from the ipv6Pool.\
+              \ Applies to range and CIDR pool entries. These addresses are reserved\
+              \ and are never assigned to cluster nodes, so they remain available\
+              \ for use."
+            items:
+              format: ipv6
+              type: string
+            type: array
         type: object
       description: VSP Cluster config spec
       title: VSP Cluster config spec
@@ -3693,6 +3956,9 @@ components:
           type: string
         targetServiceType:
           $ref: '#/components/schemas/TargetServiceType'
+        sourceClientType:
+          description: The source client type.
+          type: string
       required:
       - username
       type: object
@@ -3756,6 +4022,7 @@ components:
       - VSP_INSTANCE_FQDN
       - VSP_FLEET_FQDN
       - VSP_CLUSTER_SIZE
+      - VSP_KUBERNETES_CLUSTER_API
       - VSP_COMPONENT_SIZE
       - OVA_NODE_SIZES
       - OVA_NODE_SIZE_VALUE
@@ -3768,6 +4035,7 @@ components:
       - INVALID_VCFA_VSP_CLUSTER
       - INVALID_VCFA_CONFIG_SPEC
       - VCFA_FQDN_RESOLVES_TO_IPV6
+      - INVALID_COMPONENT_CONFIG_SPEC
       - VSP_COMPONENT_CONFIG_SPEC_SIZES_MISMATCH
       - INVALID_PASSWORD
       - PASSWORD_COMPLEXITY
@@ -3775,6 +4043,8 @@ components:
       - SDDC_LCM_IDS_NOT_FOUND
       - DUPLICATE_COMPONENT_TYPE_SPEC
       - NOT_PRIMARY_SDDC_LCM
+      - EXISTING_VIDB_IN_OPS
+      - VIDB_OPS_INVENTORY_CHECK_FAILED
       - OPS_NETWORKS_INVALID_DEPLOYMENT_SIZE
       - OPS_NETWORKS_INVALID_PLATFORM_NODE_COUNT
       - COMPONENT_NOT_FOUND
@@ -3785,8 +4055,11 @@ components:
       - OPS_REPLICA_NODE_ALREADY_EXISTS
       - OVA_INVALID_NODE_TYPE
       - OPS_NODE_VERSION_MISMATCH
+      - CLOUD_PROXY_OPS_VERSION_MISMATCH
       - VSP_INVALID_HOSTNAME_IN_PLATFORM_FQDN
       - VCFA_INTERNAL_CLUSTER_CIDR_NOT_VALID
+      - VCFA_FQDN_SAME_AS_VSP_PLATFORM_FQDN
+      - INTEGRATED_VCFA_REQUIRED
       type: string
     Validation:
       properties:
@@ -3841,7 +4114,10 @@ components:
       description: |
         Payload for initiating a component upgrade operation. It encapsulates the desired component state,
         deployment policies, lifecycle management options, and auditing information for the request.
+        ignoreOpsRegistrationError is an optional property that is propagated up to FBS's refresh component request to determine if
+        an error during ops registration error should fail or be treated as best effort.
       example:
+        ignoreOpsRegistrationError: false
         lcmPlatformSpec:
           performBackup: false
         correlationId: f0e9d8c7-b6a5-4321-fedc-ba9876543210
@@ -3868,6 +4144,13 @@ components:
           example: f0e9d8c7-b6a5-4321-fedc-ba9876543210
           format: uuid
           type: string
+        ignoreOpsRegistrationError:
+          default: false
+          description: "When false (the default), a failure to register the component\
+            \ with VCF Operations during this refresh fails the refresh. Set to true\
+            \ to treat Ops registration as best-effort instead. This is used to propagate\
+            \ up to FBS's refresh component request."
+          type: boolean
       required:
       - componentSpec
       type: object
@@ -4085,6 +4368,7 @@ components:
           type: type
           status: PENDING
         retriable: true
+        targetSddcServiceId: targetSddcServiceId
         createdBy: admin
         createTime: 2000-01-23T04:56:07.000+00:00
         name: vcfa_90_to_91_upgrade
@@ -4263,6 +4547,10 @@ components:
           description: A map of task-specific details. This can be used to store any
             additional information about the task that is relevant to a specific task.
           type: object
+        targetSddcServiceId:
+          description: |
+            The SDDC LCM instance ID this task was delegated to, if any.
+          type: string
       required:
       - id
       type: object
@@ -4664,6 +4952,7 @@ components:
           type: type
           cancellable: true
           retriable: true
+          targetSddcServiceId: targetSddcServiceId
           createdBy: admin
           createTime: 2000-01-23T04:56:07.000+00:00
           name: vcfa_90_to_91_upgrade
@@ -4686,6 +4975,7 @@ components:
           type: type
           cancellable: true
           retriable: true
+          targetSddcServiceId: targetSddcServiceId
           createdBy: admin
           createTime: 2000-01-23T04:56:07.000+00:00
           name: vcfa_90_to_91_upgrade
@@ -4727,6 +5017,7 @@ components:
         type: type
         cancellable: true
         retriable: true
+        targetSddcServiceId: targetSddcServiceId
         createdBy: admin
         createTime: 2000-01-23T04:56:07.000+00:00
         name: vcfa_90_to_91_upgrade
@@ -4767,6 +5058,10 @@ components:
         resourceType:
           description: Type of resource on which the task is triggered
           example: COMPONENT
+          type: string
+        targetSddcServiceId:
+          description: |
+            The SDDC LCM instance ID this task was delegated to, if any.
           type: string
         createTime:
           description: ISO 8601 timestamp when this Task was created
@@ -5197,6 +5492,25 @@ components:
       - inventoryNetworks
       - type
       type: object
+    SupportBundlesResult:
+      description: |
+        Result of a task-scoped support bundle collection task (type = SUPPORT_BUNDLES). Returned
+        when GET /v1/tasks/{taskId} completes successfully for a CREATE_SDDC_TASK_SUPPORT_BUNDLE_WORKFLOW
+        task, listing every support bundle generated for the task's resolved components (one entry
+        per OPS/VRNI appliance or VSP cluster group).
+      properties:
+        type:
+          example: SUPPORT_BUNDLES
+          type: string
+        supportBundles:
+          description: Generated support bundles.
+          items:
+            $ref: '#/components/schemas/SupportBundle'
+          type: array
+      required:
+      - supportBundles
+      - type
+      type: object
     ComponentDesiredSpec:
       description: |
         Specifications related to the component's desired configuration and the source for its upgrade artifacts.
@@ -5328,6 +5642,7 @@ components:
           VALIDATION: '#/components/schemas/ValidationResult'
           INVENTORY_NETWORKS_FETCH: '#/components/schemas/InventoryNetworksResult'
           SDDC_RESOURCES_FETCH: '#/components/schemas/SddcResourcesFetchResult'
+          SUPPORT_BUNDLES: '#/components/schemas/SupportBundlesResult'
         propertyName: type
       oneOf:
       - $ref: '#/components/schemas/PrecheckResult'
@@ -5335,6 +5650,7 @@ components:
       - $ref: '#/components/schemas/ValidationResult'
       - $ref: '#/components/schemas/InventoryNetworksResult'
       - $ref: '#/components/schemas/SddcResourcesFetchResult'
+      - $ref: '#/components/schemas/SupportBundlesResult'
   securitySchemes:
     bearerToken:
       bearerFormat: JWT

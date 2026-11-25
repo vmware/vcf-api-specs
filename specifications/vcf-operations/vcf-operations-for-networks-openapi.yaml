@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: VCF Operations for networks API Reference
   description: VCF Operations for networks API Reference
-  version: 9.1.1.0
+  version: 9.1.2.0
 servers:
   - url: /api/ni
 tags:
@@ -24364,20 +24364,23 @@ components:
           example: default
         authentication_type:
           type: string
-          description: SNMPv3 Authentication type
-          example: MD5
+          description: "SNMPv3 Authentication type. MD5 and SHA (SHA-1) are legacy/deprecated -\
+            \ prefer SHA256."
+          example: SHA256
           nullable: true
           enum:
             - NO_AUTH
             - MD5
             - SHA
+            - SHA256
         authentication_password:
           type: string
           description: SNMPv3 Authentication password
           example: VMware1!
         privacy_type:
           type: string
-          description: SNMPv3 Privacy password type
+          description: "SNMPv3 Privacy password type. DES and 3DES are legacy/deprecated - prefer\
+            \ AES128/AES192/AES256."
           example: AES256
           nullable: true
           enum:
@@ -26163,6 +26166,14 @@ components:
               $ref: '#/components/schemas/Reference'
             destination_host:
               $ref: '#/components/schemas/Reference'
+            source_managers:
+              type: array
+              items:
+                $ref: '#/components/schemas/Reference'
+            destination_managers:
+              type: array
+              items:
+                $ref: '#/components/schemas/Reference'
             source_vm_tags:
               type: array
               items:
@@ -32653,6 +32664,8 @@ components:
           description: Desired overall log verbosity for the NI
         content:
           type: string
+          # Holds the OpsLogs auth token. "password" makes the generated toString() mask it, so it is not logged.
+          format: password
           description: The raw text/string content for the log collector agent's configuration (INI, YAML, etc.).
         certificates:
           type: array
@@ -32697,6 +32710,8 @@ components:
           format: int64
         content:
           type: string
+          # Holds the OpsLogs auth token. "password" makes the generated toString() mask it, so it is not logged.
+          format: password
           description: The raw text/string content for the log collector agent's configuration (INI, YAML, etc.).
         certificates:
           type: string
