@@ -1,0 +1,1201 @@
+#
+#  Copyright © 2025-26 Broadcom Inc. and/or its subsidiaries. All Rights Reserved.
+#
+
+openapi: 3.0.2
+info:
+  title: Real-Time Metrics APIs
+  version: 9.1.2.0
+  license:
+    name: 'Copyright © 2025-26 Broadcom Inc. and/or its subsidiaries. All Rights Reserved.'
+  description: |
+    The Real-Time Metrics component provides Prometheus-compatible APIs for querying real time metrics collected from VMware vCenter environments. These APIs enable you to execute PromQL queries, retrieve metric metadata, and manage vCenter metrics configuration.
+
+    ## Authentication
+
+    All API requests require a valid JWT Bearer token in the Authorization header. Access is restricted to resources that the authenticated user is authorized to view or modify.
+
+    ### Obtaining a Token
+
+    1. **Acquire an OpsToken** by calling:
+       ```
+       POST https://<vcf-operations-fqdn>/suite-api/api/auth/token/acquire
+       Content-Type: application/json
+
+       {
+         "username": "<username>",
+         "password": "<password>"
+       }
+       ```
+       This returns an OpsToken in the response.
+
+    2. **Get the Real-Time metrics Service Key**(service-key) by calling the integrations API (find the key where type = VCF_VODAP):
+       ```
+       GET https://<vcf-operations-fqdn>/suite-api/api/integrations/services
+       Authorization: OpsToken <ops-token>
+       ```
+
+    3. **Exchange the Service Key for a JWT Token** by calling the VCF Operations API:
+       ```
+       POST https://<vcf-operations-fqdn>/suite-api/api/auth/token/exchange
+       Content-Type: application/json
+       Authorization: OpsToken <ops-token>
+
+       {
+         "serviceKeys": ["<service-key>"]
+       }
+       ```
+
+    ### Using the Token
+
+    Include the JWT token in the Authorization header:
+    ```
+    Authorization: Bearer <jwt-token>
+    ```
+servers:
+  - url: 'https://{vcf-operations-fqdn}/'
+    variables:
+      vcf-operations-fqdn:
+        description: FQDN of the VCF Operations instance.
+        default: ''
+paths:
+  '/api/v1/query':
+    get:
+      tags:
+        - prometheus-expression
+      summary: Execute instant PromQL query.
+      description: Executes a PromQL query and returns the result.
+      operationId: query
+      parameters:
+        - $ref: '#/components/parameters/queryQueryParam'
+        - $ref: '#/components/parameters/sourceIdRequiredQueryParam'
+        - $ref: '#/components/parameters/timeQueryParam'
+        - $ref: '#/components/parameters/timeoutQueryParam'
+        - $ref: '#/components/parameters/limitQueryParam'
+        - $ref: '#/components/parameters/externalTagsFilterQueryParam'
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PrometheusResponse"
+        '400':
+          description: Bad request.
+          x-vmw-compiler-skip: true
+        '401':
+          description: Unauthorized.
+          x-vmw-compiler-skip: true
+        '403':
+          description: Forbidden.
+          x-vmw-compiler-skip: true
+        '422':
+          description: Unprocessable Entity.
+          x-vmw-compiler-skip: true
+        '503':
+          description: Service Unavailable.
+          x-vmw-compiler-skip: true
+    post:
+      tags:
+        - prometheus-expression
+      description: Executes a PromQL query and returns the result. Accepts parameters as a form-urlencoded request body.
+      operationId: queryPost
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - query
+                - sourceId
+              properties:
+                query:
+                  type: string
+                  description: The PromQL query for execution.
+                  example: "jvm_gc_collection_seconds_count{service=\"server\"}"
+                sourceId:
+                  type: string
+                  description: Source Id against which we need to query data for, like VC Instance UUID, NSX Id etc.
+                  example: 59e196ae-45c9-4bff-8176-5e6812435f8a
+                time:
+                  type: string
+                  description: |
+                    Evaluation timestamp in Unix epoch seconds or RFC3339 format.
+                    The current server time is used if the time parameter is unset.
+                  example: "1739780198"
+                timeout:
+                  type: string
+                  description: Evaluation timeout in duration.
+                  example: "1s"
+                limit:
+                  type: integer
+                  format: int32
+                  description: |
+                    Maximum number of returned series. Doesn't affect scalars or strings but truncates the number of series for matrices
+                    and vectors. If not set, default limit is applied.
+                  example: 100
+                externalTagsFilter:
+                  type: string
+                  description: Additionally passed tag filters which are needed to be applied on provided promql in request.
+                  example: "{\"host\":\"host-15\", \"vm\":\"vm-25\"}"
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PrometheusResponse"
+        '400':
+          description: Bad request.
+          x-vmw-compiler-skip: true
+        '401':
+          description: Unauthorized.
+          x-vmw-compiler-skip: true
+        '403':
+          description: Forbidden.
+          x-vmw-compiler-skip: true
+        '422':
+          description: Unprocessable Entity.
+          x-vmw-compiler-skip: true
+        '503':
+          description: Service Unavailable.
+          x-vmw-compiler-skip: true
+  '/api/v1/query_range':
+    get:
+      tags:
+        - prometheus-expression
+      summary: Execute range PromQL query.
+      description: Executes a PromQL query over a specified time range and returns the result.
+      operationId: queryRange
+      parameters:
+        - $ref: '#/components/parameters/queryQueryParam'
+        - $ref: '#/components/parameters/sourceIdRequiredQueryParam'
+        - $ref: '#/components/parameters/timeoutQueryParam'
+        - $ref: '#/components/parameters/startQueryParam'
+        - $ref: '#/components/parameters/endQueryParam'
+        - $ref: '#/components/parameters/stepQueryParam'
+        - $ref: '#/components/parameters/limitQueryParam'
+        - $ref: '#/components/parameters/externalTagsFilterQueryParam'
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PrometheusResponse"
+        '400':
+          description: Bad request.
+          x-vmw-compiler-skip: true
+        '401':
+          description: Unauthorized.
+          x-vmw-compiler-skip: true
+        '403':
+          description: Forbidden.
+          x-vmw-compiler-skip: true
+        '422':
+          description: Unprocessable Entity.
+          x-vmw-compiler-skip: true
+        '503':
+          description: Service Unavailable.
+          x-vmw-compiler-skip: true
+    post:
+      tags:
+        - prometheus-expression
+      description: Executes a PromQL query over a specified time range and returns the result. Accepts parameters as a form-urlencoded request body.
+      operationId: queryRangePost
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - query
+                - sourceId
+                - start
+                - end
+                - step
+              properties:
+                query:
+                  type: string
+                  description: The PromQL query for execution.
+                  example: "jvm_gc_collection_seconds_count{service=\"server\"}"
+                sourceId:
+                  type: string
+                  description: Source Id against which we need to query data for, like VC Instance UUID, NSX Id etc.
+                  example: 59e196ae-45c9-4bff-8176-5e6812435f8a
+                start:
+                  type: string
+                  description: Start timestamp in Unix epoch seconds or RFC3339 format.
+                  example: "1739780198"
+                end:
+                  type: string
+                  description: End timestamp in Unix epoch seconds or RFC3339 format.
+                  example: "1739780198"
+                step:
+                  type: string
+                  description: Query resolution step width in duration format or float number of seconds.
+                  example: "1s"
+                timeout:
+                  type: string
+                  description: Evaluation timeout in duration.
+                  example: "1s"
+                limit:
+                  type: integer
+                  format: int32
+                  description: |
+                    Maximum number of returned series. Doesn't affect scalars or strings but truncates the number of series for matrices
+                    and vectors. If not set, default limit is applied.
+                  example: 100
+                externalTagsFilter:
+                  type: string
+                  description: Additionally passed tag filters which are needed to be applied on provided promql in request.
+                  example: "{\"host\":\"host-15\", \"vm\":\"vm-25\"}"
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PrometheusResponse"
+        '400':
+          description: Bad request.
+          x-vmw-compiler-skip: true
+        '401':
+          description: Unauthorized.
+          x-vmw-compiler-skip: true
+        '403':
+          description: Forbidden.
+          x-vmw-compiler-skip: true
+        '422':
+          description: Unprocessable Entity.
+          x-vmw-compiler-skip: true
+        '503':
+          description: Service Unavailable.
+          x-vmw-compiler-skip: true
+  '/api/v1/metadata':
+    get:
+      tags:
+        - metadata
+      summary: Get metric metadata.
+      description: Returns metadata about metrics currently scraped from targets.
+      operationId: queryMetricMetadata
+      parameters:
+        - $ref: '#/components/parameters/metricNameQueryParam'
+        - $ref: '#/components/parameters/limitQueryParam'
+        - $ref: '#/components/parameters/sourceIdQueryParam'
+      responses:
+        200:
+          description: OK.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PrometheusResponse"
+        '400':
+          description: Bad request.
+          x-vmw-compiler-skip: true
+        '401':
+          description: Unauthorized.
+          x-vmw-compiler-skip: true
+        '403':
+          description: Forbidden.
+          x-vmw-compiler-skip: true
+        '503':
+          description: Service Unavailable.
+          x-vmw-compiler-skip: true
+  '/api/v1/vcenters/{vcId}/metrics_config':
+    put:
+      tags:
+        - vcMetricsConfig
+      summary: Update vCenter metrics configuration.
+      description: |
+        Updates the metrics collection configuration for a specific vCenter Server.
+
+        This endpoint allows you to control which metrics are collected from the vCenter by:
+        - Enable/Disable metrics collection profiles (STANDARD or VERBOSE).
+        - Managing ESXi Top metrics collection by adding or removing specific ESXi host MOIDs.
+      operationId: updateVcMetricsConfig
+      parameters:
+        - $ref: '#/components/parameters/vcIdPathParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VcMetricsConfigRequestBody"
+      responses:
+        200:
+          description: OK.
+        '400':
+          description: Bad request.
+          x-vmw-compiler-skip: true
+        '401':
+          description: Unauthorized.
+          x-vmw-compiler-skip: true
+        '403':
+          description: Forbidden.
+          x-vmw-compiler-skip: true
+        '503':
+          description: Service Unavailable.
+          x-vmw-compiler-skip: true
+  '/api/v1/labels':
+    get:
+      tags:
+        - prometheus-metadata
+      summary: Get label names
+      description: Returns a list of label names for PromQL autocompletion
+      operationId: getLabels
+      parameters:
+        - $ref: '#/components/parameters/sourceIdRequiredQueryParam'
+        - $ref: '#/components/parameters/matchQueryParam'
+        - $ref: '#/components/parameters/optionalStartQueryParam'
+        - $ref: '#/components/parameters/optionalEndQueryParam'
+        - $ref: '#/components/parameters/metadataLimitQueryParam'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrometheusResponse'
+        '400':
+          description: Bad request
+          x-vmw-compiler-skip: true
+        '401':
+          description: Unauthorized
+          x-vmw-compiler-skip: true
+        '403':
+          description: Forbidden
+          x-vmw-compiler-skip: true
+        '422':
+          description: Unprocessable Entity - Query cannot be executed
+          x-vmw-compiler-skip: true
+        '429':
+          description: Too Many Requests - Rate limit exceeded
+          headers:
+            Retry-After:
+              description: Number of seconds to wait before retrying
+              schema:
+                type: integer
+          x-vmw-compiler-skip: true
+        '500':
+          description: Internal server error
+          x-vmw-compiler-skip: true
+    post:
+      tags:
+        - prometheus-metadata
+      summary: Get label names
+      description: Returns a list of label names for PromQL autocompletion. Accepts parameters as a form-urlencoded request body.
+      operationId: getLabelsPost
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - sourceId
+              properties:
+                sourceId:
+                  type: string
+                  description: Source Id against which we need to query data for, like VC Instance UUID, NSX Id etc.
+                  example: 59e196ae-45c9-4bff-8176-5e6812435f8a
+                match:
+                  type: array
+                  items:
+                    type: string
+                  description: |
+                    Series selectors to filter results (optional). To receive non-empty results, at least one
+                    selector must identify a metric by name — either as a bare name (e.g. `cpu.usage.HOST`) or
+                    via the `__name__` label (e.g. `{__name__="cpu.usage.HOST"}`). Selectors that contain only
+                    tag/label matchers without a metric name (e.g. `{host="host-15"}`) will produce an empty
+                    response.
+                  example: ["cpu.usage.HOST", "mem.consumed.HOST"]
+                start:
+                  type: string
+                  description: Start timestamp in Unix epoch seconds or RFC3339 format.
+                  example: "1739780198"
+                end:
+                  type: string
+                  description: End timestamp in Unix epoch seconds or RFC3339 format.
+                  example: "1739780198"
+                limit:
+                  type: integer
+                  format: int32
+                  description: |
+                    Maximum number of results to return. Behaviour:
+                    - Omitted or null: default of 500 is applied.
+                    - `-1`: no limit; all matching results are returned.
+                    - `1–10000`: used as-is.
+                    - `> 10000`: silently capped to 10000.
+                    - `0` or any other negative value: rejected with 400.
+                  example: 100
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrometheusResponse'
+        '400':
+          description: Bad request
+          x-vmw-compiler-skip: true
+        '401':
+          description: Unauthorized
+          x-vmw-compiler-skip: true
+        '403':
+          description: Forbidden
+          x-vmw-compiler-skip: true
+        '422':
+          description: Unprocessable Entity - Query cannot be executed
+          x-vmw-compiler-skip: true
+        '429':
+          description: Too Many Requests - Rate limit exceeded
+          headers:
+            Retry-After:
+              description: Number of seconds to wait before retrying
+              schema:
+                type: integer
+          x-vmw-compiler-skip: true
+        '500':
+          description: Internal server error
+          x-vmw-compiler-skip: true
+  '/api/v1/label/{label_name}/values':
+    get:
+      tags:
+        - prometheus-metadata
+      summary: Get label values
+      description: Returns a list of label values for a specific label name
+      operationId: getLabelValues
+      parameters:
+        - $ref: '#/components/parameters/labelNamePathParam'
+        - $ref: '#/components/parameters/sourceIdRequiredQueryParam'
+        - $ref: '#/components/parameters/matchQueryParam'
+        - $ref: '#/components/parameters/optionalStartQueryParam'
+        - $ref: '#/components/parameters/optionalEndQueryParam'
+        - $ref: '#/components/parameters/metadataLimitQueryParam'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrometheusResponse'
+        '400':
+          description: Bad request
+          x-vmw-compiler-skip: true
+        '401':
+          description: Unauthorized
+          x-vmw-compiler-skip: true
+        '403':
+          description: Forbidden
+          x-vmw-compiler-skip: true
+        '422':
+          description: Unprocessable Entity - Query cannot be executed
+          x-vmw-compiler-skip: true
+        '429':
+          description: Too Many Requests - Rate limit exceeded
+          headers:
+            Retry-After:
+              description: Number of seconds to wait before retrying
+              schema:
+                type: integer
+          x-vmw-compiler-skip: true
+        '500':
+          description: Internal server error
+          x-vmw-compiler-skip: true
+    post:
+      tags:
+        - prometheus-metadata
+      summary: Get label values
+      description: Returns a list of label values for a specific label name. Accepts parameters as a form-urlencoded request body.
+      operationId: getLabelValuesPost
+      parameters:
+        - $ref: '#/components/parameters/labelNamePathParam'
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - sourceId
+              properties:
+                sourceId:
+                  type: string
+                  description: Source Id against which we need to query data for, like VC Instance UUID, NSX Id etc.
+                  example: 59e196ae-45c9-4bff-8176-5e6812435f8a
+                match:
+                  type: array
+                  items:
+                    type: string
+                  description: |
+                    Series selectors to filter results (optional). To receive non-empty results, at least one
+                    selector must identify a metric by name — either as a bare name (e.g. `cpu.usage.HOST`) or
+                    via the `__name__` label (e.g. `{__name__="cpu.usage.HOST"}`). Selectors that contain only
+                    tag/label matchers without a metric name (e.g. `{host="host-15"}`) will produce an empty
+                    response.
+                  example: ["cpu.usage.HOST", "mem.consumed.HOST"]
+                start:
+                  type: string
+                  description: Start timestamp in Unix epoch seconds or RFC3339 format.
+                  example: "1739780198"
+                end:
+                  type: string
+                  description: End timestamp in Unix epoch seconds or RFC3339 format.
+                  example: "1739780198"
+                limit:
+                  type: integer
+                  format: int32
+                  description: |
+                    Maximum number of results to return. Behaviour:
+                    - Omitted or null: default of 500 is applied.
+                    - `-1`: no limit; all matching results are returned.
+                    - `1–10000`: used as-is.
+                    - `> 10000`: silently capped to 10000.
+                    - `0` or any other negative value: rejected with 400.
+                  example: 100
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrometheusResponse'
+        '400':
+          description: Bad request
+          x-vmw-compiler-skip: true
+        '401':
+          description: Unauthorized
+          x-vmw-compiler-skip: true
+        '403':
+          description: Forbidden
+          x-vmw-compiler-skip: true
+        '422':
+          description: Unprocessable Entity - Query cannot be executed
+          x-vmw-compiler-skip: true
+        '429':
+          description: Too Many Requests - Rate limit exceeded
+          headers:
+            Retry-After:
+              description: Number of seconds to wait before retrying
+              schema:
+                type: integer
+          x-vmw-compiler-skip: true
+        '500':
+          description: Internal server error
+          x-vmw-compiler-skip: true
+  '/api/v1/series':
+    get:
+      tags:
+        - prometheus-metadata
+      summary: Get series metadata
+      description: Returns a list of time series matching the label selectors
+      operationId: getSeries
+      parameters:
+        - $ref: '#/components/parameters/matchRequiredQueryParam'
+        - $ref: '#/components/parameters/sourceIdRequiredQueryParam'
+        - $ref: '#/components/parameters/optionalStartQueryParam'
+        - $ref: '#/components/parameters/optionalEndQueryParam'
+        - $ref: '#/components/parameters/metadataLimitQueryParam'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrometheusResponse'
+        '400':
+          description: Bad request
+          x-vmw-compiler-skip: true
+        '401':
+          description: Unauthorized
+          x-vmw-compiler-skip: true
+        '403':
+          description: Forbidden
+          x-vmw-compiler-skip: true
+        '422':
+          description: Unprocessable Entity - Query cannot be executed
+          x-vmw-compiler-skip: true
+        '429':
+          description: Too Many Requests - Rate limit exceeded
+          headers:
+            Retry-After:
+              description: Number of seconds to wait before retrying
+              schema:
+                type: integer
+          x-vmw-compiler-skip: true
+        '500':
+          description: Internal server error
+          x-vmw-compiler-skip: true
+    post:
+      tags:
+        - prometheus-metadata
+      summary: Get series metadata
+      description: Returns a list of time series matching the label selectors. Accepts parameters as a form-urlencoded request body.
+      operationId: getSeriesPost
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - sourceId
+                - match
+              properties:
+                match:
+                  type: array
+                  minItems: 1
+                  items:
+                    type: string
+                  description: |
+                    Series selectors used to filter results (required). To receive non-empty results, at least
+                    one selector must identify a metric by name — either as a bare name (e.g. `cpu.usage.HOST`)
+                    or via the `__name__` label (e.g. `{__name__="cpu.usage.HOST"}`). Selectors that contain
+                    only tag/label matchers without a metric name (e.g. `{host="host-15"}`) will produce an
+                    empty response.
+                  example: ["cpu.usage.HOST", "mem.consumed{cluster=\"prod\"}"]
+                sourceId:
+                  type: string
+                  description: Source Id against which we need to query data for, like VC Instance UUID, NSX Id etc.
+                  example: 59e196ae-45c9-4bff-8176-5e6812435f8a
+                start:
+                  type: string
+                  description: Start timestamp in Unix epoch seconds or RFC3339 format.
+                  example: "1739780198"
+                end:
+                  type: string
+                  description: End timestamp in Unix epoch seconds or RFC3339 format.
+                  example: "1739780198"
+                limit:
+                  type: integer
+                  format: int32
+                  description: |
+                    Maximum number of results to return. Behaviour:
+                    - Omitted or null: default of 500 is applied.
+                    - `-1`: no limit; all matching results are returned.
+                    - `1–10000`: used as-is.
+                    - `> 10000`: silently capped to 10000.
+                    - `0` or any other negative value: rejected with 400.
+                  example: 100
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrometheusResponse'
+        '400':
+          description: Bad request
+          x-vmw-compiler-skip: true
+        '401':
+          description: Unauthorized
+          x-vmw-compiler-skip: true
+        '403':
+          description: Forbidden
+          x-vmw-compiler-skip: true
+        '422':
+          description: Unprocessable Entity - Query cannot be executed
+          x-vmw-compiler-skip: true
+        '429':
+          description: Too Many Requests - Rate limit exceeded
+          headers:
+            Retry-After:
+              description: Number of seconds to wait before retrying
+              schema:
+                type: integer
+          x-vmw-compiler-skip: true
+        '500':
+          description: Internal server error
+          x-vmw-compiler-skip: true
+  '/api/v1/sources':
+    get:
+      tags:
+        - prometheus-metadata
+      summary: Get available sources
+      description: |
+        Returns the list of all known source IDs for which data is available.
+      operationId: getSources
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrometheusResponse'
+        '400':
+          description: Bad request
+          x-vmw-compiler-skip: true
+        '401':
+          description: Unauthorized
+          x-vmw-compiler-skip: true
+        '403':
+          description: Forbidden
+          x-vmw-compiler-skip: true
+        '422':
+          description: Unprocessable Entity - Query cannot be executed
+          x-vmw-compiler-skip: true
+        '429':
+          description: Too Many Requests - Rate limit exceeded
+          headers:
+            Retry-After:
+              description: Number of seconds to wait before retrying
+              schema:
+                type: integer
+          x-vmw-compiler-skip: true
+        '500':
+          description: Internal server error
+          x-vmw-compiler-skip: true
+components:
+  parameters:
+    queryQueryParam:
+      name: query
+      in: query
+      description: The PromQL query for execution.
+      required: true
+      style: form
+      explode: true
+      schema:
+        type: string
+      example: "jvm_gc_collection_seconds_count{service=\"server\"}"
+    policyQueryParam:
+      name: policy
+      in: query
+      description: |
+        Name of the policy for which the aggregated or rolled-up data to be queried.
+      required: true
+      style: form
+      explode: true
+      schema:
+        type: string
+      example: "TROUBLESHOOTING"
+    sourceIdRequiredQueryParam:
+      name: sourceId
+      in: query
+      description: The source identifier to query data for, such as a vCenter instance UUID or NSX ID.
+      required: true
+      style: form
+      explode: true
+      schema:
+        type: string
+        example: 59e196ae-45c9-4bff-8176-5e6812435f8a
+    timeQueryParam:
+      name: time
+      in: query
+      description: |
+        Evaluation timestamp in Unix epoch seconds or RFC3339 format.
+        The current server time is used if the time parameter is unset.
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: string
+      example: "1739780198"
+    timeoutQueryParam:
+      name: timeout
+      in: query
+      description: Evaluation timeout in duration.
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: string
+      example: "1s"
+    startQueryParam:
+      name: start
+      in: query
+      description: Start timestamp in Unix epoch seconds or RFC3339 format.
+      required: true
+      style: form
+      explode: true
+      schema:
+        type: string
+      example: "1739780198"
+    endQueryParam:
+      name: end
+      in: query
+      description: End timestamp in Unix epoch seconds or RFC3339 format.
+      required: true
+      style: form
+      explode: true
+      schema:
+        type: string
+      example: "1739780198"
+    stepQueryParam:
+      name: step
+      in: query
+      description: Query resolution step width in duration format or float number of seconds.
+      required: true
+      style: form
+      explode: true
+      schema:
+        type: string
+      example: "1s"
+    limitQueryParam:
+      name: limit
+      in: query
+      description: |
+        Maximum number of returned series. Doesn't affect scalars or strings but truncates the number of series for matrices
+        and vectors. If not set, default limit is applied.
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: integer
+        format: int32
+      example: 100
+    metadataLimitQueryParam:
+      name: limit
+      in: query
+      description: |
+        Maximum number of results to return. Behaviour:
+        - Omitted or null: default of 500 is applied.
+        - `-1`: no limit; all matching results are returned.
+        - `1–10000`: used as-is.
+        - `> 10000`: silently capped to 10000.
+        - `0` or any other negative value: rejected with 400.
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: integer
+        format: int32
+      example: 100
+    sourceIdQueryParam:
+      name: sourceId
+      in: query
+      description: The source identifier to query data for, such as a vCenter instance UUID or NSX ID.
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: string
+        example: 59e196ae-45c9-4bff-8176-5e6812435f8a
+    externalTagsFilterQueryParam:
+      name: externalTagsFilter
+      in: query
+      description: Additional tag filters to be applied to the provided PromQL query.
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: string
+        example: "{\"host\":\"host-15\", \"vm\":\"vm-25\"}"
+    metricNameQueryParam:
+      name: metric
+      in: query
+      description: Metric name.
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: string
+        example: cpu.usage.HOST
+    vcIdPathParam:
+      name: vcId
+      in: path
+      description: UUID of the vCenter Server instance.
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: 1725ff48-ab45-4bb5-9d02-88745177dedb
+    labelNamePathParam:
+      name: label_name
+      in: path
+      required: true
+      description: Name of the label
+      schema:
+        type: string
+      example: "__name__"
+    matchQueryParam:
+      name: match
+      in: query
+      required: false
+      description: |
+        Series selectors to filter results (optional). To receive non-empty results, at least one
+        selector must identify a metric by name — either as a bare name (e.g. `cpu.usage.HOST`) or
+        via the `__name__` label (e.g. `{__name__="cpu.usage.HOST"}`). Selectors that contain only
+        tag/label matchers without a metric name (e.g. `{host="host-15"}`) will produce an empty
+        response.
+      style: form
+      explode: true
+      schema:
+        type: array
+        items:
+          type: string
+      example: ["cpu.usage.HOST", "mem.consumed.HOST"]
+    matchRequiredQueryParam:
+      name: match
+      in: query
+      required: true
+      description: |
+        Series selectors used to filter results (required). To receive non-empty results, at least
+        one selector must identify a metric by name — either as a bare name (e.g. `cpu.usage.HOST`)
+        or via the `__name__` label (e.g. `{__name__="cpu.usage.HOST"}`). Selectors that contain
+        only tag/label matchers without a metric name (e.g. `{host="host-15"}`) will produce an
+        empty response.
+      style: form
+      explode: true
+      schema:
+        type: array
+        minItems: 1
+        items:
+          type: string
+      example: ["cpu.usage.HOST", "mem.consumed{cluster=\"prod\"}"]
+    optionalStartQueryParam:
+      name: start
+      in: query
+      description: Start timestamp in Unix epoch seconds or RFC3339 format.
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: string
+      example: "1739780198"
+    optionalEndQueryParam:
+      name: end
+      in: query
+      description: End timestamp in Unix epoch seconds or RFC3339 format.
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: string
+      example: "1739780198"
+  schemas:
+    PrometheusResponse:
+      type: object
+      required:
+        - status
+        - data
+      description: Standard Prometheus response.
+      properties:
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        data:
+          type: object
+          description: Loose object reference for circumventing OpenAPI Generator's oneOf() problem for client SDK
+        pageInfo:
+          $ref: '#/components/schemas/PageInfo'
+        errorType:
+          type: string
+          description: |
+            Type of an error.
+            This field is set only if status is "error". The data field may still hold additional data.
+        error:
+          type: string
+          description: |
+            Error message returned when the query fails.
+            This field is set only if status is "error". The data field may still hold additional data.
+        warnings:
+          type: array
+          description: |
+            Warnings generated during API execution.
+            This field is set only if there were warnings while executing the request.
+            The data field will still hold additional data.
+          items:
+            type: string
+        infos:
+          type: array
+          description: |
+            Info generated during API execution.
+            This field is set only if there were info-level messages while executing the request.
+          items:
+            type: string
+    Data:
+      type: object
+      required:
+        - resultType
+        - result
+      properties:
+        resultType:
+          $ref: '#/components/schemas/ResultTypeEnum'
+        result:
+          type: object
+          description: Loose object reference for circumventing OpenAPI Generator's oneOf() problem for client SDK
+    # Range Vectors.
+    Matrix:
+      title: Matrix
+      description: |
+        Represents a Range Vector which is a set of time series containing a range of data points over time for each
+        time series.
+      type: array
+      items:
+        $ref: '#/components/schemas/Series'
+    Series:
+      type: object
+      required:
+        - metric
+      description: List of data points for a metric.
+      properties:
+        metric:
+          type: object
+          additionalProperties:
+            type: string
+        values:
+          type: array
+          items:
+            type: array
+            items:
+              type: object
+            minItems: 2
+            maxItems: 2
+            description: Array containing timestamp (number) and metric value (string)
+    # This is a copy to support array types in metric tag values.
+    # JIRA: https://vmw-jira.broadcom.net/browse/VCOPS-41847
+    # VODAP Adapter uses the OpenAPI spec generated models for response parsing
+    # The "data-->result" is an Object Type.
+    # The Client SDK parses the DQS response as an object.
+    # The VODAP Adapter then models this "object" response into the "Series" model defined here.
+    # This serialization is done to better leverage the generated model's fields, instead of playing with string keys
+    # in Map datastructures.
+    # The Series model above defines metrics tags as a String key, value pair.
+    # It is possible to have an array value for a metric tag.
+    # Below we mark the possible values as "object" type.
+    SeriesAdapter:
+      type: object
+      required:
+        - metric
+      description: List of data points for a metric.
+      properties:
+        metric:
+          type: object
+          additionalProperties:
+            type: object
+        values:
+          type: array
+          items:
+            type: array
+            items:
+              type: object
+            minItems: 2
+            maxItems: 2
+            description: Array containing timestamp (number) and metric value (string)
+    # Instant Vectors.
+    Vector:
+      title: Vector
+      description: |
+        Represents an Instant Vector which is a set of time series containing a single sample for each time series,
+        all sharing the same timestamp.
+      type: array
+      items:
+        $ref: '#/components/schemas/Sample'
+    Sample:
+      type: object
+      required:
+        - metric
+      description: Single data point for a metric.
+      properties:
+        metric:
+          type: object
+          additionalProperties:
+            type: string
+        value:
+          type: array
+          items:
+            type: object
+          minItems: 2
+          maxItems: 2
+          description: Array containing timestamp (number) and metric value (string)
+    # Scalar.
+    Scalar:
+      type: array
+      items:
+        type: object
+      minItems: 2
+      maxItems: 2
+      description: Array containing timestamp (number) and metric value (string)
+    # String.
+    StringResult:
+      type: array
+      items:
+        type: object
+      minItems: 2
+      maxItems: 2
+      description: Array containing timestamp (number) and value (string)
+    StatusEnum:
+      type: string
+      description: API execution status.
+      enum: [success, error]
+    ResultTypeEnum:
+      type: string
+      description: Type of a result.
+      enum: [matrix, vector, scalar, string]
+    MetricMetadataResponse:
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/MetricMetadata'
+    MetricMetadata:
+      type: array
+      items:
+        $ref: '#/components/schemas/MetricMetadataItem'
+    MetricMetadataItem:
+      type: object
+      properties:
+        type:
+          type: string
+          description: The metric type (e.g., counter, gauge, etc.).
+          example: cpu.usage.HOST
+        help:
+          type: string
+          description: Description of the metric.
+          example: CPU Usage Host is the measurement of how much of the CPU's capacity is being utilized by the host system.
+        unit:
+          type: string
+          description: Unit of the metric (can be empty).
+          example: percentage
+      required:
+        - type
+        - help
+        - unit
+    VcMetricsConfigRequestBody:
+      type: object
+      properties:
+        standard:
+          type: boolean
+          description: Enable/disable VC standard metrics.
+        verbose:
+          type: boolean
+          description: Enable/disable VC verbose metrics.
+        esxTopHostMoids:
+          type: array
+          items:
+            $ref: '#/components/schemas/EsxTopHostMoidOperation'
+      example:
+        verbose: false
+    EsxTopHostMoidOperation:
+      type: object
+      required:
+        - moid
+        - operation
+      properties:
+        moid:
+          type: string
+          description: The ESXi host MOID.
+          example: "host-1"
+        operation:
+          type: string
+          description: The operation to perform on the MOID.
+          enum: [ADD, REMOVE]
+          example: "ADD"
+    PageInfo:
+      type: object
+      description: Pagination metadata for paginated responses.
+      properties:
+        nextPageToken:
+          type: string
+          description: Token for the next page of results. If null, there are no more pages.
+          example: "eyJuYW1lIjoiY3B1LnVzYWdlIiwidGltZXN0YW1wIjoxNjAwMDAwMDAwfQ=="
+        pageSize:
+          type: integer
+          description: Number of results requested per page.
+          example: 50
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+security:
+  - bearerAuth: []

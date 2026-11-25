@@ -7,7 +7,7 @@
         "license": {
             "name": "VMware Cloud Foundation"
         },
-        "version": "9.1.1.0"
+        "version": "9.1.2.0"
     },
     "servers": [
         {
@@ -4772,7 +4772,7 @@
                 "tags": [
                     "BrownfieldImport"
                 ],
-                "description": "Import a vCenter as a VI domain",
+                "description": "Import a vCenter as a VI domain. In VCF, from NSX context expect below behaviour :\n\nIf vCenter is connected to NSX, then NSX Manager credentials are imported and updated in SDDC Manager inventory and node certificates are explicitly trusted by SDDC Manager. Any vSphere cluster that is not prepared for NSX, will not be configured for NSX. If vCenter is not connected to NSX, then SDDC Manager deploys NSX Manager VMs and configures NSX Cluster. vCenter gets registered as Compute Manager in the NSX. All eligible vSphere clusters in the domain are prepared for NSX.",
                 "operationId": "import",
                 "requestBody": {
                     "content": {
@@ -8139,7 +8139,7 @@
                 "tags": [
                     "BrownfieldImport"
                 ],
-                "description": "Perform synchronization of SDDC Manager state with any changes performed out-of-band in the vSphere environment",
+                "description": "Perform synchronization of SDDC Manager state with any changes performed out-of-band in the vSphere environment. In VCF, from NSX perspective expect below behaviour :\n\nDuring sync, SDDC Manager rediscovers NSX Manager nodes i.e. newly detected nodes are trusted. NSX nodes no longer present are removed from SDDC Manager inventory. Every vSphere cluster in the domain that is not yet NSX-configured is automatically prepared for NSX. A cluster is skipped from NSX preparation if it is already prepared for NSX or its ESXi Host version is incompatible with the NSX version.",
                 "operationId": "synchronization",
                 "parameters": [
                     {
@@ -8429,7 +8429,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Ok",
+                        "description": "OK",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -8452,7 +8452,7 @@
                         }
                     },
                     "500": {
-                        "description": "InternalServerError",
+                        "description": "Internal Server Error",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -8522,7 +8522,7 @@
                         }
                     },
                     "500": {
-                        "description": "InternalServerError",
+                        "description": "Internal Server Error",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -8594,7 +8594,7 @@
                         }
                     },
                     "500": {
-                        "description": "InternalServerError",
+                        "description": "Internal Server Error",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -22469,7 +22469,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Ok",
+                        "description": "OK",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -22492,7 +22492,7 @@
                         }
                     },
                     "500": {
-                        "description": "InternalServerError",
+                        "description": "Internal Server Error",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -22563,7 +22563,7 @@
                         }
                     },
                     "500": {
-                        "description": "InternalServerError",
+                        "description": "Internal Server Error",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -25693,7 +25693,7 @@
                         }
                     },
                     "500": {
-                        "description": "InternalServerError",
+                        "description": "Internal Server Error",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -27879,6 +27879,7 @@
                         "example": "medium"
                     },
                     "loadBalancerFqdn": {
+                        "pattern": "^$|^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$",
                         "type": "string",
                         "description": "Load Balancer FQDN"
                     },
@@ -28361,6 +28362,13 @@
                             "$ref": "#/components/schemas/ComponentVmRequirement"
                         }
                     },
+                    "hostCapacities": {
+                        "type": "array",
+                        "description": "Actual per-host CPU and memory capacity breakdown; populated for available capacity only",
+                        "items": {
+                            "$ref": "#/components/schemas/HostCapacityInfo"
+                        }
+                    },
                     "context": {
                         "type": "object",
                         "additionalProperties": {
@@ -28443,6 +28451,29 @@
                     }
                 },
                 "description": "Represents a single metric representing digital data"
+            },
+            "HostCapacityInfo": {
+                "type": "object",
+                "properties": {
+                    "hostAddress": {
+                        "type": "string",
+                        "description": "ESXi host address (FQDN or IP)"
+                    },
+                    "numberOfCores": {
+                        "type": "integer",
+                        "description": "Number of CPU cores available on the host",
+                        "format": "int32"
+                    },
+                    "numberOfCpuThreads": {
+                        "type": "integer",
+                        "description": "Number of CPU threads (logical processors) available on the host",
+                        "format": "int32"
+                    },
+                    "memory": {
+                        "$ref": "#/components/schemas/DataMetric"
+                    }
+                },
+                "description": "Represents the actual CPU and memory capacity of a single ESXi host"
             },
             "AddOn": {
                 "required": [
@@ -30705,6 +30736,64 @@
                 },
                 "description": "Brownfield Import Spec"
             },
+            "BrownfieldOverlayClusterSpec": {
+                "required": [
+                    "clusterName",
+                    "transportVlan",
+                    "vdsName"
+                ],
+                "type": "object",
+                "properties": {
+                    "clusterName": {
+                        "minLength": 1,
+                        "type": "string",
+                        "description": "vCenter Cluster Name.",
+                        "example": "cluster-1"
+                    },
+                    "vdsName": {
+                        "minLength": 1,
+                        "type": "string",
+                        "description": "vSphere Distributed Switch Name.",
+                        "example": "vds-1"
+                    },
+                    "transportVlan": {
+                        "maximum": 9223372036854775807,
+                        "minimum": 0,
+                        "type": "integer",
+                        "description": "The vlan used for tagging overlay traffic of the associated Host Switch",
+                        "format": "int32",
+                        "example": 1000
+                    },
+                    "ipAddressPoolSpec": {
+                        "$ref": "#/components/schemas/IpAddressPoolSpec"
+                    },
+                    "subClusterSpecs": {
+                        "type": "array",
+                        "description": "NSX Sub Clusters Specification.",
+                        "items": {
+                            "$ref": "#/components/schemas/SubClusterSpec"
+                        }
+                    }
+                },
+                "description": "Per vSphere Cluster Dedicated Overlay TEP Configuration."
+            },
+            "BrownfieldOverlaySpec": {
+                "required": [
+                    "brownfieldOverlayClusterSpec"
+                ],
+                "type": "object",
+                "properties": {
+                    "brownfieldOverlayClusterSpec": {
+                        "minItems": 1,
+                        "type": "array",
+                        "description": "Per vSphere Cluster Dedicated Overlay TEP Configuration to be used during Brownfield Convert or Import.",
+                        "items": {
+                            "$ref": "#/components/schemas/BrownfieldOverlayClusterSpec"
+                        }
+                    }
+                },
+                "description": "Dedicated OVERLAY TEP Configuration to be used during Brownfield Convert or Import."
+            },
             "DtgwSpec": {
                 "required": [
                     "externalIpBlockCidr",
@@ -30961,6 +31050,9 @@
                         "example": true,
                         "default": false
                     },
+                    "brownfieldOverlaySpec": {
+                        "$ref": "#/components/schemas/BrownfieldOverlaySpec"
+                    },
                     "overlayVtepSpec": {
                         "$ref": "#/components/schemas/OverlayVtepSpec"
                     },
@@ -30982,6 +31074,42 @@
                     }
                 },
                 "description": "Spec contains parameters for NSX deployment and configurations"
+            },
+            "SubClusterSpec": {
+                "required": [
+                    "hostNames",
+                    "name",
+                    "transportVlan"
+                ],
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "minLength": 1,
+                        "type": "string",
+                        "description": "NSX Sub Cluster Name.",
+                        "example": "SubClusterName"
+                    },
+                    "hostNames": {
+                        "type": "array",
+                        "description": "Hostname of hosts which are part of this Sub Cluster.",
+                        "items": {
+                            "type": "string",
+                            "description": "Hostname of hosts which are part of this Sub Cluster."
+                        }
+                    },
+                    "ipAddressPoolSpec": {
+                        "$ref": "#/components/schemas/IpAddressPoolSpec"
+                    },
+                    "transportVlan": {
+                        "maximum": 9223372036854775807,
+                        "minimum": 0,
+                        "type": "integer",
+                        "description": "The vlan used for tagging overlay traffic of the associated Host Switch",
+                        "format": "int32",
+                        "example": 1000
+                    }
+                },
+                "description": "Specification for Hosts which are part of Sub Cluster and corresponding Overridden Configuration"
             },
             "VpcSpec": {
                 "type": "object",
@@ -34143,7 +34271,7 @@
                         "type": "string",
                         "description": "Type of IP addresss",
                         "readOnly": true,
-                        "example": "One among: MANAGEMENT, VSAN, VMOTION, NFS, VSAN_EXTERNAL"
+                        "example": "One among: MANAGEMENT, VSAN, VMOTION, NFS, VSAN_EXTERNAL, ISCSI"
                     },
                     "ipAddressVersion": {
                         "type": "string",

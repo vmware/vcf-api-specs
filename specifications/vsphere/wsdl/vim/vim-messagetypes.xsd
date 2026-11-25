@@ -5852,6 +5852,14 @@
          <element name="datastore" type="vim25:ManagedObjectReference" />
       </sequence>
    </complexType>
+   <complexType name="VStorageObjectDeleteAllSnapshotsRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="id" type="vim25:ID" />
+         <element name="datastore" type="vim25:ManagedObjectReference" />
+         <element name="deleteOnlyVanillaDisks" type="xsd:boolean" minOccurs="0" />
+      </sequence>
+   </complexType>
    <complexType name="HostCreateDiskRequestType">
       <sequence>
          <element name="_this" type="vim25:ManagedObjectReference" />

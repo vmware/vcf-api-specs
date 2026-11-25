@@ -50,7 +50,7 @@ SPDX-License-Identifier: Apache-2.0-->
                 <plugin>
                     <groupId>org.apache.cxf</groupId>
                     <artifactId>cxf-codegen-plugin</artifactId>
-                    <version>4.1.7</version>
+                    <version>4.1.9</version>
                     <executions>
                         <execution>
                             <id>generate-bindings</id>
@@ -102,4 +102,3 @@ SPDX-License-Identifier: Apache-2.0-->
     </modules>
 
 </project>
-

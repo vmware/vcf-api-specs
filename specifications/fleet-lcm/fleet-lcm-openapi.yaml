@@ -759,6 +759,15 @@ paths:
         schema:
           type: boolean
         style: form
+      - description: "Return all known components, including those skipped by default\
+          \ such as Migrator Service."
+        explode: true
+        in: query
+        name: includeAllComponents
+        required: false
+        schema:
+          type: boolean
+        style: form
       - description: Filter components by their import status.
         explode: true
         in: query
@@ -808,6 +817,15 @@ paths:
     post:
       description: Install new or import existing component(s).
       operationId: createComponents
+      parameters:
+      - description: Correlation ID for tracing the request across services
+        explode: true
+        in: header
+        name: X-Correlation-Id
+        required: false
+        schema:
+          type: string
+        style: simple
       requestBody:
         content:
           application/json:
@@ -1273,6 +1291,63 @@ paths:
           description: Internal server error
       tags:
       - Components
+  /v1/components/{componentId}/legacy-credentials:
+    patch:
+      deprecated: true
+      description: Update stored credentials for a component when the actual password
+        has changed. Only applies to components still using an admin credential rather
+        than a dedicated service account; this API will be removed once all supported
+        components have moved to service-account-based credential management.
+      operationId: manageComponentCredentials
+      parameters:
+      - description: Component Identifier.
+        explode: true
+        in: path
+        name: componentId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LegacyCredentialSpec'
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+          description: Accepted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal server error
+      tags:
+      - LegacyCredentials
   /v1/components/{componentId}/nodes:
     get:
       description: List a Component's nodes.
@@ -1824,6 +1899,14 @@ paths:
         schema:
           default: false
           type: boolean
+      - description: |
+          Filter tasks by the associatedTask stored in additionalDetails (e.g. ?associatedTask=<uuid>).
+        in: query
+        name: associatedTask
+        required: false
+        schema:
+          format: uuid
+          type: string
       - description: "Page Number (1-based, defaults to 1)"
         explode: true
         in: query
@@ -1978,6 +2061,107 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Internal Server Error
       summary: Cancel a task
+      tags:
+      - Task
+  /v1/tasks/{taskId}/support-bundles:
+    get:
+      description: |
+        Returns all support bundles associated with the given Fleet task, ordered by creation time descending (most recent first). Each element in the response is a SupportBundleResponse representing one collection run, with per-cluster SupportBundle entries inside.
+        Optional filters:
+        * **excludeExpired** — when `true`, collection results whose every bundle URL has expired
+          are omitted from the response.
+      operationId: getSupportBundles
+      parameters:
+      - description: Task Id
+        explode: true
+        in: path
+        name: taskId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      - description: |
+          When true, exclude support bundle results where every bundle URL has already expired.
+        in: query
+        name: excludeExpired
+        required: false
+        schema:
+          default: false
+          type: boolean
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/SupportBundleResponse'
+                type: array
+          description: List of SupportBundleResponse objects (filtered per query parameters)
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: "Bad Request - invalid path variable or query parameter type\
+            \ (e.g. non-UUID taskId, non-boolean excludeExpired)"
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not Found - parent task does not exist
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal Server Error
+      summary: Get all support bundles for a task
+      tags:
+      - Task
+    post:
+      description: |
+        Starts an asynchronous support-bundle collection workflow for a Fleet task. Returns 202 Accepted immediately with a Fleet Task that tracks the collection progress. Poll GET /v1/tasks/{supportBundleTaskId} until the task status is SUCCEEDED, then retrieve the bundle URLs via GET /v1/tasks/{taskId}/support-bundles.
+      operationId: generateSupportBundle
+      parameters:
+      - description: Task Id
+        explode: true
+        in: path
+        name: taskId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+          description: Support bundle collection workflow started; poll the returned
+            task for completion
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: |
+            Bad Request. Possible causes: taskId is not a valid UUID; the task is in PENDING, SCHEDULED, or CANCELED status (support bundle generation requires RUNNING, SUCCEEDED, or FAILED); or the task was created more than 7 days ago and its logs are no longer retained.
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not Found - task does not exist
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal Server Error
+      summary: Start support bundle collection for a task
       tags:
       - Task
   /v1/upgrade-plans/validations:
@@ -2232,6 +2416,16 @@ paths:
             type: string
           type: array
           uniqueItems: true
+        style: form
+      - description: "Return all possible components for upgrade. By default some\
+          \ components, such as Migration Service, are excluded if this flag is not\
+          \ set."
+        explode: true
+        in: query
+        name: includeAllComponents
+        required: false
+        schema:
+          type: boolean
         style: form
       responses:
         "200":
@@ -2614,6 +2808,32 @@ paths:
         schema:
           type: integer
         style: form
+      - description: Filter components by scope. Multiple values can be provided.
+        explode: true
+        in: query
+        name: componentScope
+        required: false
+        schema:
+          example:
+          - MANAGEMENT
+          - SDDC
+          items:
+            $ref: '#/components/schemas/ComponentScope'
+          type: array
+          uniqueItems: true
+        style: form
+      - description: |
+          Whether to include every component in each release's bill of materials, or only the
+          components the caller's account (VCF_SERVICE_MANAGER or Fleet Admin) is allowed to
+          operate on. Defaults to false, i.e. the BOM is narrowed to the caller's own components.
+        explode: true
+        in: query
+        name: includeAllComponents
+        required: false
+        schema:
+          default: false
+          type: boolean
+        style: form
       responses:
         "200":
           content:
@@ -2810,6 +3030,15 @@ components:
       schema:
         example: en-US
         type: string
+    CorrelationIdHeader:
+      description: Correlation ID for tracing the request across services
+      explode: true
+      in: header
+      name: X-Correlation-Id
+      required: false
+      schema:
+        type: string
+      style: simple
     componentActionQueryParam:
       description: Component action to perform.
       explode: true
@@ -2899,6 +3128,16 @@ components:
       explode: true
       in: query
       name: includeVcdMigrator
+      required: false
+      schema:
+        type: boolean
+      style: form
+    componentFilterIncludeAllComponents:
+      description: "Return all known components, including those skipped by default\
+        \ such as Migrator Service."
+      explode: true
+      in: query
+      name: includeAllComponents
       required: false
       schema:
         type: boolean
@@ -3220,6 +3459,44 @@ components:
         type: array
         uniqueItems: true
       style: form
+    upgradePlanComponentIncludeAllComponentsQueryParam:
+      description: "Return all possible components for upgrade. By default some components,\
+        \ such as Migration Service, are excluded if this flag is not set."
+      explode: true
+      in: query
+      name: includeAllComponents
+      required: false
+      schema:
+        type: boolean
+      style: form
+    releaseVersionIncludeAllComponentsQueryParam:
+      description: |
+        Whether to include every component in each release's bill of materials, or only the
+        components the caller's account (VCF_SERVICE_MANAGER or Fleet Admin) is allowed to
+        operate on. Defaults to false, i.e. the BOM is narrowed to the caller's own components.
+      explode: true
+      in: query
+      name: includeAllComponents
+      required: false
+      schema:
+        default: false
+        type: boolean
+      style: form
+    componentScopeFilterQueryParam:
+      description: Filter components by scope. Multiple values can be provided.
+      explode: true
+      in: query
+      name: componentScope
+      required: false
+      schema:
+        example:
+        - MANAGEMENT
+        - SDDC
+        items:
+          $ref: '#/components/schemas/ComponentScope'
+        type: array
+        uniqueItems: true
+      style: form
     taskCreatedByQueryParam:
       description: Filter tasks by creator (username or service account)
       in: query
@@ -3318,6 +3595,15 @@ components:
       schema:
         default: false
         type: boolean
+    associatedTaskQueryParam:
+      description: |
+        Filter tasks by the associatedTask stored in additionalDetails (e.g. ?associatedTask=<uuid>).
+      in: query
+      name: associatedTask
+      required: false
+      schema:
+        format: uuid
+        type: string
   responses:
     BadRequest:
       content:
@@ -3418,30 +3704,77 @@ components:
           type: integer
       type: object
     SupportBundle:
+      description: |
+        Represents a collected support bundle. Used both for per-cluster bundle entries in a task-scoped collection and for standalone component support bundles. Fields source, status, and expirationTimestamp are only populated for task-scoped bundles; they are absent in component-level bundle responses.
       example:
-        size: 0
+        size: 5242880
         createdTimestamp: 2000-01-23T04:56:07.000+00:00
-        name: name
-        id: id
-        url: https://openapi-generator.tech
+        name: task-log.tar
+        errorMessage:
+          args:
+            cloudProxyFqdn: cloudProxy1.vsphere.local
+          localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+          defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+          id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+        expirationTimestamp: 2000-01-23T04:56:07.000+00:00
+        errorMessageId: errorMessageId
+        id: woszbxj3jred7il7gkg3nzgu2y
+        source: sddc-manager.example.com
+        url: https://sddc-manager.example.com/api/v1/task-logs/download?token=abc123
+        status: SUCCEEDED
+        errorArguments:
+          key: errorArguments
       properties:
         id:
+          description: Unique identifier of the support bundle.
+          example: woszbxj3jred7il7gkg3nzgu2y
           type: string
-        createdTimestamp:
-          description: Time when the operation is started.
-          format: date-time
+        name:
+          description: Filename of the support bundle archive.
+          example: task-log.tar
           type: string
         size:
-          description: Size of support bundle in bytes
+          description: Size of the bundle archive in bytes.
+          example: 5242880
           format: int64
           type: integer
-        name:
-          description: File name of the support bundle
-          type: string
         url:
-          description: Download URL of the support bundle from VMSP
+          description: Pre-signed URL to download the bundle.
+          example: https://sddc-manager.example.com/api/v1/task-logs/download?token=abc123
           format: uri
           type: string
+        createdTimestamp:
+          description: ISO-8601 timestamp when the bundle collection was started.
+          format: date-time
+          type: string
+        source:
+          description: |
+            FQDN of the cluster from which this bundle was collected. Populated only for task-scoped bundles; absent for component bundles.
+          example: sddc-manager.example.com
+          type: string
+        status:
+          description: |
+            Collection status for this bundle. Populated only for task-scoped bundles; absent for component bundles.
+          enum:
+          - SUCCEEDED
+          - FAILED
+          example: SUCCEEDED
+          type: string
+        expirationTimestamp:
+          description: |
+            ISO-8601 timestamp when the presigned download URL expires. Populated only for task-scoped bundles; absent for component bundles.
+          format: date-time
+          type: string
+        errorMessageId:
+          description: Error message identifier.
+          type: string
+        errorArguments:
+          additionalProperties:
+            type: string
+          description: Arguments for the error message.
+          type: object
+        errorMessage:
+          $ref: '#/components/schemas/LocalizableMessage'
       required:
       - id
       type: object
@@ -4923,6 +5256,12 @@ components:
         configSpec:
           additionalProperties: true
           type: object
+        ignoreOpsRegistrationError:
+          default: false
+          description: "When false (the default), a failure to register the component\
+            \ with VCF Operations during this refresh fails the refresh. Set to true\
+            \ to treat VCF Operations registration as best-effort instead."
+          type: boolean
       type: object
     ComponentConfig:
       description: Component's current configuration
@@ -4949,6 +5288,26 @@ components:
       - $ref: '#/components/schemas/OvaComponentConfigSpec'
       - $ref: '#/components/schemas/VspComponentConfigSpec'
       - $ref: '#/components/schemas/VspClusterConfigSpec'
+      type: object
+    LegacyCredentialSpec:
+      description: Specification for updating stored credentials of a component.
+      example:
+        skipValidation: false
+        password: password
+      properties:
+        password:
+          description: The new password to store. Must match the password currently
+            configured on the component.
+          type: string
+        skipValidation:
+          default: false
+          description: "When true, writes the new password to the secret without first\
+            \ verifying it against the live component. Only use this when validation\
+            \ itself is known to be unreliable for this component -- an incorrect\
+            \ password will not be detected."
+          type: boolean
+      required:
+      - password
       type: object
     VcenterPlacement:
       example:
@@ -5157,6 +5516,10 @@ components:
         ceip:
           description: CEIP status
           type: boolean
+        clusterApiEnabled:
+          description: Configures whether the Kubernetes API server is reachable from
+            outside the cluster nodes
+          type: boolean
       required:
       - type
       title: VSP Cluster config spec
@@ -5177,12 +5540,30 @@ components:
           prefix:
             description: Global address pool network prefix (IPv4)
             type: string
+          ipv4ExcludedAddresses:
+            description: "list of individual IPv4 addresses excluded from the ipv4Pool.\
+              \ Applies to range and CIDR pool entries. These addresses are reserved\
+              \ and are never assigned to cluster nodes, so they remain available\
+              \ for use."
+            items:
+              format: ipv4
+              type: string
+            type: array
           ipv6Gateway:
             description: Global address pool network gateway (IPv6)
             type: string
           ipv6Prefix:
             description: Global address pool network prefix (IPv6)
             type: string
+          ipv6ExcludedAddresses:
+            description: "list of individual IPv6 addresses excluded from the ipv6Pool.\
+              \ Applies to range and CIDR pool entries. These addresses are reserved\
+              \ and are never assigned to cluster nodes, so they remain available\
+              \ for use."
+            items:
+              format: ipv6
+              type: string
+            type: array
         type: object
       description: VSP Cluster config spec
       title: VSP Cluster config spec
@@ -6267,6 +6648,7 @@ components:
       - VCFMS_METRICS_STORE
       - VCF_OPS_CLOUD_PROXY
       - VCD_MIGRATOR
+      - VCF_SERVICE_VSAN_BACKEND
       type: string
     OpsNodeType:
       description: Enum of VCF Operation node types.
@@ -6374,6 +6756,8 @@ components:
       properties:
         size:
           type: string
+        raas:
+          $ref: '#/components/schemas/SaltConfigSpec_raas'
       required:
       - size
       type: object
@@ -6394,6 +6778,14 @@ components:
       type: object
     TelemetryAcceptorConfigSpec:
       description: Telemetry acceptor component config spec.
+      properties:
+        size:
+          type: string
+      required:
+      - size
+      type: object
+    VsanBackendConfigSpec:
+      description: VCF Service vSAN Backend component config spec.
       properties:
         size:
           type: string
@@ -6443,6 +6835,7 @@ components:
       - VSP_INSTANCE_FQDN
       - VSP_FLEET_FQDN
       - VSP_CLUSTER_SIZE
+      - VSP_KUBERNETES_CLUSTER_API
       - VSP_COMPONENT_SIZE
       - OVA_NODE_SIZES
       - OVA_NODE_SIZE_VALUE
@@ -6455,6 +6848,7 @@ components:
       - INVALID_VCFA_VSP_CLUSTER
       - INVALID_VCFA_CONFIG_SPEC
       - VCFA_FQDN_RESOLVES_TO_IPV6
+      - INVALID_COMPONENT_CONFIG_SPEC
       - VSP_COMPONENT_CONFIG_SPEC_SIZES_MISMATCH
       - INVALID_PASSWORD
       - PASSWORD_COMPLEXITY
@@ -6462,6 +6856,8 @@ components:
       - SDDC_LCM_IDS_NOT_FOUND
       - DUPLICATE_COMPONENT_TYPE_SPEC
       - NOT_PRIMARY_SDDC_LCM
+      - EXISTING_VIDB_IN_OPS
+      - VIDB_OPS_INVENTORY_CHECK_FAILED
       - OPS_NETWORKS_INVALID_DEPLOYMENT_SIZE
       - OPS_NETWORKS_INVALID_PLATFORM_NODE_COUNT
       - COMPONENT_NOT_FOUND
@@ -6472,8 +6868,11 @@ components:
       - OPS_REPLICA_NODE_ALREADY_EXISTS
       - OVA_INVALID_NODE_TYPE
       - OPS_NODE_VERSION_MISMATCH
+      - CLOUD_PROXY_OPS_VERSION_MISMATCH
       - VSP_INVALID_HOSTNAME_IN_PLATFORM_FQDN
       - VCFA_INTERNAL_CLUSTER_CIDR_NOT_VALID
+      - VCFA_FQDN_SAME_AS_VSP_PLATFORM_FQDN
+      - INTEGRATED_VCFA_REQUIRED
       type: string
     Validation:
       properties:
@@ -6561,6 +6960,7 @@ components:
         type: type
         cancellable: true
         retriable: true
+        targetSddcServiceId: targetSddcServiceId
         createdBy: admin
         createTime: 2000-01-23T04:56:07.000+00:00
         name: vcfa_90_to_91_upgrade
@@ -6601,6 +7001,10 @@ components:
         resourceType:
           description: Type of resource on which the task is triggered
           example: COMPONENT
+          type: string
+        targetSddcServiceId:
+          description: |
+            The SDDC LCM instance ID this task was delegated to, if any.
           type: string
         createTime:
           description: ISO 8601 timestamp when this Task was created
@@ -7057,12 +7461,14 @@ components:
       description: Defines a release version
       example:
         components:
-        - publicName: publicName
+        - updatedBy: updatedBy
+          publicName: publicName
           versions:
           - versions
           - versions
           type: OPS
-        - publicName: publicName
+        - updatedBy: updatedBy
+          publicName: publicName
           versions:
           - versions
           - versions
@@ -7079,6 +7485,7 @@ components:
     ComponentReleaseVersions:
       description: Component versions for a release
       example:
+        updatedBy: updatedBy
         publicName: publicName
         versions:
         - versions
@@ -7089,6 +7496,11 @@ components:
           $ref: '#/components/schemas/ComponentType'
         publicName:
           description: Public display name for the component
+          type: string
+        updatedBy:
+          description: |
+            Identifier of the LCM system responsible for this component's lifecycle.
+            Known values: "VCF_FLEET_LCM" (Fleet LCM), "VCF_SERVICE_MANAGER" (VCF Service Manager).
           type: string
         versions:
           description: List of component releases sorted by the versions (descending
@@ -7289,24 +7701,28 @@ components:
       example:
         elements:
         - components:
-          - publicName: publicName
+          - updatedBy: updatedBy
+            publicName: publicName
             versions:
             - versions
             - versions
             type: OPS
-          - publicName: publicName
+          - updatedBy: updatedBy
+            publicName: publicName
             versions:
             - versions
             - versions
             type: OPS
           version: version
         - components:
-          - publicName: publicName
+          - updatedBy: updatedBy
+            publicName: publicName
             versions:
             - versions
             - versions
             type: OPS
-          - publicName: publicName
+          - updatedBy: updatedBy
+            publicName: publicName
             versions:
             - versions
             - versions
@@ -7348,6 +7764,8 @@ components:
       description: |
         Payload for initiating a component upgrade operation. It encapsulates the desired component state,
         deployment policies, lifecycle management options, and auditing information for the request.
+        ignoreOpsRegistrationError is an optional property that is propagated up to FBS's refresh component request to determine if
+        an error during ops registration error should fail or be treated as best effort.
       properties:
         componentSpec:
           $ref: '#/components/schemas/ComponentDesiredSpec'
@@ -7360,6 +7778,13 @@ components:
           example: f0e9d8c7-b6a5-4321-fedc-ba9876543210
           format: uuid
           type: string
+        ignoreOpsRegistrationError:
+          default: false
+          description: "When false (the default), a failure to register the component\
+            \ with VCF Operations during this refresh fails the refresh. Set to true\
+            \ to treat Ops registration as best-effort instead. This is used to propagate\
+            \ up to FBS's refresh component request."
+          type: boolean
       required:
       - componentSpec
       type: object
@@ -7582,6 +8007,7 @@ components:
           type: type
           status: PENDING
         retriable: true
+        targetSddcServiceId: targetSddcServiceId
         createdBy: admin
         createTime: 2000-01-23T04:56:07.000+00:00
         name: vcfa_90_to_91_upgrade
@@ -7760,6 +8186,10 @@ components:
           description: A map of task-specific details. This can be used to store any
             additional information about the task that is relevant to a specific task.
           type: object
+        targetSddcServiceId:
+          description: |
+            The SDDC LCM instance ID this task was delegated to, if any.
+          type: string
       required:
       - id
       type: object
@@ -8180,6 +8610,13 @@ components:
             This object allows for arbitrary key-value pairs specific to the component or operation.
           type: object
       type: object
+    ComponentScope:
+      description: Scope classification of a component — management/fleet-level vs
+        core-components (per-instance infrastructure)
+      enum:
+      - MANAGEMENT
+      - SDDC
+      type: string
     UpgradePlanComponentEligibilityStatus:
       description: Status of a component in the upgrade plan
       enum:
@@ -8409,6 +8846,7 @@ components:
           type: type
           cancellable: true
           retriable: true
+          targetSddcServiceId: targetSddcServiceId
           createdBy: admin
           createTime: 2000-01-23T04:56:07.000+00:00
           name: vcfa_90_to_91_upgrade
@@ -8431,6 +8869,7 @@ components:
           type: type
           cancellable: true
           retriable: true
+          targetSddcServiceId: targetSddcServiceId
           createdBy: admin
           createTime: 2000-01-23T04:56:07.000+00:00
           name: vcfa_90_to_91_upgrade
@@ -8771,6 +9210,92 @@ components:
       - id
       - name
       type: object
+    SupportBundlesResult:
+      description: |
+        Result of a task-scoped support bundle collection task (type = SUPPORT_BUNDLES). Returned
+        when GET /v1/tasks/{taskId} completes successfully for a CREATE_SDDC_TASK_SUPPORT_BUNDLE_WORKFLOW
+        task, listing every support bundle generated for the task's resolved components (one entry
+        per OPS/VRNI appliance or VSP cluster group).
+      properties:
+        type:
+          example: SUPPORT_BUNDLES
+          type: string
+        supportBundles:
+          description: Generated support bundles.
+          items:
+            $ref: '#/components/schemas/SupportBundle'
+          type: array
+      required:
+      - supportBundles
+      - type
+      type: object
+    SupportBundleResponse:
+      description: |
+        Result of a support-bundle collection run for a Fleet task. Contains one SupportBundle entry per targeted cluster.
+      example:
+        supportBundles:
+        - size: 5242880
+          createdTimestamp: 2000-01-23T04:56:07.000+00:00
+          name: task-log.tar
+          errorMessage:
+            args:
+              cloudProxyFqdn: cloudProxy1.vsphere.local
+            localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+            defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+            id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+          expirationTimestamp: 2000-01-23T04:56:07.000+00:00
+          errorMessageId: errorMessageId
+          id: woszbxj3jred7il7gkg3nzgu2y
+          source: sddc-manager.example.com
+          url: https://sddc-manager.example.com/api/v1/task-logs/download?token=abc123
+          status: SUCCEEDED
+          errorArguments:
+            key: errorArguments
+        - size: 5242880
+          createdTimestamp: 2000-01-23T04:56:07.000+00:00
+          name: task-log.tar
+          errorMessage:
+            args:
+              cloudProxyFqdn: cloudProxy1.vsphere.local
+            localizedMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+            defaultMessage: Started upgrade for Cloud Proxy `cloudProxy1.vsphere.local`
+            id: com.broadcom.lcm.ops.cloudproxy.upgrade.started
+          expirationTimestamp: 2000-01-23T04:56:07.000+00:00
+          errorMessageId: errorMessageId
+          id: woszbxj3jred7il7gkg3nzgu2y
+          source: sddc-manager.example.com
+          url: https://sddc-manager.example.com/api/v1/task-logs/download?token=abc123
+          status: SUCCEEDED
+          errorArguments:
+            key: errorArguments
+        size: 920690
+        status: SUCCEEDED
+      properties:
+        status:
+          description: |
+            Rollup collection status across all SupportBundles.
+            SUCCEEDED           — every bundle collected successfully.
+            PARTIALLY_SUCCEEDED — at least one bundle succeeded and at least one failed.
+            FAILED              — every bundle failed to collect.
+          enum:
+          - SUCCEEDED
+          - PARTIALLY_SUCCEEDED
+          - FAILED
+          type: string
+        size:
+          description: Total size of all collected bundles in bytes.
+          example: 920690
+          format: int64
+          type: integer
+        supportBundles:
+          description: Per-cluster bundle results.
+          items:
+            $ref: '#/components/schemas/SupportBundle'
+          type: array
+      required:
+      - status
+      - supportBundles
+      type: object
     ComponentDesiredSpec:
       description: |
         Specifications related to the component's desired configuration and the source for its upgrade artifacts.
@@ -8930,6 +9455,12 @@ components:
         vcfa:
           $ref: '#/components/schemas/VcfaConfigSpecIngressVcfa'
       type: object
+    SaltConfigSpec_raas:
+      properties:
+        raas_password:
+          format: password
+          type: string
+      type: object
     OpsLogsConfigSpec_ingress_component_vips:
       properties:
         ipv4:
@@ -9012,6 +9543,7 @@ components:
           VALIDATION: '#/components/schemas/ValidationResult'
           INVENTORY_NETWORKS_FETCH: '#/components/schemas/InventoryNetworksResult'
           SDDC_RESOURCES_FETCH: '#/components/schemas/SddcResourcesFetchResult'
+          SUPPORT_BUNDLES: '#/components/schemas/SupportBundlesResult'
         propertyName: type
       oneOf:
       - $ref: '#/components/schemas/PrecheckResult'
@@ -9019,6 +9551,7 @@ components:
       - $ref: '#/components/schemas/ValidationResult'
       - $ref: '#/components/schemas/InventoryNetworksResult'
       - $ref: '#/components/schemas/SddcResourcesFetchResult'
+      - $ref: '#/components/schemas/SupportBundlesResult'
   securitySchemes:
     basicAuth:
       scheme: basic

@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: vSphere Automation API
-  version: 9.1.1.0
+  version: 9.1.2.0
 servers:
 - url: "https://{host}/api"
   variables:
@@ -85,6 +85,11 @@ tags:
 - name: Appliance.Health.Applmgmt
   description: Appliance.Health.Applmgmt resource provides operations Get health status
     of applmgmt services.
+- name: Appliance.Health.Certificates
+  description: |-
+    Appliance.Health.Certificates resource provides operations Get vCenter certificates health.
+
+    This resource was added in __vSphere API 9.1.2.0__.
 - name: Appliance.Health.Database
   description: |-
     This resource is deprecated as of __vSphere API 9.1.0.0__. The DB health check tool has been removed from 9.0 release.
@@ -99,6 +104,11 @@ tags:
   description: Appliance.Health.Load resource provides operations Get load health.
 - name: Appliance.Health.Mem
   description: Appliance.Health.Mem resource provides operations Get memory health.
+- name: Appliance.Health.Services
+  description: |-
+    Appliance.Health.Services resource provides operations Get vCenter Services overall health.
+
+    This resource was added in __vSphere API 9.1.2.0__.
 - name: Appliance.Health.Softwarepackages
   description: Appliance.Health.Softwarepackages resource provides operations Get
     information on available software updates available in remote VUM repository.
@@ -567,6 +577,11 @@ tags:
     The Esx.Settings.Clusters.Policies.Apply resource provides operations to configure the policies that will impact how the software and configuration specification documents are applied to an ESXi cluster.
 
     This resource was added in __vSphere API 7.0.0.0__.
+- name: Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy
+  description: |-
+    The Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy resource provides operations to configure the policies that govern desired-state configuration management operations on an ESXi cluster.
+
+    This resource was added in __vSphere API 9.1.2.0__.
 - name: Esx.Settings.Clusters.Policies.Apply.Effective
   description: |-
     The Esx.Settings.Clusters.Policies.Apply.Effective resource provides operations to manage the effective policies that will impact how the software and configuration specification documents are applied to an ESXi cluster.
@@ -1562,7 +1577,7 @@ tags:
     This resource was added in __vSphere API 6.7__.
 - name: Vcenter.Deployment.ImportHistory
   description: |-
-    The Vcenter.Deployment.ImportHistory resource provides operations for managing the import of vCenter historical data, e.g. Tasks, Events and Statistics, when is is imported separately from the upgrade.
+    The Vcenter.Deployment.ImportHistory resource provides operations for managing the import of vCenter historical data, e.g. Tasks, Events and Statistics, when it is imported separately from the upgrade.
 
     This resource was added in __vSphere API 6.7__.
 - name: Vcenter.Deployment.Size
@@ -1632,7 +1647,7 @@ tags:
     This resource was added in __vSphere API 6.7.1__.
 - name: Vcenter.Host.Crypto.Fips.Modules
   description: |-
-    The Vcenter.Host.Crypto.Fips.Modules resource provides a mapping of the the ESX hosts this vCenter server manages to the FIPS validated crypto modules installed on them. Only modules from the hosts base VIBs are listed.
+    The Vcenter.Host.Crypto.Fips.Modules resource provides a mapping of the ESX hosts this vCenter server manages to the FIPS validated crypto modules installed on them. Only modules from the hosts base VIBs are listed.
 
     This resource was added in __vSphere API 9.1.0.0__.
 - name: Vcenter.Host.Entropy.ExternalPool
@@ -4280,6 +4295,40 @@ paths:
                 type: string
       security:
       - api_key_auth: []
+  /appliance/health/certificates:
+    get:
+      tags:
+      - Appliance.Health.Certificates
+      description: |-
+        Get certificates health.
+
+        This operation was added in __vSphere API 9.1.2.0__.
+      operationId: Appliance.Health.Certificates_get
+      responses:
+        "500":
+          description: Generic error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Error"
+        "200":
+          description: |-
+            vCenter certificates health.
+
+            Possible values:
+              - `orange`: Some of the certificates are expiring within 30 days
+              - `gray`: No data is available for some of the certificates.
+              - `green`: Certificates are valid.
+              - `red`: Some of the certificates had expired.
+
+
+            For more information see: *Appliance.Health.Certificates.HealthLevel*.
+          content:
+            application/json:
+              schema:
+                type: string
+      security:
+      - api_key_auth: []
   /appliance/health/database:
     get:
       tags:
@@ -4397,6 +4446,40 @@ paths:
 
 
             For more information see: *Appliance.Health.Mem.HealthLevel*.
+          content:
+            application/json:
+              schema:
+                type: string
+      security:
+      - api_key_auth: []
+  /appliance/health/services:
+    get:
+      tags:
+      - Appliance.Health.Services
+      description: |-
+        Get vCenter services overall health.
+
+        This operation was added in __vSphere API 9.1.2.0__.
+      operationId: Appliance.Health.Services_get
+      responses:
+        "500":
+          description: Generic error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Error"
+        "200":
+          description: |-
+            Services health.
+
+            Possible values:
+              - `orange`: The health is degraded for some of the services. The services might have serious problems
+              - `gray`: No health data is available for services.
+              - `green`: Services are healthy.
+              - `red`: Some of the services are unhealthy.
+
+
+            For more information see: *Appliance.Health.Services.HealthLevel*.
           content:
             application/json:
               schema:
@@ -5829,11 +5912,14 @@ paths:
         required: true
       responses:
         "400":
-          description: A backup or restore is already in progress
+          description: |-
+            ***Vapi.Std.Errors.FeatureInUse*** A backup or restore is already in progress
+
+            ***Vapi.Std.Errors.InvalidArgument*** if server_identity is not a certificate or an SSH host key the appliance can read
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Vapi.Std.Errors.FeatureInUse"
+                $ref: "#/components/schemas/Vapi.Std.Errors.Error"
         "500":
           description: Generic error
           content:
@@ -5846,6 +5932,46 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Appliance.Recovery.Backup.ReturnResult"
+      security:
+      - api_key_auth: []
+  /appliance/recovery/backup?action=get-server-identity:
+    post:
+      tags:
+      - Appliance.Recovery.Backup
+      description: "Report the identity a backup server presents - its TLS certificate\
+        \ for FTPS and HTTPS, or its SSH host keys for SFTP - along with where that\
+        \ identity stands against what this appliance trusts for the location, so\
+        \ the administrator can confirm it out-of-band before verification is turned\
+        \ on and a client can describe a location that is already saved. This operation\
+        \ establishes no trust, and reports what the server presents whether or not\
+        \ the appliance can verify it. \n\nA restore client calls this same operation.\
+        \ The identity belongs to the backup server, not to the backup or the restore,\
+        \ so there is one operation for both. \n\nA server that cannot be reached,\
+        \ and a location whose protocol presents no identity, both fail rather than\
+        \ reporting UNVERIFIED: being unable to read an identity is not the same as\
+        \ reading one that nothing trusts.\n\nThis operation was added in __vSphere\
+        \ API 9.1.2.0__."
+      operationId: Appliance.Recovery.Backup_getServerIdentity
+      requestBody:
+        description: ServerIdentitySpec Structure
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Appliance.Recovery.Backup.ServerIdentitySpec"
+        required: true
+      responses:
+        "500":
+          description: Generic error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Error"
+        "200":
+          description: ServerIdentityInfo Structure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Appliance.Recovery.Backup.ServerIdentityInfo"
       security:
       - api_key_auth: []
   /appliance/recovery/restore?action=validate:
@@ -5965,11 +6091,14 @@ paths:
         required: true
       responses:
         "400":
-          description: A backup or restore is already in progress.
+          description: |-
+            ***Vapi.Std.Errors.FeatureInUse*** A backup or restore is already in progress.
+
+            ***Vapi.Std.Errors.InvalidArgument*** if server_identity is not a certificate or an SSH host key the appliance can read.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Vapi.Std.Errors.FeatureInUse"
+                $ref: "#/components/schemas/Vapi.Std.Errors.Error"
         "500":
           description: if any error occurs during the execution of the operation.
           content:
@@ -6352,6 +6481,15 @@ paths:
               $ref: "#/components/schemas/Appliance.Recovery.Backup.LocationSpec"
         required: true
       responses:
+        "400":
+          description: |-
+            if server_identity is not a certificate or an SSH host key the appliance can read.
+
+            This error was added in __vSphere API 9.1.2.0__.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.InvalidArgument"
         "500":
           description: if any error occurs during the execution of the operation.
           content:
@@ -6462,6 +6600,15 @@ paths:
               $ref: "#/components/schemas/Appliance.Recovery.Backup.LocationSpec"
         required: true
       responses:
+        "400":
+          description: |-
+            if server_identity is not a certificate or an SSH host key the appliance can read.
+
+            This error was added in __vSphere API 9.1.2.0__.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.InvalidArgument"
         "500":
           description: if any error occurs during the execution of the operation.
           content:
@@ -6517,6 +6664,15 @@ paths:
                   $ref: "#/components/schemas/Appliance.Recovery.Backup.SystemName.Archive.FilterSpec"
         required: true
       responses:
+        "400":
+          description: |-
+            if server_identity is not a certificate or an SSH host key the appliance can read.
+
+            This error was added in __vSphere API 9.1.2.0__.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.InvalidArgument"
         "500":
           description: if any error occurs during the execution of the operation.
           content:
@@ -19155,6 +19311,211 @@ paths:
       responses:
         "400":
           description: If invalid value is provided.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.InvalidArgument"
+        "401":
+          description: If the caller is not authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Unauthenticated"
+        "404":
+          description: If there is no cluster associated with cluster in the system.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.NotFound"
+        "500":
+          description: If there is an unknown internal error. The accompanying error
+            message will give more details about the failure.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Error"
+        "503":
+          description: If the service is not available.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.ServiceUnavailable"
+        "204":
+          description: Success!
+      security:
+      - api_key_auth: []
+  /esx/settings/clusters/{cluster}/policies/configuration-services-policy:
+    get:
+      tags:
+      - Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy
+      description: "Returns the configuration services policy for the cluster. Any\
+        \ property or section that has not been explicitly configured is returned\
+        \ with its system default value.\n\nThis operation was added in __vSphere\
+        \ API 9.1.2.0__.\n\nReturns an authorization error if you do not have all\
+        \ of the privileges described as follows: \n   -  Operation execution requires\
+        \ `VcIntegrity.ClusterConfiguration.View`. \n  -  The resource `ClusterComputeResource`\
+        \ referenced by the parameter cluster requires `VcIntegrity.ClusterConfiguration.View`.\
+        \ \n"
+      operationId: Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy_get
+      parameters:
+      - name: cluster
+        in: path
+        description: |-
+          The cluster identifier.
+
+          The parameter must be an identifier for the resource type: `ClusterComputeResource`.
+        required: true
+        schema:
+          type: string
+      responses:
+        "400":
+          description: If Vsphere Configuration Profiles (VCP) is not enabled on the
+            cluster cluster.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.InvalidArgument"
+        "401":
+          description: if the caller is not authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Unauthenticated"
+        "404":
+          description: If there is no cluster associated with cluster in the system.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.NotFound"
+        "500":
+          description: If there is an unknown internal error. The accompanying error
+            message will give more details about the failure.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Error"
+        "503":
+          description: If the service is not available.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.ServiceUnavailable"
+        "200":
+          description: "The configuration services policy for the cluster, with system\
+            \ defaults filled in for any unconfigured field or section."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy.PolicyInfo"
+      security:
+      - api_key_auth: []
+    put:
+      tags:
+      - Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy
+      description: "Sets the configuration services policy for the cluster. This replaces\
+        \ the entire configuration services policy for the cluster; any property or\
+        \ section that is not explicitly provided as input is reset to its system\
+        \ default value.\n\nThis operation was added in __vSphere API 9.1.2.0__.\n\
+        \nReturns an authorization error if you do not have all of the privileges\
+        \ described as follows: \n   -  Operation execution requires `VcIntegrity.ClusterConfiguration.Modify`.\
+        \ \n  -  The resource `ClusterComputeResource` referenced by the parameter\
+        \ cluster requires `VcIntegrity.ClusterConfiguration.Modify`. \n"
+      operationId: Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy_set
+      parameters:
+      - name: cluster
+        in: path
+        description: |-
+          The cluster identifier.
+
+          The parameter must be an identifier for the resource type: `ClusterComputeResource`.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: The configuration services policy specification to be configured.
+          Any missing or `null` field or section is reset to its system default value.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy.PolicySpec"
+        required: true
+      responses:
+        "400":
+          description: If an invalid value is provided. If Vsphere Configuration Profiles
+            (VCP) is not enabled on the cluster cluster.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.InvalidArgument"
+        "401":
+          description: If the caller is not authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Unauthenticated"
+        "404":
+          description: If there is no cluster associated with cluster in the system.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.NotFound"
+        "500":
+          description: If there is an unknown internal error. The accompanying error
+            message will give more details about the failure.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.Error"
+        "503":
+          description: If the service is not available.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vapi.Std.Errors.ServiceUnavailable"
+        "204":
+          description: Success!
+      security:
+      - api_key_auth: []
+  /esx/settings/clusters/{cluster}/policies/configuration-services-policy?action=reset:
+    post:
+      tags:
+      - Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy
+      description: "Resets the configuration services policy for the cluster back\
+        \ to system default values, at the granularity of whole sections or individual\
+        \ fields within a section.\n\nThis operation was added in __vSphere API 9.1.2.0__.\n\
+        \nReturns an authorization error if you do not have all of the privileges\
+        \ described as follows: \n   -  Operation execution requires `VcIntegrity.ClusterConfiguration.Modify`.\
+        \ \n  -  The resource `ClusterComputeResource` referenced by the parameter\
+        \ cluster requires `VcIntegrity.ClusterConfiguration.Modify`. \n"
+      operationId: Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy_reset
+      parameters:
+      - name: cluster
+        in: path
+        description: |-
+          The cluster identifier.
+
+          The parameter must be an identifier for the resource type: `ClusterComputeResource`.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: "Specification of which sections and/or individual fields to\
+          \ reset. Callers must explicitly select *Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy.ResetSpec.reset_all*\
+          \ (to reset everything), *Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy.CommonPolicyResetField.ALL*\
+          \ (or the equivalent value of a future section's enumeration, to reset a\
+          \ whole section), or specific fields;"
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy.ResetSpec"
+        required: true
+      responses:
+        "400":
+          description: "If an invalid value is provided, including if *Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy.ResetSpec.reset_all*\
+            \ is `true` while another field of spec is also set, or if any section\
+            \ of spec combines *Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy.CommonPolicyResetField.ALL*\
+            \ with another value in the same set. If Vsphere Configuration Profiles\
+            \ (VCP) is not enabled on the cluster cluster."
           content:
             application/json:
               schema:
@@ -42059,7 +42420,7 @@ paths:
         \ be used to authenticate the register call for its corresponding Expanded\
         \ Access Token.\n\nThis operation was added in __vSphere API 9.1.0.0__.\n\n\
         Returns an authorization error if you do not have all of the privileges described\
-        \ as follows: \n   -  Operation execution requires `System.Read`. \n"
+        \ as follows: \n   -  Operation execution requires `System.Anonymous`. \n"
       operationId: Vcenter.RegisteredTokens_create
       requestBody:
         description: The CreateSpec for the token.
@@ -43845,7 +44206,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Vapi.Std.Errors.Error"
         "404":
-          description: If the the permission is not found.
+          description: If the permission is not found.
           content:
             application/json:
               schema:
@@ -44395,7 +44756,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Vapi.Std.Errors.Error"
         "404":
-          description: If the the role is not found.
+          description: If the role is not found.
           content:
             application/json:
               schema:
@@ -74583,7 +74944,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Vapi.Std.Errors.Error"
         "200":
-          description: Info structure containing the mode of the the VCHA cluster.
+          description: Info structure containing the mode of the VCHA cluster.
           content:
             application/json:
               schema:
@@ -86781,6 +87142,24 @@ components:
           format: int64
       description: Appliance.Access.Shell.ShellConfig schema Structure that defines
         shell configuration.
+    Appliance.Health.Certificates.HealthLevel:
+      type: string
+      description: |-
+        Appliance.Health.Certificates.HealthLevel enumerated type Defines health levels.
+
+        Possible values:
+          - `orange`: Some of the certificates are expiring within 30 days
+          - `gray`: No data is available for some of the certificates.
+          - `green`: Certificates are valid.
+          - `red`: Some of the certificates had expired.
+
+
+        This enumeration was added in __vSphere API 9.1.2.0__.
+      enum:
+      - orange
+      - gray
+      - green
+      - red
     Appliance.Health.Database.Info:
       required:
       - messages
@@ -86942,6 +87321,24 @@ components:
       - green
       - red
       - yellow
+    Appliance.Health.Services.HealthLevel:
+      type: string
+      description: |-
+        Appliance.Health.Services.HealthLevel enumerated type Defines health levels.
+
+        Possible values:
+          - `orange`: The health is degraded for some of the services. The services might have serious problems
+          - `gray`: No health data is available for services.
+          - `green`: Services are healthy.
+          - `red`: Some of the services are unhealthy.
+
+
+        This enumeration was added in __vSphere API 9.1.2.0__.
+      enum:
+      - orange
+      - gray
+      - green
+      - red
     Appliance.Health.Softwarepackages.HealthLevel:
       type: string
       description: |
@@ -88657,6 +89054,22 @@ components:
       - SFTP
       - NFS
       - SMB
+    Appliance.Recovery.Backup.VerificationStatus:
+      type: string
+      description: |-
+        The Appliance.Recovery.Backup.VerificationStatus enumerated type says where the identity a backup server presents stands against what the appliance trusts for that location.
+
+        Possible values:
+          - `TRUSTED`: The appliance verifies this identity as it stands, either because the certificate validates against a certificate authority it trusts or because this is the identity confirmed for the location. There is nothing to confirm.
+          - `UNVERIFIED`: No identity is trusted for the location and the server does not validate on its own, so a request that verifies the server is refused until this identity is confirmed.
+          - `MISMATCH`: An identity is confirmed for this location and the server presents a different one, so a request that verifies the server is refused. Confirming the identity presented now is how a replaced certificate or host key is accepted.
+
+
+        This enumeration was added in __vSphere API 9.1.2.0__.
+      enum:
+      - TRUSTED
+      - UNVERIFIED
+      - MISMATCH
     Appliance.Recovery.Backup.LocalizableMessage:
       required:
       - args
@@ -88771,8 +89184,145 @@ components:
             Option to enable Postgres DB/ VCDB fast backup.
 
             If missing or `null` backup will proceed at slow rate
+        verify_server_identity:
+          type: boolean
+          description: |-
+            Whether the appliance verifies the backup server's identity - the TLS certificate for FTPS and HTTPS, or the SSH host key for SFTP - before it transfers any data.
+
+            This property was added in __vSphere API 9.1.2.0__.
+
+            If missing or `null`, the appliance-wide certificate validation setting applies.
+        server_identity:
+          type: string
+          description: |-
+            The backup server's identity, confirmed out-of-band by the administrator: for FTPS and HTTPS element zero of *Appliance.Recovery.Backup.ServerIdentityInfo.pem_certificate_chain*, for SFTP the *Appliance.Recovery.Backup.ServerIdentityInfo.ssh_host_keys* lines joined by newlines. Submit the value *POST /appliance/recovery/backup?action=get-server-identity* returned, unmodified.
+
+            This property was added in __vSphere API 9.1.2.0__.
+
+            Only read when verify_server_identity is true. For FTPS and HTTPS, missing or `null` means the server has to validate against a certificate authority the appliance trusts. SFTP has no certificate authority to validate against, so the first connection to an SFTP server always needs a confirmed value.
       description: Appliance.Recovery.Backup.BackupRequest schema Structure representing
         requested backup piece
+    Appliance.Recovery.Backup.ServerIdentitySpec:
+      required:
+      - location
+      type: object
+      properties:
+        location:
+          type: string
+          description: |-
+            The backup location, which supplies the protocol, host and port to connect to. The folder is ignored.
+
+            This property was added in __vSphere API 9.1.2.0__.
+      description: |-
+        The Appliance.Recovery.Backup.ServerIdentitySpec schema names the backup server whose identity is to be read. A server presents its identity during the handshake, before it authenticates anyone, so no credentials are needed to read one.
+
+        This schema was added in __vSphere API 9.1.2.0__.
+    Appliance.Recovery.Backup.ServerIdentityInfo:
+      required:
+      - location_type
+      - status
+      type: object
+      properties:
+        location_type:
+          type: string
+          description: |-
+            The protocol the location names, which decides the form the identity takes: a certificate chain for FTPS and HTTPS, host keys for SFTP.
+
+            Possible values:
+              - `FTP`: Destination is FTP server
+              - `HTTP`: Destination is HTTP server
+              - `FTPS`: Destination is FTPS server
+              - `HTTPS`: Destination is HTTPS server
+              - `SCP`: Destination is SSH server
+              - `SFTP`: Destination is SFTP server
+              - `NFS`: Destination is NFS server
+
+            This constant was added in __vSphere API 6.7.2__.
+              - `SMB`: Destination is SMB server
+
+            This constant was added in __vSphere API 6.7.2__.
+
+
+            For more information see: *Appliance.Recovery.Backup.LocationType*.
+
+            This property was added in __vSphere API 9.1.2.0__.
+        status:
+          type: string
+          description: "Where the identity the server presents stands against what\
+            \ the appliance trusts for the location. \n\nA confirmed identity stays\
+            \ TRUSTED once its certificate expires, because confirming an identity\
+            \ trusts that exact certificate or host key rather than its validity period.\n\
+            \nPossible values:\n  - `TRUSTED`: The appliance verifies this identity\
+            \ as it stands, either because the certificate validates against a certificate\
+            \ authority it trusts or because this is the identity confirmed for the\
+            \ location. There is nothing to confirm.\n  - `UNVERIFIED`: No identity\
+            \ is trusted for the location and the server does not validate on its\
+            \ own, so a request that verifies the server is refused until this identity\
+            \ is confirmed.\n  - `MISMATCH`: An identity is confirmed for this location\
+            \ and the server presents a different one, so a request that verifies\
+            \ the server is refused. Confirming the identity presented now is how\
+            \ a replaced certificate or host key is accepted.\n\n\nFor more information\
+            \ see: *Appliance.Recovery.Backup.VerificationStatus*.\n\nThis property\
+            \ was added in __vSphere API 9.1.2.0__."
+        chain_validates:
+          type: boolean
+          description: |-
+            Whether the server's certificate validates against a certificate authority the appliance trusts, which is the one way an identity is trusted without an administrator confirming it.
+
+            This property was added in __vSphere API 9.1.2.0__.
+
+            This property is optional and it is only relevant when the value of location_type is one of *Appliance.Recovery.Backup.LocationType.FTPS* or *Appliance.Recovery.Backup.LocationType.HTTPS*.
+        confirmed_identity_recorded:
+          type: boolean
+          description: |-
+            Whether an identity confirmed for this location is recorded on the appliance. A record has precedence over chain validation, so a record held for a server that validates on its own is redundant, and warnings says so.
+
+            This property was added in __vSphere API 9.1.2.0__.
+
+            This property is optional and it is only relevant when the value of location_type is one of *Appliance.Recovery.Backup.LocationType.FTPS* or *Appliance.Recovery.Backup.LocationType.HTTPS*.
+        pem_certificate_chain:
+          type: array
+          description: |-
+            The server's certificate chain, PEM encoded, leaf first, for a client that shows the administrator the subject, the issuer and the fingerprint to compare against the server's owner. A server that sends only its leaf certificate produces a single-element list.
+
+            This property was added in __vSphere API 9.1.2.0__.
+
+            This property is optional and it is only relevant when the value of location_type is one of *Appliance.Recovery.Backup.LocationType.FTPS* or *Appliance.Recovery.Backup.LocationType.HTTPS*.
+          items:
+            type: string
+        not_after:
+          type: string
+          description: |-
+            Expiry of the leaf certificate. Reported whether or not the certificate validates, because it describes what the server presents rather than the trust decision reached on it.
+
+            This property was added in __vSphere API 9.1.2.0__.
+
+            This property is optional and it is only relevant when the value of location_type is one of *Appliance.Recovery.Backup.LocationType.FTPS* or *Appliance.Recovery.Backup.LocationType.HTTPS*.
+          format: date-time
+        ssh_host_keys:
+          type: array
+          description: |-
+            The host key lines the server offers, in OpenSSH format, one for each host key algorithm it holds. All of them are reported, and all of them are confirmed together, because which algorithm a later connection settles on is not the appliance's to choose.
+
+            This property was added in __vSphere API 9.1.2.0__.
+
+            This property is optional and it is only relevant when the value of location_type is *Appliance.Recovery.Backup.LocationType.SFTP*.
+          items:
+            type: string
+        warnings:
+          type: array
+          description: |-
+            Advisory messages about this identity, to be shown as returned.
+
+            This property was added in __vSphere API 9.1.2.0__.
+
+            missing or `null` when there is nothing to advise.
+          items:
+            $ref: "#/components/schemas/Appliance.Recovery.Backup.LocalizableMessage"
+      description: |-
+        The Appliance.Recovery.Backup.ServerIdentityInfo schema carries the identity a backup server presents, and where that identity stands against what the appliance trusts for the location, so an administrator can confirm it out-of-band. Reading an identity establishes no trust; submitting it as *Appliance.Recovery.Backup.BackupRequest.server_identity* does.
+
+        This schema was added in __vSphere API 9.1.2.0__.
     Appliance.Recovery.Restore.LocationType:
       type: string
       description: |
@@ -88877,6 +89427,22 @@ components:
 
             If missing or `null` SSO authentication will not be used. If the vCenter Server is a management node or an embedded node, authentication is required.
           format: password
+        verify_server_identity:
+          type: boolean
+          description: |-
+            Whether the appliance verifies the backup server's identity - the TLS certificate for FTPS and HTTPS, or the SSH host key for SFTP - when it reads the backup for validation.
+
+            This property was added in __vSphere API 9.1.2.0__.
+
+            If missing or `null`, the appliance-wide certificate validation setting applies.
+        server_identity:
+          type: string
+          description: |-
+            The backup server's identity, confirmed out-of-band by the administrator: for FTPS and HTTPS the leaf certificate, for SFTP the host key lines joined by newlines. Submit the value *POST /appliance/recovery/backup?action=get-server-identity* returned, unmodified.
+
+            This property was added in __vSphere API 9.1.2.0__.
+
+            Only read when verify_server_identity is true. For FTPS and HTTPS, missing or `null` means the server has to validate against a certificate authority the appliance trusts. SFTP has no certificate authority to validate against, so the first connection to an SFTP server always needs a confirmed value. A restore target is a freshly deployed appliance that trusts nothing yet, so a self-signed or privately-issued server has to be confirmed here.
       description: Appliance.Recovery.Restore.RestoreRequest schema Structure representing
         requested restore piece
     Appliance.Recovery.Restore.LocalizableMessage:
@@ -88976,6 +89542,22 @@ components:
 
             If missing or `null` authentication will not be used.
           format: password
+        verify_server_identity:
+          type: boolean
+          description: |-
+            Whether the appliance verifies the backup server's identity - the TLS certificate for FTPS and HTTPS, or the SSH host key for SFTP - during remote discovery.
+
+            This property was added in __vSphere API 9.1.2.0__.
+
+            If missing or `null`, the appliance-wide certificate validation setting applies.
+        server_identity:
+          type: string
+          description: |-
+            The backup server's identity, confirmed out-of-band by the administrator: for FTPS and HTTPS the leaf certificate, for SFTP the host key lines joined by newlines. Submit the value *POST /appliance/recovery/backup?action=get-server-identity* returned, unmodified.
+
+            This property was added in __vSphere API 9.1.2.0__.
+
+            Only read when verify_server_identity is true. For FTPS and HTTPS, missing or `null` means the server has to validate against a certificate authority the appliance trusts. SFTP has no certificate authority to validate against, so the first connection to an SFTP server always needs a confirmed value.
       description: |-
         The Appliance.Recovery.Backup.LocationSpec schema has fields to represent a location on the backup server.
 
@@ -89150,6 +89732,22 @@ components:
             Option to enable Postgres DB/ VCDB fast backup
 
             If missing or `null` backup will proceed at slow rate
+        verify_server_identity:
+          type: boolean
+          description: |-
+            Whether the appliance verifies the backup server's identity - the TLS certificate for FTPS and HTTPS, or the SSH host key for SFTP - before it transfers any data.
+
+            This property was added in __vSphere API 9.1.2.0__.
+
+            If missing or `null`, the appliance-wide certificate validation setting applies.
+        server_identity:
+          type: string
+          description: |-
+            The backup server's identity, confirmed out-of-band by the administrator: for FTPS and HTTPS the leaf certificate, for SFTP the host key lines joined by newlines. Submit the value *POST /appliance/recovery/backup?action=get-server-identity* returned, unmodified.
+
+            This property was added in __vSphere API 9.1.2.0__.
+
+            Only read when verify_server_identity is true. For FTPS and HTTPS, missing or `null` means the server has to validate against a certificate authority the appliance trusts. SFTP has no certificate authority to validate against, so the first connection to an SFTP server always needs a confirmed value. When supplied, the appliance checks it against the identity the server presents before the backup runs.
       description: The Appliance.Recovery.Backup.Job.BackupRequest schema represents
         a requested backup piece.
     Appliance.Recovery.Backup.Job.BackupJobStatus:
@@ -89426,6 +90024,22 @@ components:
             This property was added in __vSphere API 6.7__.
 
             If missing or `null` backup will proceed at slow rate
+        verify_server_identity:
+          type: boolean
+          description: |-
+            Whether the appliance verifies the backup server's identity - the TLS certificate for FTPS and HTTPS, or the SSH host key for SFTP - for backups on this schedule.
+
+            This property was added in __vSphere API 9.1.2.0__.
+
+            If missing or `null`, the appliance-wide certificate validation setting applies.
+        server_identity:
+          type: string
+          description: |-
+            The backup server's identity, confirmed out-of-band by the administrator: for FTPS and HTTPS the leaf certificate, for SFTP the host key lines joined by newlines. Submit the value *POST /appliance/recovery/backup?action=get-server-identity* returned, unmodified.
+
+            This property was added in __vSphere API 9.1.2.0__.
+
+            Only read when verify_server_identity is true. For FTPS and HTTPS, missing or `null` means the server has to validate against a certificate authority the appliance trusts. SFTP has no certificate authority to validate against, so the first connection to an SFTP server always needs a confirmed value.
       description: |-
         The Appliance.Recovery.Backup.Schedules.CreateSpec schema contains fields to be specified for creating a new schedule. The structure includes parts, location information, encryption password and enable flag.
 
@@ -89492,6 +90106,17 @@ components:
             This property was added in __vSphere API 6.7__.
 
             If missing or `null` backup will proceed at slow rate
+        verify_server_identity:
+          type: boolean
+          description: "Whether the appliance verifies the backup server's identity\
+            \ - the TLS certificate for FTPS and HTTPS, or the SSH host key for SFTP\
+            \ - for backups on this schedule. \n\nThe identity the schedule has recorded\
+            \ is not reported here. *POST /appliance/recovery/backup?action=get-server-identity*\
+            \ reports what the server presents now and how it stands against that\
+            \ record, which is what an administrator reopening the schedule needs\
+            \ to see.\n\nThis property was added in __vSphere API 9.1.2.0__.\n\nmissing\
+            \ or `null` when the schedule records no choice, in which case the appliance-wide\
+            \ certificate validation setting applies."
       description: |-
         The Appliance.Recovery.Backup.Schedules.Info schema contains information about an existing schedule. The structure includes Schedule ID, parts, location information, encryption password, enable flag, recurrence and retention information.
 
@@ -89578,6 +90203,22 @@ components:
             This property was added in __vSphere API 6.7__.
 
             If missing or `null` backup will proceed at slow rate
+        verify_server_identity:
+          type: boolean
+          description: |-
+            Whether the appliance verifies the backup server's identity - the TLS certificate for FTPS and HTTPS, or the SSH host key for SFTP - for backups on this schedule.
+
+            This property was added in __vSphere API 9.1.2.0__.
+
+            If missing or `null`, the value is not changed.
+        server_identity:
+          type: string
+          description: |-
+            The backup server's identity, confirmed out-of-band by the administrator: for FTPS and HTTPS the leaf certificate, for SFTP the host key lines joined by newlines. Submit the value *POST /appliance/recovery/backup?action=get-server-identity* returned, unmodified.
+
+            This property was added in __vSphere API 9.1.2.0__.
+
+            If missing or `null`, the recorded identity is not changed - unless this update moves the schedule to a different protocol, host or port, in which case the recorded identity belongs to the previous server and is discarded.
       description: |-
         The Appliance.Recovery.Backup.Schedules.UpdateSpec schema contains the fields of the existing schedule which can be updated.
 
@@ -90333,6 +90974,22 @@ components:
             This property was added in __vSphere API 6.7__.
 
             If missing or `null`, validation warnings will fail the restore operation
+        verify_server_identity:
+          type: boolean
+          description: |-
+            Whether the appliance verifies the backup server's identity - the TLS certificate for FTPS and HTTPS, or the SSH host key for SFTP - when it reads the backup.
+
+            This property was added in __vSphere API 9.1.2.0__.
+
+            If missing or `null`, the appliance-wide certificate validation setting applies.
+        server_identity:
+          type: string
+          description: |-
+            The backup server's identity, confirmed out-of-band by the administrator: for FTPS and HTTPS the leaf certificate, for SFTP the host key lines joined by newlines. Submit the value *POST /appliance/recovery/backup?action=get-server-identity* returned, unmodified.
+
+            This property was added in __vSphere API 9.1.2.0__.
+
+            Only read when verify_server_identity is true. For FTPS and HTTPS, missing or `null` means the server has to validate against a certificate authority the appliance trusts. SFTP has no certificate authority to validate against, so the first connection to an SFTP server always needs a confirmed value. A restore target is a freshly deployed appliance that trusts nothing yet, so a self-signed or privately-issued server has to be confirmed here.
       description: Appliance.Recovery.Restore.Job.RestoreRequest schema Structure
         representing requested restore piece
     Appliance.Recovery.Restore.Job.RestoreJobStatus:
@@ -102504,6 +103161,20 @@ components:
             This property is optional because it was added in a newer version than its parent node.
           items:
             $ref: "#/components/schemas/Esx.Settings.Clusters.Configuration.DriftReview"
+        ignored_health_check_issues:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: "#/components/schemas/Esx.Settings.CheckStatus"
+          description: |-
+            Map of EHP *Esx.Settings.CheckStatus* objects to suppress during Apply, keyed by entity MoRef ID (host or cluster ID). vLCM runs all EHP checks; a live *Esx.Settings.CheckStatus* is filtered out before generating task notifications if its check ID and issue set are fully covered by an entry here. New EHP issues not present at Precheck time are never suppressed. Intended to be populated directly from *Esx.Settings.Clusters.Configuration.ClusterPrecheckResult.ignored_health_check_issues* without modification.
+
+            This property was added in __vSphere API 9.1.2.0__.
+
+            If unset, no *Esx.Settings.CheckStatus* entries are suppressed.
+
+            When clients pass a value of this schema as a parameter, the key in the property map must be an identifier for the resource type: `ManagedEntity`. When operations return a value of this schema as a response, the key in the property map will be an identifier for the resource type: `ManagedEntity`.
       description: |-
         The Esx.Settings.Clusters.Configuration.ApplySpec schema contains properties that describe the specification to be used for applying the desired configuration to a cluster.
 
@@ -105007,6 +105678,20 @@ components:
             This property is optional because it was added in a newer version than its parent node.
 
             When clients pass a value of this schema as a parameter, the key in the property map must be an identifier for the resource type: `com.vmware.esx.settings.configuration.component`. When operations return a value of this schema as a response, the key in the property map will be an identifier for the resource type: `com.vmware.esx.settings.configuration.component`.
+        ignored_health_check_issues:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: "#/components/schemas/Esx.Settings.CheckStatus"
+          description: |-
+            Pre-constructed map of the EHP *Esx.Settings.CheckStatus* objects that caused the *Esx.Settings.Clusters.Configuration.ClusterPrecheckResult.Status.OK_REVIEW_REQUIRED* status, keyed by entity MoRef ID (host or cluster). Set whenever EHP health check failures contribute to the *Esx.Settings.Clusters.Configuration.ClusterPrecheckResult.Status.OK_REVIEW_REQUIRED* status. May be set simultaneously with *Esx.Settings.Clusters.Configuration.ClusterPrecheckResult.solutions_precheck_result* when drift reviews are also required; the two fields are independent and consumed separately by Apply. Each *Esx.Settings.CheckStatus* carries the fully localized check name, issue descriptions, and resolutions, so the UI can present them directly on the acknowledgement screen. The user can pass this field verbatim to ApplySpec#ignoredHealthCheckIssues to suppress the acknowledged *Esx.Settings.CheckStatus* entries during Apply. Apply is not gated on this field; if omitted, EHP still runs and surfaces the same issues as task notifications. At Apply time, a live *Esx.Settings.CheckStatus* is suppressed only if its check ID and all of its issue IDs are a subset of an acknowledged entry. New issues that appeared since acknowledgement are not suppressed.
+
+            This property was added in __vSphere API 9.1.2.0__.
+
+            Unset when precheck succeeded, or when there are no EHP failures.
+
+            When clients pass a value of this schema as a parameter, the key in the property map must be an identifier for the resource type: `ManagedEntity`. When operations return a value of this schema as a response, the key in the property map will be an identifier for the resource type: `ManagedEntity`.
         precheck_result:
           description: |-
             This field represents the precheck results on the cluster, if any one host in the cluster needs to be put in maintenance mode or to be rebooted.
@@ -106031,6 +106716,20 @@ components:
             This property is optional because it was added in a newer version than its parent node.
           items:
             $ref: "#/components/schemas/Esx.Settings.Clusters.Configuration.DriftReview"
+        ignored_health_check_issues:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: "#/components/schemas/Esx.Settings.CheckStatus"
+          description: |-
+            Map of EHP *Esx.Settings.CheckStatus* objects to suppress during Apply, keyed by entity MoRef ID (host or cluster ID). vLCM runs all EHP checks; a live *Esx.Settings.CheckStatus* is filtered out before generating task notifications if its check ID and issue set are fully covered by an entry here. New EHP issues not present at Precheck time are never suppressed. Intended to be populated directly from com.vmware.esx.settings.clusters.Configuration.ClusterPrecheckResult#ignoredHealthCheckIssues without modification.
+
+            This property was added in __vSphere API 9.1.2.0__.
+
+            If unset, no *Esx.Settings.CheckStatus* entries are suppressed.
+
+            When clients pass a value of this schema as a parameter, the key in the property map must be an identifier for the resource type: `ManagedEntity`. When operations return a value of this schema as a response, the key in the property map will be an identifier for the resource type: `ManagedEntity`.
       description: |-
         The Esx.Settings.Clusters.Configuration.Drafts.ApplySpec schema contains properties that are used to create a new commit.
 
@@ -107278,6 +107977,204 @@ components:
       - SUSPEND_VMS
       - DO_NOT_CHANGE_VMS_POWER_STATE
       - SUSPEND_VMS_TO_MEMORY
+    Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy.AutomaticOperations:
+      type: string
+      description: "The Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy.AutomaticOperations\
+        \ enumerated type defines whether configuration management operations are\
+        \ automatically run on the cluster.\n\nPossible values:\n  - `ENABLED`: Configuration\
+        \ management operations are run automatically.\n  - `DISABLED`: Configuration\
+        \ management operations are not run automatically. Manually invoked configuration\
+        \ management APIs and UI workflows, including check compliance triggered internally\
+        \ by `draft.apply` and `core.apply`, remain fully functional in this state.\
+        \ \n\n While this value is set, the following automatic behaviors are suppressed:\
+        \ \n     - The periodic check compliance operation does not run.\n     - Check\
+        \ compliance triggered by cluster membership changes (such as a host moving\
+        \ between clusters) does not run.\n     - Check compliance triggered as part\
+        \ of a cluster image patch or upgrade does not run.\n     - The *Esx.Settings.Clusters.Policies.ConfigManagerPolicySpec*\
+        \ policy is not enforced, even if configured; newly added hosts are not automatically\
+        \ remediated.\n     - Validation of the cluster's desired configuration document\
+        \ against cluster software specification changes is skipped; the document\
+        \ may become invalid as a result.\n     - Automatic patching of the desired\
+        \ configuration document (and any resulting drift notification) during a cluster\
+        \ image patch or upgrade does not run.\n     - Automatic synchronization of\
+        \ cluster solution integrations during a vCenter Server upgrade does not run.\n\
+        \  \n\n If a skipped validation, patching, or synchronization step leaves\
+        \ the desired configuration document in an invalid or stale state, customers\
+        \ must use the \"Import from host\" draft workflow, or manually edit the draft,\
+        \ to correct the document. After switching back to *Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy.AutomaticOperations.ENABLED*,\
+        \ customers must manually trigger a check compliance operation to obtain an\
+        \ up-to-date compliance result. \n\n Automatic cleanup of a host's host-specific\
+        \ and host-override configuration sections from the cluster desired state\
+        \ document when the host is removed from inventory is unaffected by this value\
+        \ and continues to run.\n\n\nThis enumeration was added in __vSphere API 9.1.2.0__."
+      enum:
+      - ENABLED
+      - DISABLED
+    Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy.CommonPolicyResetField:
+      type: string
+      description: |-
+        The Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy.CommonPolicyResetField enumerated type selects which *Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy.CommonPolicySpec* properties to reset to their system default values.
+
+        Possible values:
+          - `ALL`: Reset every property of *Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy.CommonPolicySpec*.
+          - `AUTOMATIC_OPERATIONS`: *Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy.CommonPolicySpec.automatic_operations*.
+
+
+        This enumeration was added in __vSphere API 9.1.2.0__.
+      enum:
+      - ALL
+      - AUTOMATIC_OPERATIONS
+    Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy.CommonPolicySpec:
+      type: object
+      properties:
+        automatic_operations:
+          type: string
+          description: "Whether configuration management operations are automatically\
+            \ run on the cluster.\n\nPossible values:\n  - `ENABLED`: Configuration\
+            \ management operations are run automatically.\n  - `DISABLED`: Configuration\
+            \ management operations are not run automatically. Manually invoked configuration\
+            \ management APIs and UI workflows, including check compliance triggered\
+            \ internally by `draft.apply` and `core.apply`, remain fully functional\
+            \ in this state. \n\n While this value is set, the following automatic\
+            \ behaviors are suppressed: \n     - The periodic check compliance operation\
+            \ does not run.\n     - Check compliance triggered by cluster membership\
+            \ changes (such as a host moving between clusters) does not run.\n   \
+            \  - Check compliance triggered as part of a cluster image patch or upgrade\
+            \ does not run.\n     - The *Esx.Settings.Clusters.Policies.ConfigManagerPolicySpec*\
+            \ policy is not enforced, even if configured; newly added hosts are not\
+            \ automatically remediated.\n     - Validation of the cluster's desired\
+            \ configuration document against cluster software specification changes\
+            \ is skipped; the document may become invalid as a result.\n     - Automatic\
+            \ patching of the desired configuration document (and any resulting drift\
+            \ notification) during a cluster image patch or upgrade does not run.\n\
+            \     - Automatic synchronization of cluster solution integrations during\
+            \ a vCenter Server upgrade does not run.\n  \n\n If a skipped validation,\
+            \ patching, or synchronization step leaves the desired configuration document\
+            \ in an invalid or stale state, customers must use the \"Import from host\"\
+            \ draft workflow, or manually edit the draft, to correct the document.\
+            \ After switching back to *Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy.AutomaticOperations.ENABLED*,\
+            \ customers must manually trigger a check compliance operation to obtain\
+            \ an up-to-date compliance result. \n\n Automatic cleanup of a host's\
+            \ host-specific and host-override configuration sections from the cluster\
+            \ desired state document when the host is removed from inventory is unaffected\
+            \ by this value and continues to run.\n\n\nFor more information see: *Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy.AutomaticOperations*.\n\
+            \nThis property was added in __vSphere API 9.1.2.0__.\n\nIf missing or\
+            \ `null`, the system default is *Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy.AutomaticOperations.ENABLED*."
+      description: |-
+        The Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy.CommonPolicySpec schema contains properties that describe policy settings common across configuration management operations, as opposed to a setting specific to a single operation (such as check compliance or precheck).
+
+        This schema was added in __vSphere API 9.1.2.0__.
+    Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy.CommonPolicyInfo:
+      required:
+      - automatic_operations
+      type: object
+      properties:
+        automatic_operations:
+          type: string
+          description: "Whether configuration management operations are automatically\
+            \ run on the cluster. If not configured, the system default is *Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy.AutomaticOperations.ENABLED*.\n\
+            \nPossible values:\n  - `ENABLED`: Configuration management operations\
+            \ are run automatically.\n  - `DISABLED`: Configuration management operations\
+            \ are not run automatically. Manually invoked configuration management\
+            \ APIs and UI workflows, including check compliance triggered internally\
+            \ by `draft.apply` and `core.apply`, remain fully functional in this state.\
+            \ \n\n While this value is set, the following automatic behaviors are\
+            \ suppressed: \n     - The periodic check compliance operation does not\
+            \ run.\n     - Check compliance triggered by cluster membership changes\
+            \ (such as a host moving between clusters) does not run.\n     - Check\
+            \ compliance triggered as part of a cluster image patch or upgrade does\
+            \ not run.\n     - The *Esx.Settings.Clusters.Policies.ConfigManagerPolicySpec*\
+            \ policy is not enforced, even if configured; newly added hosts are not\
+            \ automatically remediated.\n     - Validation of the cluster's desired\
+            \ configuration document against cluster software specification changes\
+            \ is skipped; the document may become invalid as a result.\n     - Automatic\
+            \ patching of the desired configuration document (and any resulting drift\
+            \ notification) during a cluster image patch or upgrade does not run.\n\
+            \     - Automatic synchronization of cluster solution integrations during\
+            \ a vCenter Server upgrade does not run.\n  \n\n If a skipped validation,\
+            \ patching, or synchronization step leaves the desired configuration document\
+            \ in an invalid or stale state, customers must use the \"Import from host\"\
+            \ draft workflow, or manually edit the draft, to correct the document.\
+            \ After switching back to *Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy.AutomaticOperations.ENABLED*,\
+            \ customers must manually trigger a check compliance operation to obtain\
+            \ an up-to-date compliance result. \n\n Automatic cleanup of a host's\
+            \ host-specific and host-override configuration sections from the cluster\
+            \ desired state document when the host is removed from inventory is unaffected\
+            \ by this value and continues to run.\n\n\nFor more information see: *Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy.AutomaticOperations*.\n\
+            \nThis property was added in __vSphere API 9.1.2.0__."
+      description: |-
+        The Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy.CommonPolicyInfo schema contains properties that describe the resolved policy settings common across configuration management operations, as returned by *GET /esx/settings/clusters/{cluster}/policies/configuration-services-policy*. Every property is always populated with either user configured or system default value.
+
+        This schema was added in __vSphere API 9.1.2.0__.
+    Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy.PolicyInfo:
+      required:
+      - common_policy
+      type: object
+      properties:
+        common_policy:
+          description: |-
+            The policy settings common across configuration management operations, resolved from any configured override and the system default.
+
+            This property was added in __vSphere API 9.1.2.0__.
+          allOf:
+          - $ref: "#/components/schemas/Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy.CommonPolicyInfo"
+      description: "The Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy.PolicyInfo\
+        \ schema contains properties that describe the resolved configuration services\
+        \ policy for an ESXi cluster, as returned by *GET /esx/settings/clusters/{cluster}/policies/configuration-services-policy*.\
+        \ \n\n\n\nThis schema was added in __vSphere API 9.1.2.0__."
+    Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy.PolicySpec:
+      type: object
+      properties:
+        common_policy:
+          description: |-
+            The policy settings common across configuration management operations.
+
+            This property was added in __vSphere API 9.1.2.0__.
+
+            If missing or `null`, no common policy settings are configured for the cluster (the system default applies).
+          allOf:
+          - $ref: "#/components/schemas/Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy.CommonPolicySpec"
+      description: "The Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy.PolicySpec\
+        \ schema contains properties that describe the configuration services policy\
+        \ overrides to be configured for an ESXi cluster via *PUT /esx/settings/clusters/{cluster}/policies/configuration-services-policy*.\
+        \ \n\n Each property corresponds to a section of related policy settings (currently\
+        \ just #commonPolicy; An missing or `null` value means no override is configured\
+        \ for that field (the system default applies);\n\nThis schema was added in\
+        \ __vSphere API 9.1.2.0__."
+    Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy.ResetSpec:
+      type: object
+      properties:
+        reset_all:
+          type: boolean
+          description: |-
+            Whether to reset every section and property of the configuration services policy to its system default value.
+
+            This property was added in __vSphere API 9.1.2.0__.
+
+            If missing or `null`, only the sections and fields explicitly selected elsewhere in this Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy.ResetSpec are reset. If `true`, no other property of this Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy.ResetSpec may be set.
+        common_policy:
+          uniqueItems: true
+          type: array
+          description: |-
+            The common policy fields (or *Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy.CommonPolicyResetField.ALL*) to reset to their system default values.
+
+            Possible values:
+              - `ALL`: Reset every property of *Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy.CommonPolicySpec*.
+              - `AUTOMATIC_OPERATIONS`: *Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy.CommonPolicySpec.automatic_operations*.
+
+
+            For more information see: *Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy.CommonPolicyResetField*.
+
+            This property was added in __vSphere API 9.1.2.0__.
+
+            If missing or `null`, nothing in the common policy section is reset via this call (unless *Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy.ResetSpec.reset_all* is `true`).
+          items:
+            type: string
+      description: "The Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy.ResetSpec\
+        \ schema contains properties used to select which sections, or which individual\
+        \ properties within a section, of the configuration services policy to reset\
+        \ to their system default values. Its sections mirror *Esx.Settings.Clusters.Policies.ConfigurationServicesPolicy.PolicySpec*'s.\
+        \ \n\n\n\nThis schema was added in __vSphere API 9.1.2.0__."
     Esx.Settings.Clusters.Policies.Apply.Effective.FailureAction:
       required:
       - action
@@ -120511,7 +121408,7 @@ components:
     Oauth2.Errors.InvalidRequest:
       type: object
       description: |-
-        Indicates that the request is missing a required parameter, includes an unsupported parameter value (other than grant type), repeats a parameter, includes multiple credentials, utilizes more than one mechanism for authenticating the client, or is otherwise malformed
+        Indicates that the request is missing a required parameter, includes an unsupported parameter value (other than grant type), repeats a parameter, includes multiple credentials, utilizes more than one mechanism for authenticating the client, or is otherwise malformed.
 
         This schema was added in __vSphere API 7.0.2.0__.
       allOf:
@@ -122985,7 +123882,7 @@ components:
 
             if missing or `null`, then remote service endpoint certificate will not be verified upon connection.
       description: |-
-        This data object type specifies the information of a service endpoint as well as the parameters needed to locate and login to to the service endpoint.
+        This data object type specifies the information of a service endpoint as well as the parameters needed to locate and login to the service endpoint.
 
         This schema was added in __vSphere API 9.0.0.0__.
     Vcenter.Cluster.FilterSpec:
@@ -133567,7 +134464,7 @@ components:
         ssl_verify:
           type: boolean
           description: |-
-            SSL verification should be enabled or disabled. If ssl_verify is true and and ssl_thumbprint is missing or `null`, the CA certificate will be used for verification. If ssl_verify is true and ssl_thumbprint is set then the thumbprint will be used for verification. No verification will be performed if ssl_verify value is set to false.
+            SSL verification should be enabled or disabled. If ssl_verify is true and ssl_thumbprint is missing or `null`, the CA certificate will be used for verification. If ssl_verify is true and ssl_thumbprint is set then the thumbprint will be used for verification. No verification will be performed if ssl_verify value is set to false.
 
             This property was added in __vSphere API 6.7__.
 
@@ -133914,7 +134811,7 @@ components:
         ssl_verify:
           type: boolean
           description: |-
-            SSL verification should be enabled or disabled. If ssl_verify is true and and ssl_thumbprint is missing or `null`, the CA certificate will be used for verification. If ssl_verify is true and ssl_thumbprint is set then the thumbprint will be used for verification. No verification will be performed if ssl_verify value is set to false.
+            SSL verification should be enabled or disabled. If ssl_verify is true and ssl_thumbprint is missing or `null`, the CA certificate will be used for verification. If ssl_verify is true and ssl_thumbprint is set then the thumbprint will be used for verification. No verification will be performed if ssl_verify value is set to false.
 
             This property was added in __vSphere API 6.7__.
 
@@ -134292,20 +135189,24 @@ components:
           format: password
         ssh_verify:
           type: boolean
-          description: |-
-            This property is deprecated as of __vSphere API 9.0.0.0__.
-
-            Appliance SSH verification should be enabled or disabled. By default it is disabled and will not use any verification. If thumbprint is provided, thumbprint verification will be performed.
-
-            This property was added in __vSphere API 6.7__.
-
-            If missing or `null`, ssh_verify true will be used.
+          description: "This property is deprecated as of __vSphere API 9.0.0.0__.\n\
+            \nAppliance SSH verification should be enabled or disabled. When enabled,\
+            \ the SSH host key presented by the source appliance is verified against\
+            \ ssh_thumbprint before root_password is sent over the connection. \n\n\
+            \ Security note: setting this field to false disables SSH host key verification\
+            \ entirely. The source appliance root password is then sent over an SSH\
+            \ connection whose server identity is not verified. If an attacker can\
+            \ intercept network traffic on the path to the source appliance (for example,\
+            \ a man-in-the-middle position), the root password can be captured. Only\
+            \ set this field to false if the network path to the source appliance\
+            \ is otherwise trusted.\n\nThis property was added in __vSphere API 6.7__.\n\
+            \nIf missing or `null`, ssh_verify true will be used."
         ssh_thumbprint:
           type: string
           description: |-
             This property is deprecated as of __vSphere API 9.0.0.0__.
 
-            MD5 thumbprint of the server SSH key will be used for verification.
+            SHA-256 thumbprint of the source appliance's SSH host key, used for verification when ssh_verify is enabled.
 
             This property was added in __vSphere API 6.7__.
 
@@ -135875,8 +136776,8 @@ components:
             The type of network to join after the customization.
 
             Possible values:
-              - `WORKGROUP`: The virtual machine should be be joined to a workgroup.
-              - `DOMAIN`: The virtual machine should be be joined to a domain.
+              - `WORKGROUP`: The virtual machine should be joined to a workgroup.
+              - `DOMAIN`: The virtual machine should be joined to a domain.
 
 
             For more information see: *Vcenter.Guest.Domain.Type*.
@@ -135933,8 +136834,8 @@ components:
         The Vcenter.Guest.Domain.Type enumerated type defines the types of network the virtual machine should join to after the customization is completed.
 
         Possible values:
-          - `WORKGROUP`: The virtual machine should be be joined to a workgroup.
-          - `DOMAIN`: The virtual machine should be be joined to a domain.
+          - `WORKGROUP`: The virtual machine should be joined to a workgroup.
+          - `DOMAIN`: The virtual machine should be joined to a domain.
 
 
         This enumeration was added in __vSphere API 7.0.0.0__.
@@ -154873,6 +155774,14 @@ components:
 
             If missing or `null`, no additional configuration parameters will be applied when installing the Supervisor Service in the vSphere Supervisor.
           format: password
+        accept_unverified_service:
+          type: boolean
+          description: |-
+            Flag indicating whether to allow the installation of this Supervisor Service version to be installed in the given Supervisor even if the Supervisor Service's images are not signed or trusted.
+
+            This property was added in __vSphere API 9.1.2.0__.
+
+            If missing or `null`, it defaults to ```false```, which breaks the previous released API in order to now have the installation secure by default. Set it to ```true``` to allow installation of this Supervisor Service version even if the images are not signed nor trusted.
       description: |-
         The Vcenter.NamespaceManagement.Supervisors.SupervisorServices.CreateSpec schema provides a specification required to install a Supervisor Service on a vSphere Supervisor.
 
@@ -154899,6 +155808,14 @@ components:
 
             If missing or `null`, no additional configuration parameters will be applied when upgrading the Supervisor Service in the vSphere Supervisor.
           format: password
+        accept_unverified_service:
+          type: boolean
+          description: |-
+            Flag indicating whether to allow this Supervisor Service to be upgraded to the given version in the Supervisor even if this Supervisor Service version's images are not signed or trusted.
+
+            This property was added in __vSphere API 9.1.2.0__.
+
+            If missing or `null`, it defaults to ```false```, which breaks the previous released API in order to now have the upgrade secure by default. Set it to ```true``` to allow this Supervisor Service to be upgraded to the given version even if the images are not signed or trusted.
       description: |-
         The Vcenter.NamespaceManagement.Supervisors.SupervisorServices.SetSpec schema provides a specification required to set a new configuration on a Supervisor Service in a vSphere Supervisor. This schema is applied in entirety, replacing the current specification fully.
 
@@ -163308,6 +164225,21 @@ components:
             `True` if the vSphere Zone has been marked for removal
 
             This property was added in __vSphere API 9.0.0.0__.
+        clusters:
+          type: array
+          description: "Identifiers of the vSphere Clusters mapped to the namespace\
+            \ in this vSphere Zone. \n\nThis list is empty when the cluster mapping\
+            \ for the namespace in this zone has not been reconciled yet. This is\
+            \ a transient state after the namespace is created in this zone; once\
+            \ reconciliation completes, the list contains at least one vSphere Cluster.\n\
+            \nThis property was added in __vSphere API 9.1.2.0__.\n\nThis property\
+            \ is optional because it was added in a newer version than its parent\
+            \ node.\n\nWhen clients pass a value of this schema as a parameter, the\
+            \ property must contain identifiers for the resource type: `ClusterComputeResource`.\
+            \ When operations return a value of this schema as a response, the property\
+            \ will contain identifiers for the resource type: `ClusterComputeResource`."
+          items:
+            type: string
       description: |-
         The Vcenter.Namespaces.Instances.ZoneInfo schema contains the information for a vSphere Zone related to a Supervisor
 
@@ -182872,7 +183804,7 @@ components:
 
             This property was added in __vSphere API 7.0.0.0__.
       description: |-
-        The Vcenter.Vm.Tools.Installer.Info schema contains information about the VMWare Tools installer.
+        The Vcenter.Vm.Tools.Installer.Info schema contains information about the VMware Tools installer.
 
         This schema was added in __vSphere API 7.0.0.0__.
     Vcenter.VmTemplate.LibraryItems.Info:

@@ -48,8 +48,8 @@ definitions:
             Source ports
           type: array
       required:
-      - destination_ports
       - alg
+      - destination_ports
       type: object
       x-vmw-nsx-module: Types
     description: |-
@@ -192,10 +192,10 @@ definitions:
         type: string
     required:
     - sync_type
-    - description
-    - standby_site
     - full_sync_status
     - status
+    - standby_site
+    - description
     - is_data_consistent
     type: object
     x-vmw-nsx-module: SiteManager
@@ -271,8 +271,8 @@ definitions:
           must be set to AddControllerNodeSpec
         type: string
     required:
-    - type
     - mpa_msg_client_info
+    - type
     - host_msg_client_info
     type: object
     x-vmw-nsx-module: ClusterManagement
@@ -317,9 +317,9 @@ definitions:
           The username to be used to authenticate with the remote node.
         type: string
     required:
-    - remote_address
     - user_name
     - type
+    - remote_address
     type: object
     x-vmw-nsx-module: ClusterManagement
   AdditionalMetadata:
@@ -811,8 +811,8 @@ definitions:
           Prefix operator to apply on networks
         type: string
     required:
-    - prefix_operator
     - match_route_types
+    - prefix_operator
     type: object
     x-vmw-nsx-module: Routing
   AgentResource:
@@ -1602,8 +1602,8 @@ definitions:
         type: string
     required:
     - node_id
-    - address
     - port
+    - address
     - certificate
     - uuid
     title: |-
@@ -2674,17 +2674,17 @@ definitions:
           Date and time in UTC of the log
         type: string
     required:
-    - priority
-    - procid
     - message
+    - hostname
+    - priority
     - appname
+    - struct_data
     - msgid
-    - timestamp
     - facility
+    - timestamp
+    - procid
     - full_log
     - loglevel
-    - struct_data
-    - hostname
     title: |-
       Audit log in RFC5424 format
     type: object
@@ -2961,8 +2961,8 @@ definitions:
           Username for AVI LB endpoint
         type: string
     required:
-    - avi_endpoint_ip
     - avi_endpoint_username
+    - avi_endpoint_ip
     title: |-
       AVI LB endpoint details
     type: object
@@ -3432,10 +3432,10 @@ definitions:
         restore_status:
           $ref: '#/definitions/ClusterRestoreStatus'
       required:
-      - current_backup_operation_status
       - backup_operation_history
-      - backup_config
       - restore_status
+      - current_backup_operation_status
+      - backup_config
       type: object
       x-vmw-nsx-module: BackupConfiguration
     description: |-
@@ -5766,14 +5766,14 @@ definitions:
           Object type for which usage is fetched
         type: string
     required:
-    - max_threshold_percentage
-    - current_usage_percentage
-    - severity
     - current_usage_count
+    - max_threshold_percentage
+    - severity
     - max_supported_count
-    - display_name
-    - min_threshold_percentage
     - usage_type
+    - min_threshold_percentage
+    - current_usage_percentage
+    - display_name
     type: object
     x-vmw-nsx-module: CapacityDashboard
   CapacityThreshold:
@@ -5803,9 +5803,9 @@ definitions:
           Object type for which threshold is to be set
         type: string
     required:
-    - threshold_type
-    - max_threshold_percentage
     - min_threshold_percentage
+    - max_threshold_percentage
+    - threshold_type
     type: object
     x-vmw-nsx-module: CapacityDashboard
   CapacityThresholdList:
@@ -5937,8 +5937,8 @@ definitions:
             Current clustering status of the node
           type: string
       required:
-      - entities
       - node_uuid
+      - entities
       type: object
       x-vmw-nsx-module: ClusterBootManager
     description: |-
@@ -6221,8 +6221,8 @@ definitions:
         readOnly: false
         type: string
     required:
-    - service_type
     - certificate_id
+    - service_type
     title: |-
       Certificate binding
     type: object
@@ -6978,8 +6978,8 @@ definitions:
           Data type configurations
         type: array
     required:
-    - data_type_configurations
     - client_type
+    - data_type_configurations
     title: |-
       HPM client data collection configuration
     type: object
@@ -7960,8 +7960,8 @@ definitions:
           Array of Management Nodes
         type: array
     required:
-    - management_cluster
     - controller_cluster
+    - management_cluster
     type: object
     x-vmw-nsx-module: ClusterManagement
   CmThumbprintHashingConfig:
@@ -8110,8 +8110,8 @@ definitions:
         type: string
     required:
     - label
-    - field
     - type
+    - field
     title: |-
       Grid Column
     type: object
@@ -8640,6 +8640,9 @@ definitions:
             - Full Access: VPC and Subnet available for configuration from vCenter
             - READONLY: VPC and Subnet available in vCenter for read only access from vCenter
             - DISABLED: No VPC objects in vCenter, networks are represented as PortGroup under relevant VDS
+            If the vCenter backing this compute manager is licensed with a VMware vSphere
+            Foundation (VVF) entitlement, this field is force set to DISABLED and cannot be
+            configured to any other value.
           enum:
           - FULL
           - READONLY
@@ -10231,8 +10234,8 @@ definitions:
           - Other
           type: string
       required:
-      - cluster_name
       - status
+      - cluster_name
       type: object
       x-vmw-nsx-module: TnContainerStatus
     x-vmw-nsx-module: TnContainerStatus
@@ -11375,8 +11378,8 @@ definitions:
           Unique index of the Non Uniform Memory Access (NUMA) node
         type: integer
     required:
-    - numa_node_index
     - num_lcores
+    - numa_node_index
     title: |-
       Enhanced Networking Stack CPU configuration
     type: object
@@ -12372,8 +12375,8 @@ definitions:
             Stateful nature of the distributed service rules in the section.
           type: boolean
       required:
-      - stateful
       - section_type
+      - stateful
       type: object
       x-vmw-nsx-module: DistributedServices
     x-vmw-nsx-module: DistributedServices
@@ -12648,8 +12651,8 @@ definitions:
           Array of relative urls and their aliases
         type: array
     required:
-    - urls
     - display_name
+    - urls
     title: |-
       Datasource Instance
     type: object
@@ -12671,8 +12674,8 @@ definitions:
           Filter default value
         type: string
     required:
-    - alias
     - value
+    - alias
     title: |-
       Default filter values
     type: object
@@ -12909,8 +12912,8 @@ definitions:
         format: mac-address
         type: string
     required:
-    - mac
     - ip
+    - mac
     type: object
     x-vmw-nsx-module: Dhcp
   DhcpFilter:
@@ -12948,8 +12951,8 @@ definitions:
           Indiactes whether DHCP V6 server blocking is enabled
         type: boolean
     required:
-    - client_block_enabled
     - server_block_enabled
+    - client_block_enabled
     title: |-
       DHCP filtering configuration
     type: object
@@ -13112,9 +13115,9 @@ definitions:
           subnet of client network
         type: string
     required:
+    - ip_address
     - mac_address
     - start_time
-    - ip_address
     type: object
     x-vmw-nsx-module: AggSvcDhcp
   DhcpLeases:
@@ -13419,8 +13422,8 @@ definitions:
           format: mac-address
           type: string
       required:
-      - mac_address
       - ip_address
+      - mac_address
       type: object
       x-vmw-nsx-module: Dhcp
     description: |-
@@ -13710,10 +13713,10 @@ definitions:
           start time of lease
         type: string
     required:
-    - duid
     - start_time
     - iaid
     - ia_type
+    - duid
     type: object
     x-vmw-nsx-module: AggSvcDhcp
   DhcpV6StaticBinding:
@@ -14216,10 +14219,10 @@ definitions:
           type: string
       required:
       - domain_id
-      - domain_name
+      - distinguished_name
       - is_global
       - resource_type
-      - distinguished_name
+      - domain_name
       type: object
       x-vmw-nsx-module: DirectoryService
     x-vmw-nsx-module: DirectoryService
@@ -14276,10 +14279,10 @@ definitions:
           type: boolean
       required:
       - member_group_id
-      - member_group_distinguished_name
-      - group_distinguished_name
-      - nested
       - group_id
+      - nested
+      - group_distinguished_name
+      - member_group_distinguished_name
       type: object
       x-vmw-nsx-module: DirectoryService
     x-vmw-nsx-module: DirectoryService
@@ -14468,8 +14471,8 @@ definitions:
           Organization Unit name
         type: string
     required:
-    - children
     - distinguished_name
+    - children
     - name
     title: |-
       Organization Unit
@@ -14921,15 +14924,15 @@ definitions:
           Total DHCP Requests
         type: integer
     required:
-    - errors
-    - discovers
-    - offers
-    - releases
-    - nacks
     - acks
-    - informs
-    - requests
     - declines
+    - discovers
+    - nacks
+    - errors
+    - offers
+    - informs
+    - releases
+    - requests
     type: object
     x-vmw-nsx-module: AggSvcL2Types
   DistributedVirtualPortgroup:
@@ -15319,9 +15322,9 @@ definitions:
             Logical router id
           type: string
       required:
+      - logical_router_id
       - default_forwarder
       - listener_ip
-      - logical_router_id
       type: object
       x-vmw-nsx-module: DnsForwarder
     x-vmw-nsx-module: DnsForwarder
@@ -16264,8 +16267,8 @@ definitions:
             Segment path
           type: string
       required:
-      - segment_path
       - dvpg_id
+      - segment_path
       type: object
       x-vmw-nsx-module: OverlayAdoption
     description: |-
@@ -16352,8 +16355,8 @@ definitions:
           Segment path
         type: string
     required:
-    - segment_path
     - dvpg_id
+    - segment_path
     title: |-
       DVPG ID and Segment path pair
     type: object
@@ -16939,8 +16942,8 @@ definitions:
       transport_node:
         $ref: '#/definitions/ResourceReference'
     required:
-    - transport_node
     - status
+    - transport_node
     type: object
     x-vmw-nsx-module: AggSvcEdgeCluster
   EdgeClusterMemberTransportNode:
@@ -17052,8 +17055,8 @@ definitions:
           Per Edge Node Status
         type: array
     required:
-    - edge_cluster_id
     - edge_cluster_status
+    - edge_cluster_id
     type: object
     x-vmw-nsx-module: AggSvcEdgeCluster
   EdgeConfigDiagnosis:
@@ -17086,8 +17089,8 @@ definitions:
         $ref: '#/definitions/FailedOrWarningConfig'
     required:
     - failed
-    - passed
     - warning
+    - passed
     type: object
     x-vmw-nsx-module: MISSING_MODULE
   EdgeConfigurationState:
@@ -17639,8 +17642,8 @@ definitions:
           Enable or disable edge failover pre-checks
         type: boolean
     required:
-    - enabled
     - disable_checks_for_unpinned_edges
+    - enabled
     type: object
     x-vmw-nsx-module: EdgeUpgrade
   EdgeHighAvailabilityProfile:
@@ -17854,8 +17857,8 @@ definitions:
       vm_deployment_config:
         $ref: '#/definitions/DeploymentConfig'
     required:
-    - node_user_settings
     - vm_deployment_config
+    - node_user_settings
     type: object
     x-vmw-nsx-module: FabricNode
   EdgeNodeServiceLoggingLevelProperties:
@@ -18479,8 +18482,8 @@ definitions:
       user_metadata:
         $ref: '#/definitions/ErrorResolverUserMetadata'
     required:
-    - error_id
     - resolver_present
+    - error_id
     type: object
     x-vmw-nsx-module: ErrorResolver
   ErrorResolverInfoList:
@@ -18840,8 +18843,8 @@ definitions:
             VLAN transport zone path
           type: string
       required:
-      - ip_subnets
       - dvpg_id
+      - ip_subnets
       type: object
       x-vmw-nsx-module: OverlayAdoption
     description: |-
@@ -19140,8 +19143,8 @@ definitions:
           Permission
         type: string
     required:
-    - permission
     - feature
+    - permission
     title: |-
       Feature Permission
     type: object
@@ -19521,10 +19524,10 @@ definitions:
         type: integer
     required:
     - epoch
-    - timestamp
     - is_vmsp
-    - id
+    - timestamp
     - sites
+    - id
     title: |-
       Federation configuration
     type: object
@@ -19703,15 +19706,15 @@ definitions:
           Vip ip
         type: string
     required:
-    - aph_list
-    - active_gm
-    - system_id
-    - name
-    - is_local
-    - site_version
-    - id
-    - node_type
     - is_federated
+    - name
+    - system_id
+    - site_version
+    - is_local
+    - aph_list
+    - node_type
+    - id
+    - active_gm
     title: |-
       Site information
     type: object
@@ -19834,8 +19837,8 @@ definitions:
         readOnly: false
         type: string
     required:
-    - workflow_resource
     - workflow_type
+    - workflow_resource
     title: |-
       Feedback list request parameters
     type: object
@@ -19917,10 +19920,10 @@ definitions:
             Size of the file in bytes
           type: integer
       required:
-      - modified_epoch_ms
-      - name
       - created_epoch_ms
       - size
+      - modified_epoch_ms
+      - name
       type: object
       x-vmw-nsx-module: MISSING_MODULE
     description: |-
@@ -19974,8 +19977,8 @@ definitions:
             File's SHA256 thumbprint
           type: string
       required:
-      - sha256
       - sha1
+      - sha256
       - name
       type: object
       x-vmw-nsx-module: MISSING_MODULE
@@ -20063,8 +20066,8 @@ definitions:
         type: string
     required:
     - protocol_name
-    - authentication_scheme
     - ssh_fingerprint
+    - authentication_scheme
     title: |-
       Protocol to transfer backup file to remote server
     type: object
@@ -20112,8 +20115,8 @@ definitions:
           Value
         type: string
     required:
-    - value
     - field_names
+    - value
     title: |-
       Filter request
     type: object
@@ -20200,8 +20203,8 @@ definitions:
             Heap memory threshold utilization percentage
           type: integer
       required:
-      - mem_threshold_percentage
       - cpu_threshold_percentage
+      - mem_threshold_percentage
       type: object
       x-vmw-nsx-module: FirewallProfile
     description: |-
@@ -20535,8 +20538,8 @@ definitions:
           Section revision
         type: integer
     required:
-    - section_revision
     - comments
+    - section_revision
     type: object
     x-vmw-nsx-module: Firewall
   FirewallSectionRuleList:
@@ -20760,17 +20763,17 @@ definitions:
             Connection timeout for destination
           type: integer
       required:
-      - tcp_opening
-      - udp_first_packet
-      - udp_multiple
-      - udp_single
-      - tcp_first_packet
-      - icmp_error_reply
       - tcp_established
-      - tcp_closing
-      - tcp_finwait
       - icmp_first_packet
       - tcp_closed
+      - udp_multiple
+      - tcp_opening
+      - udp_single
+      - tcp_finwait
+      - tcp_closing
+      - icmp_error_reply
+      - udp_first_packet
+      - tcp_first_packet
       type: object
       x-vmw-nsx-module: FirewallProfile
     description: |-
@@ -21563,10 +21566,10 @@ definitions:
           Type of full sync.
         type: string
     required:
-    - sync_type
     - completed_at
-    - sync_id
+    - sync_type
     - status
+    - sync_id
     - snapshot_version
     type: object
     x-vmw-nsx-module: SiteManager
@@ -21740,8 +21743,8 @@ definitions:
           DHCP option value
         type: array
     required:
-    - values
     - code
+    - values
     title: |-
       Generic DHCP option
     type: object
@@ -22091,8 +22094,8 @@ definitions:
             List of fields from which rows are formed
           type: array
       required:
-      - columns
       - row_list_fields
+      - columns
       type: object
       x-vmw-nsx-module: NsxDashboard
     description: |-
@@ -22363,8 +22366,8 @@ definitions:
           Identifiers of uplink ports for providing redundancy
         type: array
     required:
-    - ha_vip_subnets
     - redundant_uplink_port_ids
+    - ha_vip_subnets
     type: object
     x-vmw-nsx-module: LogicalRouter
   Header:
@@ -22434,8 +22437,8 @@ definitions:
           The host switch UUID
         type: string
     required:
-    - cluster_external_id
     - host_switch_id
+    - cluster_external_id
     title: |-
       vCenter Cluster Scope Filter
     type: object
@@ -22634,8 +22637,8 @@ definitions:
         format: int64
         type: integer
     required:
-    - end
     - start
+    - end
     title: |-
       VLAN ID range
     type: object
@@ -24119,8 +24122,8 @@ definitions:
             GRE encapsulation key
           type: integer
       required:
-      - destination_ips
       - encapsulation_type
+      - destination_ips
       type: object
       x-vmw-nsx-module: PortMirroring
     x-vmw-nsx-module: PortMirroring
@@ -24929,9 +24932,9 @@ definitions:
         tcp_mss_clamping:
           $ref: '#/definitions/TcpMssClamping'
       required:
+      - local_endpoint_id
       - peer_endpoint_id
       - resource_type
-      - local_endpoint_id
       type: object
       x-vmw-nsx-module: IPSecVPN
     description: |-
@@ -26131,8 +26134,8 @@ definitions:
             Enabled/disabled
           type: boolean
       required:
-      - enabled
       - compute_collection_id
+      - enabled
       type: object
       x-vmw-nsx-module: IdentityFirewall
     description: |
@@ -26249,8 +26252,8 @@ definitions:
           Number of active user sessions/logins
         type: integer
     required:
-    - num_user_sessions
     - num_concurrent_users
+    - num_user_sessions
     title: |-
       Identity Firewall statistics data
     type: object
@@ -26409,9 +26412,9 @@ definitions:
           Virtual machine external ID or BIOS UUID
         type: string
     required:
-    - login_time
-    - user_name
     - user_session_id
+    - user_name
+    - login_time
     - domain_name
     title: |-
       Identity Firewall user session data on client machine
@@ -26447,8 +26450,8 @@ definitions:
         type: array
     required:
     - archived_user_sessions
-    - dir_group_to_user_session_data_mappings
     - active_user_sessions
+    - dir_group_to_user_session_data_mappings
     title: |-
       Identity Firewall user session data list and Directory Group to user mappings
     type: object
@@ -27079,9 +27082,9 @@ definitions:
         type: array
     required:
     - context_id
+    - vm_nic_infos
     - storage_id
     - compute_id
-    - vm_nic_infos
     title: |-
       Instance Deployment Config
     type: object
@@ -28049,8 +28052,8 @@ definitions:
           format: ip
           type: string
       required:
-      - end
       - start
+      - end
       type: object
       x-vmw-nsx-module: Ipam
     description: |-
@@ -28191,8 +28194,8 @@ definitions:
           readOnly: false
           type: string
       required:
-      - collectors
       - resource_type
+      - collectors
       type: object
       x-vmw-nsx-module: UpmIpfixCollector
     description: |
@@ -28320,8 +28323,8 @@ definitions:
           $ref: '#/definitions/IpfixDfwTemplateParameters'
       required:
       - observation_domain_id
-      - priority
       - collector
+      - priority
       type: object
       x-vmw-nsx-module: Ipfix
     description: |-
@@ -28801,8 +28804,8 @@ definitions:
           Username on the cluster node
         type: string
     required:
-    - cluster_id
     - ip_address
+    - cluster_id
     title: |-
       Parameters needed for this node to join the NSX cluster
     type: object
@@ -29549,8 +29552,8 @@ definitions:
         tunnel_encapsulation:
           $ref: '#/definitions/L2VpnTunnelEncapsulation'
       required:
-      - transport_tunnels
       - l2vpn_service_id
+      - transport_tunnels
       type: object
       x-vmw-nsx-module: L2VPN
     description: |-
@@ -29950,10 +29953,10 @@ definitions:
           uplink names
         type: array
     required:
-    - load_balance_algorithm
-    - mode
-    - name
     - number_of_uplinks
+    - mode
+    - load_balance_algorithm
+    - name
     title: |-
       LACP group
     type: object
@@ -31197,8 +31200,8 @@ definitions:
           Value of HTTP request header
         type: string
     required:
-    - header_value
     - header_name
+    - header_value
     type: object
     x-vmw-nsx-module: LoadBalancer
   LbHttpRequestHeaderCondition:
@@ -31236,8 +31239,8 @@ definitions:
           - REGEX
           type: string
       required:
-      - header_value
       - header_name
+      - header_value
       type: object
       x-vmw-nsx-module: LoadBalancer
     description: |
@@ -31291,8 +31294,8 @@ definitions:
             Value of HTTP request header
           type: string
       required:
-      - header_value
       - header_name
+      - header_value
       type: object
       x-vmw-nsx-module: LoadBalancer
     description: |
@@ -31531,8 +31534,8 @@ definitions:
           - REGEX
           type: string
       required:
-      - header_value
       - header_name
+      - header_value
       type: object
       x-vmw-nsx-module: LoadBalancer
     description: |
@@ -31586,8 +31589,8 @@ definitions:
             Value of header field
           type: string
       required:
-      - header_value
       - header_name
+      - header_value
       type: object
       x-vmw-nsx-module: LoadBalancer
     description: |
@@ -32565,8 +32568,8 @@ definitions:
       statistics:
         $ref: '#/definitions/LbStatisticsCounter'
     required:
-    - statistics
     - ip_address
+    - statistics
     type: object
     x-vmw-nsx-module: AggSvcLb
   LbPoolMemberStatus:
@@ -32630,8 +32633,8 @@ definitions:
           Pool member status
         type: string
     required:
-    - status
     - ip_address
+    - status
     type: object
     x-vmw-nsx-module: AggSvcLb
   LbPoolStatistics:
@@ -32658,8 +32661,8 @@ definitions:
       statistics:
         $ref: '#/definitions/LbStatisticsCounter'
     required:
-    - pool_id
     - statistics
+    - pool_id
     type: object
     x-vmw-nsx-module: AggSvcLb
   LbPoolStatus:
@@ -32802,8 +32805,8 @@ definitions:
             Load balancer processing phase
           type: string
       required:
-      - phase
       - match_strategy
+      - phase
       - actions
       type: object
       x-vmw-nsx-module: LoadBalancer
@@ -34004,9 +34007,9 @@ definitions:
           Secure/insecure SSL cipher flag
         type: boolean
     required:
+    - is_default
     - cipher
     - is_secure
-    - is_default
     title: |-
       SSL cipher
     type: object
@@ -34088,9 +34091,9 @@ definitions:
         - TLS_V1_2
         type: string
     required:
+    - is_default
     - protocol
     - is_secure
-    - is_default
     title: |-
       SSL protocol
     type: object
@@ -34262,11 +34265,11 @@ definitions:
           Number of total sessions
         type: integer
     required:
-    - max_sessions
-    - bytes_out
-    - bytes_in
-    - current_sessions
     - total_sessions
+    - bytes_out
+    - current_sessions
+    - max_sessions
+    - bytes_in
     type: object
     x-vmw-nsx-module: AggSvcLb
   LbTcpHeaderCondition:
@@ -34353,8 +34356,8 @@ definitions:
             Value of variable
           type: string
       required:
-      - variable_value
       - variable_name
+      - variable_value
       type: object
       x-vmw-nsx-module: LoadBalancer
     description: |
@@ -34400,8 +34403,8 @@ definitions:
             Value of variable to be matched
           type: string
       required:
-      - variable_value
       - variable_name
+      - variable_value
       type: object
       x-vmw-nsx-module: LoadBalancer
     description: |
@@ -34681,8 +34684,8 @@ definitions:
           type: string
           x-deprecated: true
       required:
-      - application_profile_id
       - ip_address
+      - application_profile_id
       type: object
       x-vmw-nsx-module: LoadBalancer
     x-vmw-nsx-module: LoadBalancer
@@ -34732,8 +34735,8 @@ definitions:
           load balancer virtual server identifier
         type: string
     required:
-    - virtual_server_id
     - statistics
+    - virtual_server_id
     type: object
     x-vmw-nsx-module: AggSvcLb
   LbVirtualServerStatisticsListResult:
@@ -35606,9 +35609,9 @@ definitions:
       site:
         $ref: '#/definitions/FederationSite'
     required:
+    - epoch
     - site
     - id
-    - epoch
     - is_vmsp
     title: |-
       Local site information
@@ -36062,8 +36065,8 @@ definitions:
           - LEARNED
           type: string
       required:
-      - mac_address
       - mac_type
+      - mac_address
       type: object
       x-vmw-nsx-module: AggSvcLogicalPort
     x-vmw-nsx-module: AggSvcLogicalPort
@@ -36083,8 +36086,8 @@ definitions:
         - LEARNED
         type: string
     required:
-    - mac_address
     - mac_type
+    - mac_address
     type: object
     x-vmw-nsx-module: AggSvcLogicalPort
   LogicalPortMirrorDestination:
@@ -36264,8 +36267,8 @@ definitions:
           The number of logical ports whose Operational status is UP
         type: integer
     required:
-    - total_ports
     - up_ports
+    - total_ports
     type: object
     x-vmw-nsx-module: AggSvcLogicalPort
   LogicalRouter:
@@ -36787,8 +36790,8 @@ definitions:
             Service Bindings
           type: array
       required:
-      - resource_type
       - logical_router_id
+      - resource_type
       type: object
       x-vmw-nsx-module: LogicalRouterPorts
     x-vmw-nsx-module: LogicalRouterPorts
@@ -36808,8 +36811,8 @@ definitions:
             The MAC address
           type: string
       required:
-      - mac_address
       - ip
+      - mac_address
       type: object
       x-vmw-nsx-module: AggSvcLogicalRouterPort
     x-vmw-nsx-module: AggSvcLogicalRouterPort
@@ -36827,8 +36830,8 @@ definitions:
           The MAC address
         type: string
     required:
-    - mac_address
     - ip
+    - mac_address
     type: object
     x-vmw-nsx-module: AggSvcLogicalRouterPort
   LogicalRouterPortArpTable:
@@ -37892,8 +37895,8 @@ definitions:
             VNI for this LogicalSwitch.
           type: integer
       required:
-      - transport_zone_id
       - admin_state
+      - transport_zone_id
       type: object
       x-vmw-nsx-module: LogicalSwitch
     x-vmw-nsx-module: LogicalSwitch
@@ -38103,8 +38106,8 @@ definitions:
           The total number of logical switches.
         type: integer
     required:
-    - total_switches
     - fully_realized_switches
+    - total_switches
     type: object
     x-vmw-nsx-module: AggSvcLogicalSwitch
   LoginCredential:
@@ -38473,8 +38476,8 @@ definitions:
         readOnly: false
         type: string
     required:
-    - end
     - start
+    - end
     type: object
     x-vmw-nsx-module: MACAM
   MacTableCsvRecord:
@@ -38934,8 +38937,8 @@ definitions:
           Certificate thumbprint of the message bus broker on the management plane node.
         type: string
     required:
-    - thumbprint
     - host
+    - thumbprint
     title: |-
       Information about a management plane node this controller is configured to communicate with
     type: object
@@ -39280,12 +39283,12 @@ definitions:
           succeeded responses from  nova server
         type: integer
     required:
-    - error_responses_from_nova_server
-    - succeeded_responses_from_nova_server
-    - requests_from_clients
-    - requests_to_nova_server
     - responses_to_clients
+    - requests_from_clients
+    - succeeded_responses_from_nova_server
+    - requests_to_nova_server
     - logical_switch_id
+    - error_responses_from_nova_server
     type: object
     x-vmw-nsx-module: AggSvcMetadataProxy
   MetadataProxyStatus:
@@ -39690,8 +39693,8 @@ definitions:
             Tier-1 router path
           type: string
       required:
-      - tier1_path
       - segment_path
+      - tier1_path
       type: object
       x-vmw-nsx-module: OverlayAdoption
     description: |-
@@ -39734,8 +39737,8 @@ definitions:
           type: array
           uniqueItems: true
       required:
-      - dvpg_id_and_segment_path_pairs
       - vm_ids
+      - dvpg_id_and_segment_path_pairs
       type: object
       x-vmw-nsx-module: OverlayAdoption
     description: |-
@@ -41408,8 +41411,8 @@ definitions:
             Minute at which data will be collected
           type: integer
       required:
-      - day_of_month
       - hour_of_day
+      - day_of_month
       type: object
       x-vmw-nsx-module: TelemetryConfig
     x-vmw-nsx-module: TelemetryConfig
@@ -41611,9 +41614,9 @@ definitions:
         svm_config:
           $ref: '#/definitions/MpsSvmConfig'
       required:
-      - ovf_spec_name
-      - svm_config
       - cluster_svm_property
+      - svm_config
+      - ovf_spec_name
       type: object
       x-vmw-nsx-module: NsxMalwarePreventionDeployment
     description: |-
@@ -42077,9 +42080,9 @@ definitions:
           type: array
           uniqueItems: true
       required:
+      - datatype
       - value
       - key
-      - datatype
       type: object
       x-vmw-nsx-module: NSProfile
     description: |-
@@ -42296,9 +42299,9 @@ definitions:
           type: string
       required:
       - target_type
-      - value
-      - target_property
       - op
+      - target_property
+      - value
       type: object
       x-vmw-nsx-module: NSGroup
     description: |-
@@ -42647,9 +42650,9 @@ definitions:
             Version
           type: string
       required:
-      - log_token
-      - instance_id
       - deployed_by
+      - instance_id
+      - log_token
       - managed_by
       type: object
       x-vmw-nsx-module: NSXDeploymentInfo
@@ -43474,8 +43477,8 @@ definitions:
           Required Configuration
         type: boolean
     required:
-    - interface_index
     - interface_label
+    - interface_index
     - interface_type
     title: |-
       NIC Metadata
@@ -43676,9 +43679,9 @@ definitions:
           vIDM enable flag
         type: boolean
     required:
+    - host_name
     - thumbprint
     - node_host_name
-    - host_name
     - client_id
     title: |-
       Node AAA provider vIDM properties
@@ -43701,8 +43704,8 @@ definitions:
           vIDM enable flag
         type: boolean
     required:
-    - vidm_enable
     - runtime_state
+    - vidm_enable
     title: |-
       Node AAA provider vIDM status
     type: object
@@ -44209,8 +44212,8 @@ definitions:
         readOnly: false
         type: array
     required:
-    - node_id
     - service_types
+    - node_id
     type: object
     x-vmw-nsx-module: CertificateManager
   NodeInfo:
@@ -45537,6 +45540,7 @@ definitions:
         metric:
           description: |-
             Default metric value for IPv4 is 0, whereas for IPv6 default value is 1024
+          pattern: /^[\d]{1,10}$/
           title: |-
             Metric value of route
           type: string
@@ -45592,6 +45596,7 @@ definitions:
         scope:
           description: |-
             Scope of destinations covered by route
+          pattern: /^(global|host|link|nowhere|site|[\d]{1,3})$/
           title: |-
             Scope of destinations covered by route
           type: string
@@ -46529,8 +46534,8 @@ definitions:
       required:
       - protocol
       - level
-      - server
       - exporter_name
+      - server
       type: object
       x-vmw-nsx-module: MISSING_MODULE
     description: |-
@@ -47052,10 +47057,10 @@ definitions:
             Flag to indicate if REST API server should use HTTPS
           type: boolean
       required:
-      - authentication_scheme
-      - server
       - method
+      - server
       - uri
+      - authentication_scheme
       type: object
       x-vmw-nsx-module: NfwConfig
     x-vmw-nsx-module: NfwConfig
@@ -47828,8 +47833,8 @@ definitions:
           Port for the Wavefront tracing
         type: integer
     required:
-    - collector_port
     - collector_ip
+    - collector_port
     type: object
     x-vmw-nsx-module: GlobalConfigs
   OperationCollectorGlobalConfig:
@@ -48241,9 +48246,9 @@ definitions:
           format: int64
           type: integer
       required:
-      - request
-      - sessionid
       - sessionstatus
+      - sessionid
+      - request
       type: object
       x-vmw-nsx-module: PacketCapture
     description: |-
@@ -49493,9 +49498,9 @@ definitions:
             Upload status
           type: string
       required:
+      - status
       - plugin_id
       - file_name
-      - status
       type: object
       x-vmw-nsx-module: SystemHealthPlugin
     description: |-
@@ -49615,8 +49620,8 @@ definitions:
           Uplink name for this Pnic. This name will be used to reference this Pnic in other configurations.
         type: string
     required:
-    - device_name
     - uplink_name
+    - device_name
     title: |-
       Physical NIC specification
     type: object
@@ -49735,8 +49740,8 @@ definitions:
             Transport node to which to send the mirrored packets
           type: string
       required:
-      - node_id
       - dest_pnics
+      - node_id
       type: object
       x-vmw-nsx-module: PortMirroring
     x-vmw-nsx-module: PortMirroring
@@ -49767,9 +49772,9 @@ definitions:
             Source physical NIC device names
           type: array
       required:
+      - encapsulated
       - node_id
       - source_pnics
-      - encapsulated
       type: object
       x-vmw-nsx-module: PortMirroring
     x-vmw-nsx-module: PortMirroring
@@ -50615,12 +50620,12 @@ definitions:
           $ref: '#/definitions/VirtualMachine'
         type: array
     required:
+    - containers
+    - vms
+    - tunnels
     - hypervisors
     - errors
-    - vms
     - logical_switches
-    - containers
-    - tunnels
     title: |-
       Port Connection Entities (to help draw a visual picture of entities between two ports)
     type: object
@@ -50789,8 +50794,8 @@ definitions:
       tunnel_properties:
         $ref: '#/definitions/TunnelProperties'
     required:
-    - tunnel_properties
     - src_node_id
+    - tunnel_properties
     title: |-
       Tunnel information between two given transport nodes
     type: object
@@ -50911,9 +50916,9 @@ definitions:
             TCP/IP Stack
           type: string
       required:
-      - direction
       - mirror_destination
       - mirror_sources
+      - direction
       type: object
       x-vmw-nsx-module: PortMirroring
     x-vmw-nsx-module: PortMirroring
@@ -51046,8 +51051,8 @@ definitions:
       name:
         $ref: '#/definitions/PreUpgradeHealthCheckMessage'
     required:
-    - description
     - check
+    - description
     - name
     title: |-
       ESX health perspective check information
@@ -51082,8 +51087,8 @@ definitions:
           Localized string
         type: string
     required:
-    - id
     - default_message
+    - id
     title: |-
       host health perspective localized message
     type: object
@@ -51163,9 +51168,9 @@ definitions:
           Wait duration
         type: integer
     required:
+    - status
     - info
     - issues
-    - status
     title: |-
       ESX health perspective check status
     type: object
@@ -51607,9 +51612,9 @@ definitions:
         type: string
     required:
     - percentage
+    - status
     - description
     - name
-    - status
     type: object
     x-vmw-nsx-module: SiteManager
   PropertyItem:
@@ -51821,8 +51826,8 @@ definitions:
             User name
           type: string
       required:
-      - scheme
       - host
+      - scheme
       - enabled
       - port
       type: object
@@ -51881,13 +51886,13 @@ definitions:
           The symbolic org id for SRE (Site Reliability Engineer)
         type: string
     required:
-    - gss_org_id
+    - redirect_uris
     - default_org_id
     - client_id
-    - redirect_uris
-    - sre_org_id
-    - base_url
     - ea_org_id
+    - sre_org_id
+    - gss_org_id
+    - base_url
     title: |-
       Information for a PKCE OAuth2 client
     type: object
@@ -52188,8 +52193,8 @@ definitions:
           Enable strict latency
         type: boolean
     required:
-    - profinet_enabled
     - strict_latency_enabled
+    - profinet_enabled
     title: |-
       vSwitch-RT configuration for Enhanced Networking Stack
     type: object
@@ -52269,9 +52274,9 @@ definitions:
           Feature
         type: string
     required:
+    - src_features
     - target_feature
     - recommended_permissions
-    - src_features
     title: |-
       Recommended Feature Permission
     type: object
@@ -52677,8 +52682,8 @@ definitions:
           Remote server hostname or IP address
         type: string
     required:
-    - protocol
     - directory_path
+    - protocol
     - server
     title: |-
       Remote file server
@@ -52712,8 +52717,8 @@ definitions:
           SSH fingerprint of server
         type: string
     required:
-    - ssh_fingerprint
     - server
+    - ssh_fingerprint
     title: |-
       Remote server
     type: object
@@ -52788,8 +52793,8 @@ definitions:
           Username of the site
         type: string
     required:
-    - username
     - thumbprint
+    - username
     - address
     title: |-
       Credential of remote site
@@ -53142,10 +53147,10 @@ definitions:
       traffic_type:
         $ref: '#/definitions/HostInfraTrafficType'
     required:
+    - shares
     - reservation
     - limit
     - traffic_type
-    - shares
     title: |-
       Resource allocation information for a host infrastructure traffic type
     type: object
@@ -53317,8 +53322,8 @@ definitions:
           SSH fingerprint of server
         type: string
     required:
-    - port
     - server
+    - port
     title: |-
       Retrieve host key algorithm properties
     type: object
@@ -54633,8 +54638,8 @@ definitions:
           Reconciliation Status
         type: string
     required:
-    - action
     - status
+    - action
     title: |-
       The status of search reconciliation
     type: object
@@ -55950,8 +55955,8 @@ definitions:
           type: string
       required:
       - implementations
-      - vendor_id
       - functionalities
+      - vendor_id
       type: object
       x-vmw-nsx-module: ServiceInsertionCommonTypes
     description: |-
@@ -56038,8 +56043,8 @@ definitions:
           type: string
       required:
       - instance_deployment_template
-      - deployment_spec_name
       - service_deployment_config
+      - deployment_spec_name
       type: object
       x-vmw-nsx-module: ServiceInsertionCommonTypes
     description: |-
@@ -56085,8 +56090,8 @@ definitions:
       vm_nic_info:
         $ref: '#/definitions/VmNicInfo'
     required:
-    - compute_manager_id
     - compute_collection_id
+    - compute_manager_id
     title: |-
       Service Deployment Config
     type: object
@@ -56290,8 +56295,8 @@ definitions:
           Unique identifier of this service endpoint
         type: string
     required:
-    - port
     - ip_address
+    - port
     type: object
     x-vmw-nsx-module: ClusterManagement
   ServiceInsertionInsertParameters:
@@ -56644,9 +56649,9 @@ definitions:
           type: string
       required:
       - deployment_spec_name
-      - attachment_point
-      - instance_deployment_template
       - deployment_mode
+      - instance_deployment_template
+      - attachment_point
       - deployed_to
       - implementation_type
       type: object
@@ -56821,11 +56826,11 @@ definitions:
             Vendor ID
           type: string
       required:
-      - authentication_scheme
-      - service_ids
       - port
-      - server
       - uri
+      - authentication_scheme
+      - server
+      - service_ids
       type: object
       x-vmw-nsx-module: ServiceInsertionCommonTypes
     description: |-
@@ -57423,8 +57428,8 @@ definitions:
           SNMP v3 user id
         type: string
     required:
-    - user_id
     - server
+    - user_id
     title: |-
       SNMP v3 targets information
     type: object
@@ -57677,8 +57682,8 @@ definitions:
           Existing SNMP v3 user id
         type: string
     required:
-    - user_id
     - server
+    - user_id
     title: |-
       SNMP v3 target
     type: object
@@ -57748,8 +57753,8 @@ definitions:
           Version of the module in the node
         type: string
     required:
-    - module_version
     - module_name
+    - module_version
     title: |-
       Software module details
     type: object
@@ -57807,9 +57812,9 @@ definitions:
             Solution Id
           type: string
       required:
-      - listen_port
       - solution_id
       - control_ip
+      - listen_port
       type: object
       x-vmw-nsx-module: Nxgi
     description: |-
@@ -58059,8 +58064,8 @@ definitions:
           SSH fingerprint of server
         type: string
     required:
-    - port
     - server
+    - port
     title: |-
       Server ssh fingerprint properties
     type: object
@@ -58319,6 +58324,13 @@ definitions:
           When using the Quick Start workflow on 7.0 and above vCenter clusters, if the pnics specified in the pnics field are used by a single VSS HostSwitch, then they are migrated over to recommended VDS HostSwitch. If any two pnics are not used by the same VSS HostSwitch or VDS HostSwitch, it is not supported. In such cases, please migrate them in multiple steps, one VSS HostSwitch or VDS HostSwitch at a time.
         title: |-
           Migrate any pnics which are in use
+        type: boolean
+      not_ready:
+        default: false
+        description: |-
+          By default a host-switch is ready for network traffic once it is created. Set this to true to disable NSX configuration from the corresponding VDS. Setting this field to true is allowed only if the out TransportNode is prepared with the system owned vDefend TransportNodeProfile. At least one VDS host-switch on a TransportNode must remain in a ready state.
+        title: |-
+          A flag indicating the host-switch is ready or not
         type: boolean
       perf_nic_offload:
         default: false
@@ -58651,8 +58663,8 @@ definitions:
           readOnly: false
           type: string
       required:
-      - ip_list
       - default_gateway
+      - ip_list
       - subnet_mask
       type: object
       x-vmw-nsx-module: TransportNode
@@ -58688,9 +58700,9 @@ definitions:
           readOnly: false
           type: string
       required:
-      - ip_mac_list
       - default_gateway
       - subnet_mask
+      - ip_mac_list
       type: object
       x-vmw-nsx-module: TransportNode
     description: |-
@@ -58746,8 +58758,8 @@ definitions:
           type: string
       required:
       - default_gateway
-      - ipv6_list
       - prefix_length
+      - ipv6_list
       type: object
       x-vmw-nsx-module: TransportNode
     description: |-
@@ -58783,8 +58795,8 @@ definitions:
             Prefix Length
           type: string
       required:
-      - ipv6_mac_list
       - default_gateway
+      - ipv6_mac_list
       - prefix_length
       type: object
       x-vmw-nsx-module: TransportNode
@@ -59090,9 +59102,9 @@ definitions:
           Username value of the log
         type: string
     required:
+    - audit
     - comp
     - subcomp
-    - audit
     title: |-
       Structured data entry in RFC5424 log format
     type: object
@@ -59519,8 +59531,8 @@ definitions:
           Remote server hostname or IP address
         type: string
     required:
-    - protocol
     - directory_path
+    - protocol
     - server
     title: |-
       Remote file server
@@ -60019,9 +60031,9 @@ definitions:
         type: string
     required:
     - note
+    - current_step_number
     - overall_status
     - number_of_steps
-    - current_step_number
     type: object
     x-vmw-nsx-module: SiteManager
   SwsecCounters:
@@ -60386,8 +60398,8 @@ definitions:
         type: string
     required:
     - protocol
-    - max_log_level
     - server
+    - max_log_level
     title: |-
       Syslog exporter properties
     type: object
@@ -60465,8 +60477,8 @@ definitions:
           - MONITOR_STYLE
           type: string
       required:
-      - config
       - plugin_id
+      - config
       type: object
       x-vmw-nsx-module: SystemHealthAgent
     description: |
@@ -60978,9 +60990,9 @@ definitions:
             User name
           type: string
       required:
+      - hostname
       - scheme
       - port
-      - hostname
       type: object
       x-vmw-nsx-module: TelemetryConfig
     x-vmw-nsx-module: TelemetryConfig
@@ -61293,11 +61305,11 @@ definitions:
         - FAILED
         type: string
     required:
-    - dedicated_stack_status
-    - vmknic_status
-    - last_updated_time
-    - tn_node_name
     - detail
+    - vmknic_status
+    - tn_node_name
+    - dedicated_stack_status
+    - last_updated_time
     title: |-
       List all L3PortMirrorSession TN nodes mirror stack health status
     type: object
@@ -63060,8 +63072,8 @@ definitions:
             Transport Node Profile ID
           type: string
       required:
-      - transport_node_profile_id
       - compute_collection_id
+      - transport_node_profile_id
       type: object
       x-vmw-nsx-module: TransportNodeCollection
     description: |-
@@ -63393,8 +63405,8 @@ definitions:
           VM identifier for specified vcenter server in vm_deployment_config.
         type: string
     required:
-    - node_user_settings
     - vm_id
+    - node_user_settings
     - vm_deployment_config
     title: |-
       Transport Node placement Config
@@ -63504,9 +63516,9 @@ definitions:
         readOnly: false
         type: integer
     required:
+    - ip_assignment_spec
     - host_switch_name
     - rtep_vlan
-    - ip_assignment_spec
     title: |-
       Remote tunnel endpoint configuration
     type: object
@@ -64127,8 +64139,8 @@ definitions:
         format: int64
         type: integer
     required:
-    - end
     - start
+    - end
     title: |-
       Trunk VLAN id range
     type: object
@@ -65632,10 +65644,10 @@ definitions:
           Status of the upgrade
         type: string
     required:
-    - upgrade_status
     - target_version
     - timestamp
     - initial_version
+    - upgrade_status
     type: object
     x-vmw-nsx-module: UpgradeTypes
   UpgradeHistoryList:
@@ -65767,8 +65779,8 @@ definitions:
           Resource type
         type: string
     required:
-    - filters
     - resource_type
+    - filters
     type: object
     x-vmw-nsx-module: Upgrade
   UpgradeResourcesFilterListRequestParameters:
@@ -66947,11 +66959,11 @@ definitions:
           Username for VC
         type: string
     required:
+    - nsxv_ip
     - nsxv_username
     - federation_site_id
-    - vc_ip
-    - nsxv_ip
     - vc_username
+    - vc_ip
     title: |-
       Input spec for mapping of NSX-V and NSX-T sites
     type: object
@@ -66981,8 +66993,8 @@ definitions:
           Subnet Prefix Length
         type: integer
     required:
-    - prefix_length
     - active_vip_addresses
+    - prefix_length
     type: object
     x-vmw-nsx-module: LogicalRouter
   VMDeploymentProgressState:
@@ -67824,10 +67836,10 @@ definitions:
           VIDB OpenID Connect URI
         type: string
     required:
-    - client_id
-    - name
     - certificate_chain
     - vidb_uri
+    - client_id
+    - name
     title: |-
       Configuration to enable VIDB
     type: object
@@ -68094,8 +68106,8 @@ definitions:
           type: boolean
       required:
       - external_id
-      - power_state
       - local_id_on_host
+      - power_state
       - compute_ids
       type: object
       x-vmw-nsx-module: Inventory
@@ -68238,12 +68250,12 @@ definitions:
             Id of the vm unique within the host.
           type: string
       required:
-      - device_key
-      - owner_vm_id
       - vm_local_id_on_host
-      - host_id
+      - owner_vm_id
       - external_id
+      - host_id
       - mac_address
+      - device_key
       type: object
       x-vmw-nsx-module: Inventory
     x-vmw-nsx-module: Inventory
@@ -68931,8 +68943,8 @@ definitions:
           ESX vmk interface name
         type: string
     required:
-    - device_name
     - destination_network
+    - device_name
     title: |-
       Vmknic network specification
     type: object
@@ -68996,8 +69008,8 @@ definitions:
             Start value of vni range
           type: integer
       required:
-      - end
       - start
+      - end
       type: object
       x-vmw-nsx-module: Vnim
     description: |-
@@ -69570,11 +69582,11 @@ definitions:
             Vsphere compute identifier for identifying VC server
           type: string
       required:
-      - management_network_id
-      - vc_id
       - compute_id
-      - storage_id
       - hostname
+      - vc_id
+      - management_network_id
+      - storage_id
       type: object
       x-vmw-nsx-module: ClusterNodeVMDeployment
     description: |
@@ -69708,10 +69720,10 @@ definitions:
             Vsphere compute identifier for identifying the vcenter server.
           type: string
       required:
-      - management_network_id
-      - vc_id
-      - data_network_ids
       - compute_id
+      - vc_id
+      - management_network_id
+      - data_network_ids
       - storage_id
       type: object
       x-vmw-nsx-module: FabricNode
@@ -69890,8 +69902,8 @@ definitions:
             Virtual tunnel endpoint label range start
           type: integer
       required:
-      - end
       - start
+      - end
       type: object
       x-vmw-nsx-module: VtepLabel
     x-vmw-nsx-module: VtepLabel
@@ -70091,8 +70103,8 @@ definitions:
             Minute at which data will be collected
           type: integer
       required:
-      - day_of_week
       - hour_of_day
+      - day_of_week
       type: object
       x-vmw-nsx-module: TelemetryConfig
     x-vmw-nsx-module: TelemetryConfig
@@ -70456,8 +70468,8 @@ definitions:
         readOnly: false
         type: string
     required:
-    - workflow_resource
     - workflow_type
+    - workflow_resource
     title: |-
       Workflow request parameters
     type: object
@@ -70607,8 +70619,8 @@ definitions:
           Username to use when authenticating to VIDB
         type: string
     required:
-    - oidc_uri
     - certificate_chain
+    - oidc_uri
     title: |-
       Configuration to enable VIDB
     type: object
@@ -70993,7 +71005,7 @@ host: nsxmanager.your.domain
 info:
   description: VMware NSX Manager REST API
   title: NSX Manager API
-  version: 9.1.1.0
+  version: 9.1.2.0
 parameters: {}
 paths:
   /aaa/features-with-properties:
@@ -146356,6 +146368,201 @@ paths:
           "runtime_state": "running"
         }
       x-vmw-nsx-module: NodeEdgeDockerService
+  /transport-nodes/{transport-node-id}/node/services/fqdn-resolver:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        Read NSX Edge fqdn-resolver service properties
+      operationId: TransportNodesTransportNodeIdNodeReadFqdnResolverService
+      parameters:
+      - in: path
+        name: transport-node-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/NodeServiceProperties'
+        '400':
+          $ref: '#/responses/BadRequest'
+        '403':
+          $ref: '#/responses/Forbidden'
+        '404':
+          $ref: '#/responses/NotFound'
+        '412':
+          $ref: '#/responses/PreconditionFailed'
+        '500':
+          $ref: '#/responses/InternalServerError'
+        '503':
+          $ref: '#/responses/ServiceUnavailable'
+        '504':
+          $ref: '#/responses/GatewayTimeout'
+      summary: |-
+        Read NSX Edge fqdn-resolver service properties
+      tags:
+      - System (Fabric)
+      - Edge Transport Nodes (Fqdn-Resolver)
+      x-vmw-nsx-module: NodeEdgeFqdnResolverService
+  /transport-nodes/{transport-node-id}/node/services/fqdn-resolver/status:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        Read NSX Edge fqdn-resolver service status
+      operationId: TransportNodesTransportNodeIdNodeReadFqdnResolverServiceStatus
+      parameters:
+      - in: path
+        name: transport-node-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/NodeServiceStatusProperties'
+        '400':
+          $ref: '#/responses/BadRequest'
+        '403':
+          $ref: '#/responses/Forbidden'
+        '404':
+          $ref: '#/responses/NotFound'
+        '412':
+          $ref: '#/responses/PreconditionFailed'
+        '500':
+          $ref: '#/responses/InternalServerError'
+        '503':
+          $ref: '#/responses/ServiceUnavailable'
+        '504':
+          $ref: '#/responses/GatewayTimeout'
+      summary: |-
+        Read NSX Edge fqdn-resolver service status
+      tags:
+      - System (Fabric)
+      - Edge Transport Nodes (Fqdn-Resolver)
+      x-vmw-nsx-module: NodeEdgeFqdnResolverService
+  /transport-nodes/{transport-node-id}/node/services/fqdn-resolver?action=restart:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Perform an action on the fqdn-resolver service
+      operationId: TransportNodesTransportNodeIdNodeCreateFqdnResolverServiceActionRestart
+      parameters:
+      - in: path
+        name: transport-node-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/NodeServiceStatusProperties'
+        '400':
+          $ref: '#/responses/BadRequest'
+        '403':
+          $ref: '#/responses/Forbidden'
+        '404':
+          $ref: '#/responses/NotFound'
+        '412':
+          $ref: '#/responses/PreconditionFailed'
+        '500':
+          $ref: '#/responses/InternalServerError'
+        '503':
+          $ref: '#/responses/ServiceUnavailable'
+        '504':
+          $ref: '#/responses/GatewayTimeout'
+      summary: |-
+        Perform an action on the fqdn-resolver service
+      tags:
+      - System (Fabric)
+      - Edge Transport Nodes (Fqdn-Resolver)
+      x-vmw-nsx-module: NodeEdgeFqdnResolverService
+  /transport-nodes/{transport-node-id}/node/services/fqdn-resolver?action=start:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Perform an action on the fqdn-resolver service
+      operationId: TransportNodesTransportNodeIdNodeCreateFqdnResolverServiceActionStart
+      parameters:
+      - in: path
+        name: transport-node-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/NodeServiceStatusProperties'
+        '400':
+          $ref: '#/responses/BadRequest'
+        '403':
+          $ref: '#/responses/Forbidden'
+        '404':
+          $ref: '#/responses/NotFound'
+        '412':
+          $ref: '#/responses/PreconditionFailed'
+        '500':
+          $ref: '#/responses/InternalServerError'
+        '503':
+          $ref: '#/responses/ServiceUnavailable'
+        '504':
+          $ref: '#/responses/GatewayTimeout'
+      summary: |-
+        Perform an action on the fqdn-resolver service
+      tags:
+      - System (Fabric)
+      - Edge Transport Nodes (Fqdn-Resolver)
+      x-vmw-nsx-module: NodeEdgeFqdnResolverService
+  /transport-nodes/{transport-node-id}/node/services/fqdn-resolver?action=stop:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Perform an action on the fqdn-resolver service
+      operationId: TransportNodesTransportNodeIdNodeCreateFqdnResolverServiceActionStop
+      parameters:
+      - in: path
+        name: transport-node-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/NodeServiceStatusProperties'
+        '400':
+          $ref: '#/responses/BadRequest'
+        '403':
+          $ref: '#/responses/Forbidden'
+        '404':
+          $ref: '#/responses/NotFound'
+        '412':
+          $ref: '#/responses/PreconditionFailed'
+        '500':
+          $ref: '#/responses/InternalServerError'
+        '503':
+          $ref: '#/responses/ServiceUnavailable'
+        '504':
+          $ref: '#/responses/GatewayTimeout'
+      summary: |-
+        Perform an action on the fqdn-resolver service
+      tags:
+      - System (Fabric)
+      - Edge Transport Nodes (Fqdn-Resolver)
+      x-vmw-nsx-module: NodeEdgeFqdnResolverService
   /transport-nodes/{transport-node-id}/node/services/ipsecvpn:
     get:
       consumes:
@@ -166222,150 +166429,151 @@ securityDefinitions:
     type: basic
 swagger: '2.0'
 tags:
-- name: Monitoring
-- name: Certificates
-- name: Healthchecks
-- name: Networking (Vpn)
-- name: Pool Management (Vni Pools)
-- name: NSX Manager (Corfu Server)
-- name: Upgrade (History)
-- name: Transport Nodes (User Management)
-- name: NSX Manager (Telemetry Service)
-- name: Bare Metals
-- name: Telemetry
-- name: Pool Management (Vtep Pools)
-- name: Transport Nodes (Snmp Service)
-- name: Edge Clusters (Legacy Management Plane)
-- name: Fabric
-- name: NSX Manager (Node Stats Service)
-- name: NSX Manager (Cluster Certificate)
-- name: User Authentication
-- name: Dashboard (Legacy Management Plane)
-- name: Migration (Overlay Adoption)
-- name: Upgrade (Status)
-- name: Edge Transport Nodes (Diagnosis)
-- name: NSX Manager (Manager Service)
-- name: ' Transport Nodes (User Management)'
-- name: Monitoring (Alarms And Events)
-- name: Users
-- name: Compute Managers
-- name: Principal Identities
-- name: Transport Nodes (Interfaces)
-- name: Hide
-- name: NSX Manager (Auth Service)
-- name: NSX Manager (Cluster)
-- name: Vm
-- name: NSX Manager (Http Service)
-- name: Hostswitch Profiles
-- name: NSX Manager (Migration Coordinator Service)
-- name: NSX Managers (Monitoring)
-- name: Edge Transport Nodes
-- name: Edge Transport Nodes (Ipsec VPN Service)
-- name: Transport Nodes (Tunnels)
-- name: Support Bundle
-- name: Transport Nodes (Status)
-- name: Access Token
-- name: NSX Manager (Async Replicator Service)
-- name: Transport Nodes (Ssh Service)
-- name: NSX Manager (Sha Service)
-- name: Edge Transport Nodes (Security Hub Service)
-- name: Upgrade (Groups)
-- name: NSX Managers
-- name: Diagnosis
-- name: System (Fabric)
-- name: Search
-- name: Notifications
-- name: Virtual Interfaces
-- name: System (Administration)
-- name: Backup & Restore (Restore)
-- name: NSX Manager (Control Plane Agent Service)
-- name: Scope Associations
-- name: Intelligence
-- name: Upgrade (Nodes)
-- name: Inventory
-- name: NSX Manager (Messaging Manager Service)
-- name: Cloud Native Service Instance
-- name: Hardening
-- name: NSX Manager (Site Manager Service)
-- name: Nodes
-- name: IP Pools (Legacy Management Plane)
-- name: System (Lifecycle Management)
-- name: NSX Manager (Appliance Proxy)
-- name: Edge Transport Nodes (Dataplane)
-- name: Federation
-- name: Inter-Sites (Legacy Management Plane)
-- name: NSX Manager (Policy Service)
-- name: Upgrade (Upgrade Units)
-- name: API Services
-- name: Upgrade (Eula)
-- name: Search API
-- name: Capacity (Legacy Management Plane)
-- name: Settings
-- name: Networking (Ip Management)
-- name: IPSEC (Sessions)
-- name: Transport Nodes (Log Insight)
-- name: NSX Managers (Api Services)
-- name: Packet Capture (Legacy Management Plane)
-- name: Virtual Switches
-- name: Sites
-- name: System (Settings)
-- name: NSX Manager (Cm Inventory Service)
-- name: Upgrade (Edges)
-- name: Transport Nodes (Ntp Service)
-- name: Transport Nodes (Upgrade Agent Service)
-- name: NSX Manager (Install Upgrade Service)
-- name: Metadata Proxy
-- name: NSX Manager Health
-- name: User Management
 - name: NSX Message Service
-- name: Global Configurations
-- name: Latency (Legacy Management Plane)
-- name: Edge Transport Nodes (Dhcp)
-- name: NSX Intelligence
-- name: NSX Managers (Interfaces)
-- name: Grub
-- name: Upgrade (Ui Preferences)
-- name: Upgrade (Hosts)
-- name: Configuration
-- name: Compute Collections
-- name: Transport Nodes (Syslog Service)
-- name: Monitoring (Health Performance Monitoring)
-- name: Networking (Services)
-- name: LLDP
-- name: System Properties
-- name: Edge Transport Nodes (Local Controller)
-- name: Upgrade (Coordinator)
-- name: NSX Manager (Dispatcher Service)
-- name: Roles
-- name: Transport Zones (Legacy Management Plane)
-- name: NSX Managers (Watermark)
-- name: Transport Nodes (Dns)
-- name: Licenses
-- name: Upgrade (Bundles)
-- name: Containers
-- name: Transport Nodes
-- name: Enforcement Points
-- name: NSX Managers (Cluster)
-- name: User Management (Ldap)
+- name: NSX Manager (Messaging Manager Service)
+- name: Notifications
 - name: Discovered Nodes
-- name: Zones
-- name: NSX Manager (Idps Service)
-- name: None
-- name: System Administration
-- name: NSX Manager (Search Service)
-- name: NSX Manager (Controller Service)
+- name: NSX Manager (Policy Service)
 - name: Transport Nodes (Tasks Service)
-- name: System Health
-- name: NSX Manager (User Interface Service)
-- name: Services
-- name: Monitoring (Logs)
+- name: Access Token
+- name: NSX Managers (Cluster)
+- name: Cloud Native Service Instance
+- name: Virtual Interfaces
+- name: Hardening
+- name: Transport Nodes (Interfaces)
+- name: Transport Nodes (Syslog Service)
+- name: NSX Manager (Auth Service)
+- name: NSX Intelligence
 - name: VIDM Configuration
-- name: NSX Manager (Local Controller Service)
-- name: Service Insertion
-- name: Malware Prevention
-- name: Edge Transport Nodes (Services)
-- name: Proxy Settings
-- name: Upgrade (Plan)
-- name: Edge Failure Domains (Legacy Management Plane)
-- name: Pool Management (Mac Pools)
+- name: Diagnosis
+- name: Containers
+- name: NSX Manager (Telemetry Service)
+- name: Telemetry
+- name: NSX Manager (Site Manager Service)
+- name: System (Lifecycle Management)
+- name: Transport Nodes (User Management)
+- name: Hide
+- name: Sites
+- name: Upgrade (Status)
+- name: Edge Transport Nodes (Local Controller)
+- name: Migration (Overlay Adoption)
+- name: Transport Nodes (Status)
+- name: Backup & Restore (Restore)
+- name: Certificates
+- name: Transport Nodes (Ntp Service)
+- name: NSX Managers (Interfaces)
+- name: Monitoring (Alarms And Events)
+- name: Transport Nodes
+- name: Compute Managers
+- name: LLDP
+- name: NSX Manager (Corfu Server)
+- name: Roles
+- name: IPSEC (Sessions)
+- name: Upgrade (Hosts)
+- name: NSX Manager (User Interface Service)
+- name: Monitoring
+- name: Scope Associations
 - name: Edge Transport Nodes (Maintenance Mode)
+- name: NSX Manager (Cm Inventory Service)
+- name: Packet Capture (Legacy Management Plane)
+- name: Global Configurations
+- name: NSX Manager (Sha Service)
+- name: Upgrade (Nodes)
+- name: Transport Nodes (Dns)
+- name: IP Pools (Legacy Management Plane)
+- name: Zones
+- name: Search API
+- name: System Health
+- name: ' Transport Nodes (User Management)'
+- name: Upgrade (Plan)
+- name: Upgrade (Upgrade Units)
+- name: Pool Management (Vni Pools)
+- name: Intelligence
+- name: Capacity (Legacy Management Plane)
+- name: NSX Manager (Manager Service)
+- name: Service Insertion
+- name: Edge Transport Nodes (Security Hub Service)
+- name: Transport Zones (Legacy Management Plane)
+- name: Edge Transport Nodes (Ipsec VPN Service)
+- name: Federation
+- name: Edge Transport Nodes (Fqdn-Resolver)
+- name: Latency (Legacy Management Plane)
+- name: System (Administration)
+- name: Licenses
+- name: None
+- name: Upgrade (History)
+- name: NSX Managers (Api Services)
+- name: System Properties
+- name: NSX Manager (Local Controller Service)
+- name: Search
+- name: Monitoring (Health Performance Monitoring)
+- name: Enforcement Points
+- name: NSX Manager (Node Stats Service)
+- name: NSX Manager Health
+- name: Settings
+- name: NSX Manager (Controller Service)
+- name: Upgrade (Bundles)
+- name: Edge Transport Nodes (Dhcp)
+- name: NSX Manager (Dispatcher Service)
+- name: Networking (Ip Management)
+- name: Support Bundle
+- name: Edge Transport Nodes
+- name: Vm
+- name: Pool Management (Vtep Pools)
+- name: Upgrade (Edges)
+- name: NSX Manager (Search Service)
+- name: Edge Transport Nodes (Services)
+- name: NSX Manager (Idps Service)
+- name: Healthchecks
+- name: Transport Nodes (Tunnels)
+- name: Edge Clusters (Legacy Management Plane)
+- name: NSX Manager (Install Upgrade Service)
+- name: Networking (Vpn)
+- name: Inventory
+- name: Services
+- name: Compute Collections
+- name: Nodes
+- name: NSX Manager (Async Replicator Service)
+- name: NSX Managers
+- name: NSX Managers (Monitoring)
+- name: Dashboard (Legacy Management Plane)
+- name: Transport Nodes (Ssh Service)
+- name: NSX Manager (Control Plane Agent Service)
+- name: Fabric
+- name: Proxy Settings
+- name: Malware Prevention
+- name: Edge Failure Domains (Legacy Management Plane)
+- name: Configuration
+- name: Transport Nodes (Snmp Service)
+- name: NSX Manager (Migration Coordinator Service)
+- name: Edge Transport Nodes (Diagnosis)
+- name: NSX Manager (Appliance Proxy)
+- name: Pool Management (Mac Pools)
+- name: Edge Transport Nodes (Dataplane)
+- name: Users
+- name: User Authentication
+- name: Upgrade (Coordinator)
+- name: Hostswitch Profiles
+- name: Monitoring (Logs)
+- name: Virtual Switches
+- name: Upgrade (Eula)
+- name: NSX Manager (Cluster Certificate)
+- name: User Management
+- name: API Services
+- name: System (Fabric)
+- name: Transport Nodes (Upgrade Agent Service)
+- name: Grub
+- name: Bare Metals
+- name: Upgrade (Ui Preferences)
+- name: Metadata Proxy
+- name: NSX Manager (Http Service)
+- name: Networking (Services)
+- name: System Administration
+- name: Transport Nodes (Log Insight)
+- name: User Management (Ldap)
+- name: Principal Identities
+- name: System (Settings)
+- name: NSX Manager (Cluster)
+- name: NSX Managers (Watermark)
+- name: Upgrade (Groups)
+- name: Inter-Sites (Legacy Management Plane)

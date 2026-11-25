@@ -1473,6 +1473,12 @@
          <element name="syncSpecs" type="vsan:CnsSyncVolumeSpec" minOccurs="0" maxOccurs="unbounded" />
       </sequence>
    </complexType>
+   <complexType name="CnsDeleteAllSnapshotsRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="volumeId" type="vsan:CnsVolumeId" />
+      </sequence>
+   </complexType>
    <complexType name="VsanHostQueryVerifyNetworkSettingsRequestType">
       <sequence>
          <element name="_this" type="vim25:ManagedObjectReference" />
